@@ -1,0 +1,3 @@
+[submodule "image-gui/imagebox"]
+	path = image-gui/imagebox
+	url = git@github.com:cyotek/Cyotek.Windows.Forms.ImageBox.git
