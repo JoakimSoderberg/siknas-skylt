@@ -34,7 +34,7 @@ namespace image_gui
                 this.imageBox.ZoomToFit();
             }
         }
-
+ 
         private void imageBox_Paint(object sender, PaintEventArgs e)
         {
             Rectangle shape;
@@ -46,30 +46,38 @@ namespace image_gui
             shape = imageBox.GetOffsetRectangle(50, 20, 100, 20);
             using (Pen pen = new Pen(Color.DarkRed, penSize))
             {
-                int i = 0;
-                if (this.ledLocations.Count >= 2)
-                {
-                    var points = new Point[this.ledLocations.Count];
-                    i = 0;
-                    foreach (var led in this.ledLocations)
-                    {
-                        points[i] = imageBox.GetOffsetPoint(led);
-                        i++;
-                    }
+                DrawChannel(g, w, pen, this.config.Leds);
+            }
+        }
 
-                    g.DrawLines(pen, points);
-                }
+        private void DrawChannel(Graphics g, int w, Pen pen, List<Point> leds)
+        {
+            int i = 0;
 
-                i = 1;
-                foreach (var led in this.ledLocations)
+            // Draw lines between the LEDs.
+            if (leds.Count >= 2)
+            {
+                var points = new Point[leds.Count];
+                i = 0;
+                foreach (var led in leds)
                 {
-                    var rect = new Rectangle(led.X - w / 2, led.Y - w / 2, w, w);
-                    rect = imageBox.GetOffsetRectangle(rect);
-                    g.FillEllipse(Brushes.Azure, rect);
-                    g.DrawEllipse(Pens.RoyalBlue, rect);
-                    g.DrawString(i.ToString(), SystemFonts.StatusFont, Brushes.Black, rect);
+                    points[i] = imageBox.GetOffsetPoint(led);
                     i++;
                 }
+
+                g.DrawLines(pen, points);
+            }
+
+            // Draw the LEDs.
+            i = 1;
+            foreach (var led in leds)
+            {
+                var rect = new Rectangle(led.X - w / 2, led.Y - w / 2, w, w);
+                rect = imageBox.GetOffsetRectangle(rect);
+                g.FillEllipse(Brushes.Azure, rect);
+                g.DrawEllipse(Pens.RoyalBlue, rect);
+                g.DrawString(i.ToString(), SystemFonts.StatusFont, Brushes.Black, rect);
+                i++;
             }
         }
 
@@ -81,7 +89,7 @@ namespace image_gui
                                         MessageBoxDefaultButton.Button2);
             if (result == DialogResult.Yes)
             {
-                this.ledLocations.Clear();
+                this.config.Clear(false);
                 this.imageBox.Refresh();
                 this.GenerateJson();
             }
@@ -110,18 +118,17 @@ namespace image_gui
         private void AddPoint(Point loc)
         {
             this.ledLocations.Add(loc);
+            this.config.AddLed(loc);
+
             this.imageBox.Refresh();
             this.GenerateJson();
         }
 
         private void deleteLastPoint()
         {
-            if (this.ledLocations.Count > 0)
-            {
-                this.ledLocations.Remove(this.ledLocations.Last());
-                this.imageBox.Refresh();
-                this.GenerateJson();
-            }
+            this.config.RemoveLastLed();
+            this.imageBox.Refresh();
+            this.GenerateJson();
         }
 
         /*
@@ -185,6 +192,20 @@ namespace image_gui
                 this.ledChannels.Add(new FadeCandyChannel("1", this));
             }
 
+            public List<Point> Leds
+            {
+                get
+                {
+                    var leds = new List<Point>();
+                    foreach (FadeCandyChannel ch in this.ledChannels)
+                    {
+                        leds.AddRange(ch.leds);
+                    }
+
+                    return leds;
+                }
+            }
+
             public override string ToString()
             {
                 return this.serial;
@@ -209,27 +230,55 @@ namespace image_gui
                 return fc;
             }
 
-            public void AddLed(Point p)
+            private List<Point> getCurrentLeds()
             {
                 var fc = this.devices[this.selectedIndex];
-                fc.ledChannels[fc.SelectedChannel].leds.Add(p);
+                return fc.ledChannels[fc.SelectedChannel].leds;
+            }
+
+            public void Clear(bool all)
+            {
+                if (all)
+                {
+                    foreach (FadeCandy fc in this.devices)
+                    {
+                        foreach (FadeCandyChannel ch in fc.ledChannels)
+                        {
+                            ch.leds.Clear();
+                        }
+                    }
+                }
+                else
+                {
+                    this.getCurrentLeds().Clear();
+                }
+            }
+
+            public void AddLed(Point p)
+            {
+                var leds = getCurrentLeds();
+                leds.Add(p);
+            }
+
+            public void RemoveLastLed()
+            {
+                var leds = getCurrentLeds();
+                if (leds.Count > 0)
+                    leds.Remove(leds.Last());
             }
 
             public List<Point> Leds
             {
                 get
                 {
-                    var all = new List<Point>();
+                    var leds = new List<Point>();
 
                     foreach (FadeCandy fc in this.devices)
                     {
-                        foreach (FadeCandyChannel ch in fc.ledChannels)
-                        {
-                            all.AddRange(ch.leds);
-                        }
+                        leds.AddRange(fc.Leds);
                     }
  
-                    return all;
+                    return leds;
                 }
             }
         }
@@ -257,13 +306,13 @@ namespace image_gui
             var fcserver = new FCServerConfig();
             LayoutConfig layout = new LayoutConfig
             {
-                points = new List<LayoutConfigItem>(this.ledLocations.Count)
+                points = new List<LayoutConfigItem>(this.config.Leds.Count)
             };
 
 
             // TODO: We want one section 
             int i = 0;
-            foreach (var p in this.ledLocations)
+            foreach (var p in this.config.Leds)
             {
                 layout.points.Add(new LayoutConfigItem(p));
             }
