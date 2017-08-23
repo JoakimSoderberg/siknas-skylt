@@ -16,10 +16,12 @@ namespace image_gui
     {
         List<Point> ledLocations = new List<Point>();
         String layoutJson = "[]";
+        FCServerConfig config = new FCServerConfig();
 
         public Form()
         {
             InitializeComponent();
+            this.AddFadeCandy();
         }
 
         private void buttonOpen_Click(object sender, EventArgs e)
@@ -85,6 +87,26 @@ namespace image_gui
             }
         }
 
+        private void AddFadeCandy()
+        {
+            this.config.AddFadeCandy("fc" + this.treeView.Nodes.Count);
+            this.treeView.Nodes.Clear();
+
+            foreach (FadeCandy fc in this.config.devices)
+            {
+                var node = new TreeNode(fc.ToString());
+                node.Tag = fc;
+                this.treeView.Nodes.Add(node);
+
+                foreach (FadeCandyChannel ch in fc.ledChannels)
+                {
+                    var childNode = new TreeNode(ch.ToString());
+                    childNode.Tag = ch;
+                    node.Nodes.Add(childNode);
+                }
+            }
+        }
+
         private void AddPoint(Point loc)
         {
             this.ledLocations.Add(loc);
@@ -130,9 +152,86 @@ namespace image_gui
         }
         */
 
-        internal class FCServerConfig
+        public class FadeCandyChannel
         {
+            string name;
+            public List<Point> leds = new List<Point>();
+            FadeCandy parent;
 
+            public FadeCandyChannel(string name, FadeCandy parent)
+            {
+                this.name = name;
+                this.parent = parent;
+            }
+
+            public override string ToString()
+            {
+                return this.name;
+            }
+        }
+
+        public class FadeCandy
+        {
+            string serial;
+            const string type = "fadecandy";
+            public List<FadeCandyChannel> ledChannels = new List<FadeCandyChannel>();
+            private int selectedChannel;
+            public int SelectedChannel { get => selectedChannel; set => selectedChannel = value; }
+
+            public FadeCandy(string serial)
+            {
+                this.serial = serial;
+                this.SelectedChannel = 0;
+                this.ledChannels.Add(new FadeCandyChannel("1", this));
+            }
+
+            public override string ToString()
+            {
+                return this.serial;
+            }
+        }
+
+        public class FCServerConfig
+        {
+            bool verbose = true;
+
+            public List<FadeCandy> devices = new List<FadeCandy>();
+            int selectedIndex = 0;
+
+            public FCServerConfig()
+            {
+            }
+
+            public FadeCandy AddFadeCandy(string serial)
+            {
+                var fc = new FadeCandy("fc0");
+                this.devices.Add(fc);
+                return fc;
+            }
+
+            public void AddLed(Point p)
+            {
+                var fc = this.devices[this.selectedIndex];
+                fc.ledChannels[fc.SelectedChannel].leds.Add(p);
+            }
+
+            public List<Point> Leds
+            {
+                get
+                {
+                    var all = new List<Point>();
+
+                    foreach (FadeCandy fc in this.devices)
+                    {
+                        foreach (FadeCandyChannel ch in fc.ledChannels)
+                        {
+                            all.AddRange(ch.leds);
+                        }
+                    }
+ 
+                    return all;
+                }
+            }
         }
 
         public class LayoutConfigItem
@@ -153,18 +252,13 @@ namespace image_gui
             public List<LayoutConfigItem> points = new List<LayoutConfigItem>();
         }
 
-        internal struct Point3
-        {
-            int x;
-            int y;
-            int z;
-        }
-
         private void GenerateJson()
         {
             var fcserver = new FCServerConfig();
-            LayoutConfig layout = new LayoutConfig();
-            layout.points = new List<LayoutConfigItem>(this.ledLocations.Count);
+            LayoutConfig layout = new LayoutConfig
+            {
+                points = new List<LayoutConfigItem>(this.ledLocations.Count)
+            };
 
 
             // TODO: We want one section 
