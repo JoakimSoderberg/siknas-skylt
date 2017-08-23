@@ -29,10 +29,17 @@
         private void InitializeComponent()
         {
             this.panel1 = new System.Windows.Forms.Panel();
+            this.buttonRemoveFadecandy = new System.Windows.Forms.Button();
+            this.buttonAddFadecandy = new System.Windows.Forms.Button();
+            this.groupBoxCurrent = new System.Windows.Forms.GroupBox();
+            this.buttonRemoveChannel = new System.Windows.Forms.Button();
+            this.buttonAddChannel = new System.Windows.Forms.Button();
+            this.treeView = new System.Windows.Forms.TreeView();
             this.groupBoxPoints = new System.Windows.Forms.GroupBox();
             this.buttonRemove = new System.Windows.Forms.Button();
             this.buttonClear = new System.Windows.Forms.Button();
             this.groupBoxFile = new System.Windows.Forms.GroupBox();
+            this.buttonSaveConfigAs = new System.Windows.Forms.Button();
             this.buttonOpen = new System.Windows.Forms.Button();
             this.buttonSaveLayoutAs = new System.Windows.Forms.Button();
             this.tabControl = new System.Windows.Forms.TabControl();
@@ -40,14 +47,10 @@
             this.imageBox = new Cyotek.Windows.Forms.ImageBox();
             this.tabPageLayout = new System.Windows.Forms.TabPage();
             this.textBoxLayout = new System.Windows.Forms.TextBox();
-            this.treeView = new System.Windows.Forms.TreeView();
-            this.groupBoxCurrent = new System.Windows.Forms.GroupBox();
             this.tabPageFcserver = new System.Windows.Forms.TabPage();
             this.textBoxFcserver = new System.Windows.Forms.TextBox();
-            this.buttonSaveConfigAs = new System.Windows.Forms.Button();
-            this.buttonAddFadecandy = new System.Windows.Forms.Button();
-            this.buttonRemoveFadecandy = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
+            this.groupBoxCurrent.SuspendLayout();
             this.groupBoxPoints.SuspendLayout();
             this.groupBoxFile.SuspendLayout();
             this.tabControl.SuspendLayout();
@@ -69,6 +72,72 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(687, 157);
             this.panel1.TabIndex = 1;
+            // 
+            // buttonRemoveFadecandy
+            // 
+            this.buttonRemoveFadecandy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonRemoveFadecandy.Location = new System.Drawing.Point(363, 122);
+            this.buttonRemoveFadecandy.Name = "buttonRemoveFadecandy";
+            this.buttonRemoveFadecandy.Size = new System.Drawing.Size(75, 23);
+            this.buttonRemoveFadecandy.TabIndex = 7;
+            this.buttonRemoveFadecandy.Text = "Remove";
+            this.buttonRemoveFadecandy.UseVisualStyleBackColor = true;
+            this.buttonRemoveFadecandy.Click += new System.EventHandler(this.buttonRemoveFadecandy_Click);
+            // 
+            // buttonAddFadecandy
+            // 
+            this.buttonAddFadecandy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.buttonAddFadecandy.Location = new System.Drawing.Point(149, 122);
+            this.buttonAddFadecandy.Name = "buttonAddFadecandy";
+            this.buttonAddFadecandy.Size = new System.Drawing.Size(97, 23);
+            this.buttonAddFadecandy.TabIndex = 6;
+            this.buttonAddFadecandy.Text = "Add Fadecandy";
+            this.buttonAddFadecandy.UseVisualStyleBackColor = true;
+            this.buttonAddFadecandy.Click += new System.EventHandler(this.buttonAddFadecandy_Click);
+            // 
+            // groupBoxCurrent
+            // 
+            this.groupBoxCurrent.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBoxCurrent.Controls.Add(this.buttonRemoveChannel);
+            this.groupBoxCurrent.Controls.Add(this.buttonAddChannel);
+            this.groupBoxCurrent.Location = new System.Drawing.Point(444, 4);
+            this.groupBoxCurrent.Name = "groupBoxCurrent";
+            this.groupBoxCurrent.Size = new System.Drawing.Size(138, 112);
+            this.groupBoxCurrent.TabIndex = 5;
+            this.groupBoxCurrent.TabStop = false;
+            this.groupBoxCurrent.Text = "Current";
+            // 
+            // buttonRemoveChannel
+            // 
+            this.buttonRemoveChannel.Location = new System.Drawing.Point(7, 47);
+            this.buttonRemoveChannel.Name = "buttonRemoveChannel";
+            this.buttonRemoveChannel.Size = new System.Drawing.Size(125, 23);
+            this.buttonRemoveChannel.TabIndex = 1;
+            this.buttonRemoveChannel.Text = "Remove channel";
+            this.buttonRemoveChannel.UseVisualStyleBackColor = true;
+            this.buttonRemoveChannel.Click += new System.EventHandler(this.buttonRemoveChannel_Click);
+            // 
+            // buttonAddChannel
+            // 
+            this.buttonAddChannel.Location = new System.Drawing.Point(7, 20);
+            this.buttonAddChannel.Name = "buttonAddChannel";
+            this.buttonAddChannel.Size = new System.Drawing.Size(125, 23);
+            this.buttonAddChannel.TabIndex = 0;
+            this.buttonAddChannel.Text = "Add channel";
+            this.buttonAddChannel.UseVisualStyleBackColor = true;
+            this.buttonAddChannel.Click += new System.EventHandler(this.buttonAddChannel_Click);
+            // 
+            // treeView
+            // 
+            this.treeView.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.treeView.FullRowSelect = true;
+            this.treeView.HideSelection = false;
+            this.treeView.Location = new System.Drawing.Point(149, 9);
+            this.treeView.Name = "treeView";
+            this.treeView.Size = new System.Drawing.Size(289, 107);
+            this.treeView.TabIndex = 4;
+            this.treeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView_AfterSelect);
             // 
             // groupBoxPoints
             // 
@@ -114,6 +183,15 @@
             this.groupBoxFile.TabIndex = 2;
             this.groupBoxFile.TabStop = false;
             this.groupBoxFile.Text = "File";
+            // 
+            // buttonSaveConfigAs
+            // 
+            this.buttonSaveConfigAs.Location = new System.Drawing.Point(7, 77);
+            this.buttonSaveConfigAs.Name = "buttonSaveConfigAs";
+            this.buttonSaveConfigAs.Size = new System.Drawing.Size(105, 23);
+            this.buttonSaveConfigAs.TabIndex = 2;
+            this.buttonSaveConfigAs.Text = "Save config as...";
+            this.buttonSaveConfigAs.UseVisualStyleBackColor = true;
             // 
             // buttonOpen
             // 
@@ -179,7 +257,7 @@
             this.tabPageLayout.Location = new System.Drawing.Point(4, 22);
             this.tabPageLayout.Name = "tabPageLayout";
             this.tabPageLayout.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageLayout.Size = new System.Drawing.Size(679, 435);
+            this.tabPageLayout.Size = new System.Drawing.Size(679, 403);
             this.tabPageLayout.TabIndex = 1;
             this.tabPageLayout.Text = "Layout";
             this.tabPageLayout.UseVisualStyleBackColor = true;
@@ -191,27 +269,8 @@
             this.textBoxLayout.Multiline = true;
             this.textBoxLayout.Name = "textBoxLayout";
             this.textBoxLayout.ReadOnly = true;
-            this.textBoxLayout.Size = new System.Drawing.Size(673, 429);
+            this.textBoxLayout.Size = new System.Drawing.Size(673, 397);
             this.textBoxLayout.TabIndex = 0;
-            // 
-            // treeView
-            // 
-            this.treeView.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.treeView.Location = new System.Drawing.Point(149, 9);
-            this.treeView.Name = "treeView";
-            this.treeView.Size = new System.Drawing.Size(326, 107);
-            this.treeView.TabIndex = 4;
-            // 
-            // groupBoxCurrent
-            // 
-            this.groupBoxCurrent.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBoxCurrent.Location = new System.Drawing.Point(481, 4);
-            this.groupBoxCurrent.Name = "groupBoxCurrent";
-            this.groupBoxCurrent.Size = new System.Drawing.Size(101, 112);
-            this.groupBoxCurrent.TabIndex = 5;
-            this.groupBoxCurrent.TabStop = false;
-            this.groupBoxCurrent.Text = "Current group";
             // 
             // tabPageFcserver
             // 
@@ -219,7 +278,7 @@
             this.tabPageFcserver.Location = new System.Drawing.Point(4, 22);
             this.tabPageFcserver.Name = "tabPageFcserver";
             this.tabPageFcserver.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageFcserver.Size = new System.Drawing.Size(679, 435);
+            this.tabPageFcserver.Size = new System.Drawing.Size(679, 403);
             this.tabPageFcserver.TabIndex = 2;
             this.tabPageFcserver.Text = "Fadecandy Config";
             this.tabPageFcserver.UseVisualStyleBackColor = true;
@@ -230,37 +289,8 @@
             this.textBoxFcserver.Location = new System.Drawing.Point(3, 3);
             this.textBoxFcserver.Multiline = true;
             this.textBoxFcserver.Name = "textBoxFcserver";
-            this.textBoxFcserver.Size = new System.Drawing.Size(673, 429);
+            this.textBoxFcserver.Size = new System.Drawing.Size(673, 397);
             this.textBoxFcserver.TabIndex = 0;
-            // 
-            // buttonSaveConfigAs
-            // 
-            this.buttonSaveConfigAs.Location = new System.Drawing.Point(7, 77);
-            this.buttonSaveConfigAs.Name = "buttonSaveConfigAs";
-            this.buttonSaveConfigAs.Size = new System.Drawing.Size(105, 23);
-            this.buttonSaveConfigAs.TabIndex = 2;
-            this.buttonSaveConfigAs.Text = "Save config as...";
-            this.buttonSaveConfigAs.UseVisualStyleBackColor = true;
-            // 
-            // buttonAddFadecandy
-            // 
-            this.buttonAddFadecandy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.buttonAddFadecandy.Location = new System.Drawing.Point(149, 122);
-            this.buttonAddFadecandy.Name = "buttonAddFadecandy";
-            this.buttonAddFadecandy.Size = new System.Drawing.Size(97, 23);
-            this.buttonAddFadecandy.TabIndex = 6;
-            this.buttonAddFadecandy.Text = "Add Fadecandy";
-            this.buttonAddFadecandy.UseVisualStyleBackColor = true;
-            // 
-            // buttonRemoveFadecandy
-            // 
-            this.buttonRemoveFadecandy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonRemoveFadecandy.Location = new System.Drawing.Point(400, 122);
-            this.buttonRemoveFadecandy.Name = "buttonRemoveFadecandy";
-            this.buttonRemoveFadecandy.Size = new System.Drawing.Size(75, 23);
-            this.buttonRemoveFadecandy.TabIndex = 7;
-            this.buttonRemoveFadecandy.Text = "Remove";
-            this.buttonRemoveFadecandy.UseVisualStyleBackColor = true;
             // 
             // Form
             // 
@@ -273,6 +303,7 @@
             this.Name = "Form";
             this.Text = "Form";
             this.panel1.ResumeLayout(false);
+            this.groupBoxCurrent.ResumeLayout(false);
             this.groupBoxPoints.ResumeLayout(false);
             this.groupBoxFile.ResumeLayout(false);
             this.tabControl.ResumeLayout(false);
@@ -305,6 +336,8 @@
         private System.Windows.Forms.Button buttonSaveConfigAs;
         private System.Windows.Forms.Button buttonRemoveFadecandy;
         private System.Windows.Forms.Button buttonAddFadecandy;
+        private System.Windows.Forms.Button buttonRemoveChannel;
+        private System.Windows.Forms.Button buttonAddChannel;
     }
 }
 

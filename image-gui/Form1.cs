@@ -14,14 +14,14 @@ namespace image_gui
 {
     public partial class Form : System.Windows.Forms.Form
     {
-        List<Point> ledLocations = new List<Point>();
         String layoutJson = "[]";
         FCServerConfig config = new FCServerConfig();
 
         public Form()
         {
             InitializeComponent();
-            this.AddFadeCandy();
+            this.config.AddFadeCandy();
+            this.RefreshFadeCandyTreeView();
         }
 
         private void buttonOpen_Click(object sender, EventArgs e)
@@ -95,9 +95,8 @@ namespace image_gui
             }
         }
 
-        private void AddFadeCandy()
+        private void RefreshFadeCandyTreeView()
         {
-            this.config.AddFadeCandy("fc" + this.treeView.Nodes.Count);
             this.treeView.Nodes.Clear();
 
             foreach (FadeCandy fc in this.config.devices)
@@ -113,11 +112,13 @@ namespace image_gui
                     node.Nodes.Add(childNode);
                 }
             }
+            
+            // TODO: Select proper channel
+            this.treeView.SelectedNode = this.treeView.Nodes[0];
         }
 
         private void AddPoint(Point loc)
         {
-            this.ledLocations.Add(loc);
             this.config.AddLed(loc);
 
             this.imageBox.Refresh();
@@ -163,7 +164,9 @@ namespace image_gui
         {
             string name;
             public List<Point> leds = new List<Point>();
-            FadeCandy parent;
+            private FadeCandy parent;
+
+            public FadeCandy Parent { get => parent; }
 
             public FadeCandyChannel(string name, FadeCandy parent)
             {
@@ -182,16 +185,27 @@ namespace image_gui
             string serial;
             const string type = "fadecandy";
             public List<FadeCandyChannel> ledChannels = new List<FadeCandyChannel>();
-            private int selectedChannel;
-            public int SelectedChannel { get => selectedChannel; set => selectedChannel = value; }
+            private int selectedChannelIndex;
+            public int SelectedChannelIndex { get => selectedChannelIndex; set => selectedChannelIndex = value; }
+
+            public FadeCandyChannel SelectedChannel
+            {
+                get
+                {
+                    return this.ledChannels[this.selectedChannelIndex];
+                }
+            }
 
             public FadeCandy(string serial)
             {
                 this.serial = serial;
-                this.SelectedChannel = 0;
-                this.ledChannels.Add(new FadeCandyChannel("1", this));
+                this.SelectedChannelIndex = 0;
+                this.AddChannel();
             }
 
+            /// <summary>
+            /// Returns all LEDs for all Fadecandy channels.
+            /// </summary>
             public List<Point> Leds
             {
                 get
@@ -210,12 +224,20 @@ namespace image_gui
             {
                 return this.serial;
             }
+
+            internal void AddChannel()
+            {
+                this.ledChannels.Add(new FadeCandyChannel((this.ledChannels.Count + 1).ToString(), this));
+            }
+
+            internal void RemoveSelectedChannel()
+            {
+                this.ledChannels.RemoveAt(this.selectedChannelIndex);
+            }
         }
 
         public class FCServerConfig
         {
-            bool verbose = true;
-
             public List<FadeCandy> devices = new List<FadeCandy>();
             int selectedIndex = 0;
 
@@ -223,19 +245,38 @@ namespace image_gui
             {
             }
 
+            public FadeCandy AddFadeCandy()
+            {
+                return this.AddFadeCandy("fc" + this.devices.Count);
+            }
+
+            /// <summary>
+            /// Adds a new Fadecandy device to the config.
+            /// </summary>
+            /// <param name="serial"></param>
+            /// <returns>An instance of the created Fadecandy device</returns>
             public FadeCandy AddFadeCandy(string serial)
             {
-                var fc = new FadeCandy("fc0");
+                var fc = new FadeCandy(serial);
                 this.devices.Add(fc);
                 return fc;
             }
 
+            /// <summary>
+            /// Looks up the currently selected Fadecandy channel and
+            /// returns the Leds related to that.
+            /// </summary>
+            /// <returns></returns>
             private List<Point> getCurrentLeds()
             {
                 var fc = this.devices[this.selectedIndex];
-                return fc.ledChannels[fc.SelectedChannel].leds;
+                return fc.ledChannels[fc.SelectedChannelIndex].leds;
             }
 
+            /// <summary>
+            /// Clears all current LEDs for the channel.
+            /// </summary>
+            /// <param name="all">Clears all LEDs for all fadecandy devices if true</param>
             public void Clear(bool all)
             {
                 if (all)
@@ -254,6 +295,10 @@ namespace image_gui
                 }
             }
 
+            /// <summary>
+            /// Adds a new LED to the current channel for the current Fadecandy device.
+            /// </summary>
+            /// <param name="p"></param>
             public void AddLed(Point p)
             {
                 var leds = getCurrentLeds();
@@ -267,6 +312,9 @@ namespace image_gui
                     leds.Remove(leds.Last());
             }
 
+            /// <summary>
+            /// Returns ALL LEDs connected to all devices.
+            /// </summary>
             public List<Point> Leds
             {
                 get
@@ -280,6 +328,23 @@ namespace image_gui
  
                     return leds;
                 }
+            }
+
+            internal void RemoveSelectedFadeCandy()
+            {
+                if (this.devices.Count > 0)
+                    this.devices.RemoveAt(this.selectedIndex);
+            }
+
+            internal void AddChannel()
+            {
+                this.devices[this.selectedIndex].AddChannel();
+            }
+
+            internal void RemoveSelectedChannel()
+            {
+                // TODO: Don't allow removing last channel.
+                this.devices[this.selectedIndex].RemoveSelectedChannel();
             }
         }
 
@@ -296,6 +361,9 @@ namespace image_gui
             }
         }
 
+        /// <summary>
+        /// Only used to serialize Layout to JSON.
+        /// </summary>
         public class LayoutConfig
         {
             public List<LayoutConfigItem> points = new List<LayoutConfigItem>();
@@ -387,6 +455,71 @@ namespace image_gui
         {
             this.GenerateJson();
             this.SaveFile(this.layoutJson, "layout.json");
+        }
+
+        private void buttonAddFadecandy_Click(object sender, EventArgs e)
+        {
+            this.config.AddFadeCandy();
+            this.RefreshFadeCandyTreeView();
+        }
+
+        private void buttonRemoveFadecandy_Click(object sender, EventArgs e)
+        {
+            if (this.config.devices.Count == 1)
+            {
+                MessageBox.Show("You can't remove the last Fadecandy!", "Nope", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            var result = MessageBox.Show("Are you sure you want to remove the selected Fadecandy?", "Work will be lost!",
+                                        MessageBoxButtons.YesNo,
+                                        MessageBoxIcon.Warning,
+                                        MessageBoxDefaultButton.Button2);
+            if (result == DialogResult.Yes)
+            {
+                this.config.RemoveSelectedFadeCandy();
+                this.RefreshFadeCandyTreeView();
+                this.GenerateJson();
+            }
+        }
+
+        private void buttonAddChannel_Click(object sender, EventArgs e)
+        {
+            this.config.AddChannel();
+            this.RefreshFadeCandyTreeView();
+        }
+
+        private void buttonRemoveChannel_Click(object sender, EventArgs e)
+        {
+            var result = MessageBox.Show("Are you sure you want to remove the selected channel?", "Work will be lost!",
+                                        MessageBoxButtons.YesNo,
+                                        MessageBoxIcon.Warning,
+                                        MessageBoxDefaultButton.Button2);
+            if (result == DialogResult.Yes)
+            {
+                this.config.RemoveSelectedChannel();
+                this.RefreshFadeCandyTreeView();
+                this.GenerateJson();
+            }
+        }
+
+        private void treeView_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            var val = e.Node.Tag;
+
+            if (val is FadeCandy)
+            {
+                // If we select the Fadecandy, change the selection to the selected channel instead.
+                var fc = val as FadeCandy;
+                e.Node.Expand();
+                this.treeView.SelectedNode = e.Node.Nodes[fc.SelectedChannelIndex];
+            }
+            else if (val is FadeCandyChannel)
+            {
+                var fcc = val as FadeCandyChannel;
+                var fc = fcc.Parent;
+                fc.SelectedChannelIndex = e.Node.Index;
+            }
         }
     }
 }
