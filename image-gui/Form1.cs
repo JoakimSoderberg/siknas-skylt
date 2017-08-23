@@ -269,7 +269,7 @@ namespace image_gui
             /// <returns></returns>
             private List<Point> getCurrentLeds()
             {
-                var fc = this.devices[this.selectedIndex];
+                var fc = this.devices[this.SelectedIndex];
                 return fc.ledChannels[fc.SelectedChannelIndex].leds;
             }
 
@@ -330,21 +330,23 @@ namespace image_gui
                 }
             }
 
+            public int SelectedIndex { get => selectedIndex; set => selectedIndex = value; }
+
             internal void RemoveSelectedFadeCandy()
             {
                 if (this.devices.Count > 0)
-                    this.devices.RemoveAt(this.selectedIndex);
+                    this.devices.RemoveAt(this.SelectedIndex);
             }
 
             internal void AddChannel()
             {
-                this.devices[this.selectedIndex].AddChannel();
+                this.devices[this.SelectedIndex].AddChannel();
             }
 
             internal void RemoveSelectedChannel()
             {
                 // TODO: Don't allow removing last channel.
-                this.devices[this.selectedIndex].RemoveSelectedChannel();
+                this.devices[this.SelectedIndex].RemoveSelectedChannel();
             }
         }
 
@@ -513,12 +515,19 @@ namespace image_gui
                 var fc = val as FadeCandy;
                 e.Node.Expand();
                 this.treeView.SelectedNode = e.Node.Nodes[fc.SelectedChannelIndex];
+
+                // Selected fadecandy index.
+                this.config.SelectedIndex = e.Node.Index;
             }
             else if (val is FadeCandyChannel)
             {
+                // If we are selecting a channel, make sure we reflect that on the parent.
                 var fcc = val as FadeCandyChannel;
                 var fc = fcc.Parent;
                 fc.SelectedChannelIndex = e.Node.Index;
+
+                // The selected fadecandy needs to be set also.
+                this.config.SelectedIndex = e.Node.Parent.Index;
             }
         }
     }
