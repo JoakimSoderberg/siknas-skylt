@@ -76,11 +76,11 @@
             // buttonRemoveFadecandy
             // 
             this.buttonRemoveFadecandy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonRemoveFadecandy.Location = new System.Drawing.Point(363, 122);
+            this.buttonRemoveFadecandy.Location = new System.Drawing.Point(320, 122);
             this.buttonRemoveFadecandy.Name = "buttonRemoveFadecandy";
-            this.buttonRemoveFadecandy.Size = new System.Drawing.Size(75, 23);
+            this.buttonRemoveFadecandy.Size = new System.Drawing.Size(118, 23);
             this.buttonRemoveFadecandy.TabIndex = 7;
-            this.buttonRemoveFadecandy.Text = "Remove";
+            this.buttonRemoveFadecandy.Text = "Remove Fadecandy";
             this.buttonRemoveFadecandy.UseVisualStyleBackColor = true;
             this.buttonRemoveFadecandy.Click += new System.EventHandler(this.buttonRemoveFadecandy_Click);
             // 

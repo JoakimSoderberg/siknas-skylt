@@ -44,13 +44,23 @@ namespace image_gui
 
             // draw an outline around the top
             shape = imageBox.GetOffsetRectangle(50, 20, 100, 20);
-            using (Pen pen = new Pen(Color.DarkRed, penSize))
+
+            int opcIndex = 0;
+
+            foreach (FadeCandy fc in this.config.devices)
             {
-                DrawChannel(g, w, pen, this.config.Leds);
+                foreach (FadeCandyChannel c in fc.Channels)
+                {
+                    using (Pen pen = new Pen(c.Color, penSize))
+                    {
+                        opcIndex = DrawChannel(g, w, pen, c.leds, opcIndex);
+                    }
+                }
             }
+
         }
 
-        private void DrawChannel(Graphics g, int w, Pen pen, List<Point> leds)
+        private int DrawChannel(Graphics g, int w, Pen pen, List<Point> leds, int opcIndex)
         {
             int i = 0;
 
@@ -76,9 +86,12 @@ namespace image_gui
                 rect = imageBox.GetOffsetRectangle(rect);
                 g.FillEllipse(Brushes.Azure, rect);
                 g.DrawEllipse(Pens.RoyalBlue, rect);
-                g.DrawString(i.ToString(), SystemFonts.StatusFont, Brushes.Black, rect);
+                g.DrawString(opcIndex.ToString(), SystemFonts.StatusFont, Brushes.Black, rect);
                 i++;
+                opcIndex++;
             }
+
+            return opcIndex;
         }
 
         private void buttonClear_Click(object sender, EventArgs e)
@@ -165,15 +178,26 @@ namespace image_gui
             string name;
             public List<Point> leds = new List<Point>();
             private FadeCandy parent;
+            private Color color;
 
             public FadeCandy Parent { get => parent; }
+            public Color Color { get => color; set => color = value; }
 
             public FadeCandyChannel(string name, FadeCandy parent)
             {
                 this.name = name;
                 this.parent = parent;
+                this.color = this.getKnownColor();
             }
 
+            private Color getKnownColor()
+            {
+                Random randomGen = new Random();
+                KnownColor[] names = (KnownColor[])Enum.GetValues(typeof(KnownColor));
+                KnownColor randomColorName = names[randomGen.Next(names.Length)];
+                return Color.FromKnownColor(randomColorName);
+            }
+            
             public override string ToString()
             {
                 return this.name;
@@ -220,6 +244,8 @@ namespace image_gui
                 }
             }
 
+            public IEnumerable<FadeCandyChannel> Channels { get => this.ledChannels; }
+
             public override string ToString()
             {
                 return this.serial;
@@ -228,11 +254,19 @@ namespace image_gui
             internal void AddChannel()
             {
                 this.ledChannels.Add(new FadeCandyChannel((this.ledChannels.Count + 1).ToString(), this));
+                this.selectedChannelIndex = Math.Max(0, this.ledChannels.Count - 1);
             }
 
-            internal void RemoveSelectedChannel()
+            internal bool RemoveSelectedChannel()
             {
-                this.ledChannels.RemoveAt(this.selectedChannelIndex);
+                if (this.ledChannels.Count > 1)
+                {
+                    this.ledChannels.RemoveAt(this.selectedChannelIndex);
+                    this.selectedChannelIndex = Math.Max(0, this.selectedChannelIndex - 1);
+                    return true;
+                }
+
+                return false;
             }
         }
 
@@ -332,6 +366,8 @@ namespace image_gui
 
             public int SelectedIndex { get => selectedIndex; set => selectedIndex = value; }
 
+            public FadeCandy Selected => devices[selectedIndex];
+
             internal void RemoveSelectedFadeCandy()
             {
                 if (this.devices.Count > 0)
@@ -343,10 +379,9 @@ namespace image_gui
                 this.devices[this.SelectedIndex].AddChannel();
             }
 
-            internal void RemoveSelectedChannel()
+            internal bool RemoveSelectedChannel()
             {
-                // TODO: Don't allow removing last channel.
-                this.devices[this.SelectedIndex].RemoveSelectedChannel();
+                return this.devices[this.SelectedIndex].RemoveSelectedChannel();
             }
         }
 
@@ -481,6 +516,7 @@ namespace image_gui
             {
                 this.config.RemoveSelectedFadeCandy();
                 this.RefreshFadeCandyTreeView();
+                this.imageBox.Refresh();
                 this.GenerateJson();
             }
         }
@@ -499,8 +535,14 @@ namespace image_gui
                                         MessageBoxDefaultButton.Button2);
             if (result == DialogResult.Yes)
             {
-                this.config.RemoveSelectedChannel();
+                if (!this.config.RemoveSelectedChannel())
+                {
+                    MessageBox.Show("You're not allowed to remove the last channel", "Nope",
+                                        MessageBoxButtons.OK,
+                                        MessageBoxIcon.Stop);
+                }
                 this.RefreshFadeCandyTreeView();
+                this.imageBox.Refresh();
                 this.GenerateJson();
             }
         }
