@@ -26,7 +26,7 @@ def main():
     parser.add_argument('layout', help='Path to layout JSON file.')
     parser.add_argument('--image', help='Path to the image the layout was created from.')
     parser.add_argument('--size', nargs=2, type=int, help='If no image is available give the size manually.')
-    parser.add_argument('--scale', '-s', default=1.0, help='Scale points by this factor after normalizing.')
+    parser.add_argument('--scale', '-s', default=1.0, type=float, help='Scale points by this factor after normalizing.')
     parser.add_argument('--output', '-o', help='Output layout JSON file. Prints to stdout if not specified.')
     parser.add_argument('--verbose', '-v', action='store_true', help='Verbose output.')
 
@@ -52,8 +52,8 @@ def main():
             p = p['point']
             org_x = p[0]
             org_y = p[1]
-            x = org_x / float(img_size[0])
-            y = org_y / float(img_size[1])
+            x = org_x / float(img_size[0]) * args.scale
+            y = org_y / float(img_size[1]) * args.scale
             dprint('{}, {}  => {}, {}'.format(org_x, org_y, x, y))
             new_points.append({'point': [x, y, 0]})
 
