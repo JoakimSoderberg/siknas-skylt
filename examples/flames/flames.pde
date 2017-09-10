@@ -1,14 +1,14 @@
 OPC opc;
 PImage im;
 
-void load_layout()
+void load_layout(int x_offset, int y_offset, float scale)
 {
   JSONArray points = loadJSONArray("layout.json");
   
   for (int j = 0; j < points.size(); j++) {
     JSONObject o = points.getJSONObject(j);
     JSONArray p = o.getJSONArray("point");
-    opc.led(j, (int)(p.getFloat(0)*200), (int)(p.getFloat(1)*200));
+    opc.led(j, x_offset + (int)(p.getFloat(0)*scale), y_offset + (int)(p.getFloat(1)*scale));
   }
 }
 
@@ -20,12 +20,9 @@ void setup()
   im = loadImage("flames.jpeg");
 
   // Connect to the local instance of fcserver
-  opc = new OPC(this, "192.168.1.86", 7890);
+  opc = new OPC(this, "127.0.0.1", 7890);
 
-  // Map one 64-LED strip to the center of the window
-  //opc.ledStrip(0, 64, width/2, height/2, width / 70.0, 0, false);
-
-  load_layout();
+  load_layout(0,0, 200);
 }
 
 void draw()

@@ -41,26 +41,26 @@ Ring rings[];
 float smoothX, smoothY;
 boolean f = false;
 
-void load_layout()
+void load_layout(int x_offset, int y_offset, float scale)
 {
   JSONArray points = loadJSONArray("layout.json");
   
   for (int j = 0; j < points.size(); j++) {
     JSONObject o = points.getJSONObject(j);
     JSONArray p = o.getJSONArray("point");
-    opc.led(j, (int)(p.getFloat(0)*200), (int)(p.getFloat(1)*200));
+    opc.led(j, x_offset + (int)(p.getFloat(0)*scale), y_offset + (int)(p.getFloat(1)*scale));
   }
 }
 
 void setup()
 {
-  size(640, 320, P3D);
+  size(512, 512, P3D);
   colorMode(HSB, 100);
   texture = loadImage("ring.png");
 
   opc = new OPC(this, "127.0.0.1", 7890);
 
-  load_layout();
+  load_layout(100, 100, 200);
   
   // We can have up to 100 rings. They all start out invisible.
   rings = new Ring[100];
