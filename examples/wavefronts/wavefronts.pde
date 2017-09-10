@@ -41,6 +41,17 @@ Ring rings[];
 float smoothX, smoothY;
 boolean f = false;
 
+void load_layout()
+{
+  JSONArray points = loadJSONArray("layout.json");
+  
+  for (int j = 0; j < points.size(); j++) {
+    JSONObject o = points.getJSONObject(j);
+    JSONArray p = o.getJSONArray("point");
+    opc.led(j, (int)(p.getFloat(0)*200), (int)(p.getFloat(1)*200));
+  }
+}
+
 void setup()
 {
   size(640, 320, P3D);
@@ -49,13 +60,7 @@ void setup()
 
   opc = new OPC(this, "127.0.0.1", 7890);
 
-  JSONArray points = loadJSONArray("layout.json");
-  
-  for (int j = 0; j < points.size(); j++) {
-    JSONObject o = points.getJSONObject(j);
-    JSONArray p = o.getJSONArray("point");
-    opc.led(j, (int)(p.getFloat(0)*200), (int)(p.getFloat(1)*200));
-  }
+  load_layout();
   
   // We can have up to 100 rings. They all start out invisible.
   rings = new Ring[100];
