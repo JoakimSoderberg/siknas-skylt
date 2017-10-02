@@ -2,13 +2,12 @@ FROM golang:1.9
 
 WORKDIR /go/src/app
 
-ADD https://github.com/golang/dep/releases/download/v0.3.1/dep-linux-amd64 /usr/bin/dep
-RUN chmod +x /usr/bin/dep
+RUN curl -s -L https://github.com/golang/dep/releases/download/v0.3.1/dep-linux-amd64 -o /usr/bin/dep && chmod +x /usr/bin/dep
 
 COPY . .
 
 RUN dep ensure
-RUN go-wrapper install    # "go install -v ./..."
+RUN go-wrapper install
 
 EXPOSE 8080
 

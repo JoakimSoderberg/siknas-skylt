@@ -1,43 +1,51 @@
 package main
 
 import (
-    "fmt"
-    "net/http"
+	"fmt"
+	"html"
+	"log"
+	"net/http"
 
-    "github.com/gobwas/ws"
-    "github.com/gobwas/ws/wsutil"
-    "github.com/gorilla/mux"
+	"github.com/gobwas/ws"
+	"github.com/gobwas/ws/wsutil"
+	"github.com/gorilla/mux"
 )
 
-func ws_listener() {
+func ws_listener(w http.ResponseWriter, r *http.Request) {
+	conn, _, _, err := ws.UpgradeHTTP(r, w, nil)
+	if err != nil {
+		fmt.Printf("Failed to Ugrade websocket connection\n")
+		conn.Close()
+		return
+	}
+
+	go func() {
+		defer conn.Close()
+
+		fmt.Printf("New Websocket Client\n")
+
+		for {
+			msg, op, err := wsutil.ReadClientData(conn)
+			if err != nil {
+				// handle error
+			}
+			err = wsutil.WriteServerMessage(conn, op, msg)
+			if err != nil {
+				// handle error
+			}
+		}
+	}()
+}
+
+func index(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
 }
 
 func main() {
-    fmt.Printf("Starting")
-    http.ListenAndServe(":8080", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        conn, _, _, err := ws.UpgradeHTTP(r, w, nil)
-        if err != nil {
-            fmt.Printf("Failed to Ugrade websocket connection")
-            conn.Close()
-            return
-        }
+	fmt.Printf("Siknas-skylt Webserver\n\n")
 
-        go func() {
-            defer conn.Close()
-
-            fmt.Printf("New Websocket Client\n")
-
-            for {
-                msg, op, err := wsutil.ReadClientData(conn)
-                if err != nil {
-                    // handle error
-                }
-                err = wsutil.WriteServerMessage(conn, op, msg)
-                if err != nil {
-                    // handle error
-                }
-            }
-        }()
-    }))
+	router := mux.NewRouter().StrictSlash(true)
+	router.HandleFunc("/", index)
+	router.HandleFunc("/ws", ws_listener)
+	log.Fatal(http.ListenAndServe(":8080", router))
 }
-
