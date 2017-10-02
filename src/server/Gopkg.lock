@@ -20,6 +20,18 @@
   revision = "68d2472c0bfbbd6f11ba77bf2c122fbf035c246b"
 
 [[projects]]
+  name = "github.com/gorilla/context"
+  packages = ["."]
+  revision = "1ea25387ff6f684839d82767c1733ff4d4d15d0a"
+  version = "v1.1"
+
+[[projects]]
+  name = "github.com/gorilla/mux"
+  packages = ["."]
+  revision = "24fca303ac6da784b9e8269f724ddeb0b2eea5e7"
+  version = "v1.5.0"
+
+[[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
@@ -28,6 +40,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "98b6bff6146e9cf05be6cc20eb113d76f4d0117d9c41c85b30e21baf979f93ed"
+  inputs-digest = "6d35c2a881cebdd2e85101defcbc64cf81b8d8d65de1a4a6c5f8de24890c22b6"
   solver-name = "gps-cdcl"
   solver-version = 1
