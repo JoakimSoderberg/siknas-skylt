@@ -1,0 +1,30 @@
+#FROM arm32v6/golang:1.8.3-alpine as builder
+
+# Install Docker on RPi
+# curl -sSL https://get.docker.com | sh
+
+# WORKDIR /go/src/app
+
+# RUN apk --no-cache add ca-certificates
+# RUN curl -s -L https://github.com/golang/dep/archive/v0.3.1.tar.gz -o /go/src/app/v0.3.1.tar.gz
+# RUN tar xvzf v0.3.1.tar.gz
+# RUN cd 
+
+#
+# Final image.
+#
+FROM arm32v6/golang:1.8.3-alpine3.6
+
+WORKDIR /go/src/app
+
+RUN apk --no-cache add ca-certificates git
+RUN go get -u github.com/golang/dep/cmd/dep
+
+COPY . .
+
+RUN dep ensure
+RUN go-wrapper install
+
+EXPOSE 8080
+
+CMD ["go-wrapper", "run"]
