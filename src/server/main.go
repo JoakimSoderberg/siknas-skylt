@@ -27,7 +27,7 @@ func control_panel_ws_listener(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("New Websocket Client\n")
 
 		for {
-			msg, op, err := wsutil.ReadClientData(conn)
+			_, _, err := wsutil.ReadClientData(conn)
 			if err != nil {
 				// handle error
 			}
