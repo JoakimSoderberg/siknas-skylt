@@ -1,0 +1,21 @@
+#
+# Install Docker on RPi
+# curl -sSL https://get.docker.com | sh
+#
+
+# TODO: Build v0.3.1 so we use the same version as on x86
+FROM arm32v6/golang:1.8.3-alpine3.6
+
+WORKDIR /go/src/app
+
+RUN apk --no-cache add ca-certificates git
+RUN go get -u github.com/golang/dep/cmd/dep
+
+COPY . .
+
+RUN dep ensure
+RUN go-wrapper install
+
+EXPOSE 8080
+
+CMD ["go-wrapper", "run"]
