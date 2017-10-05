@@ -3,18 +3,16 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"log"
+	"os"
+	"os/signal"
 	"strconv"
 	"strings"
 
 	"github.com/jacobsa/go-serial/serial"
+	"golang.org/x/net/websocket"
 	"gopkg.in/alecthomas/kingpin.v2"
-)
-
-var (
-	server     = kingpin.Arg("server", "Websocket server to connect to. (defaults to localhost)").Default("localhost").String()
-	port       = kingpin.Flag("port", "The port to use.").Default("80").Int()
-	serialPort = kingpin.Flag("serial_port", "The serial port to listen to.").String()
 )
 
 // ControlPanelMsg represents the state of the control panel hardware.
@@ -24,7 +22,7 @@ type ControlPanelMsg struct {
 	Brightness int    `json:"brightness,omitempty"`
 }
 
-func (msg *ControlPanelMsg) String() string {
+func (msg ControlPanelMsg) String() string {
 	return fmt.Sprintf("Program: %v Color: (%v, %v, %v) Brightness: %v", msg.Program, msg.Color[0], msg.Color[0], msg.Color[0], msg.Brightness)
 }
 
@@ -53,21 +51,27 @@ func NewControlPanelMsg(msgBytes []byte) (*ControlPanelMsg, error) {
 	return msg, nil
 }
 
-// SerialPortListener listens for messages on the serial port.
-func SerialPortListener(messages chan ControlPanelMsg) {
+func openSerialPort(serialPort string) io.ReadWriteCloser {
 	options := serial.OpenOptions{
-		PortName:        *serialPort,
-		BaudRate:        19200,
+		PortName:        serialPort,
+		BaudRate:        115200,
 		DataBits:        8,
 		StopBits:        1,
 		MinimumReadSize: 4,
 	}
 
+	log.Printf("Opening serial port: %v\n", options.PortName)
+
 	port, err := serial.Open(options)
 	if err != nil {
-		log.Fatalf("serial.Open: %v", err)
+		log.Fatalf("Failed to open serial port: %v", err)
 	}
 
+	return port
+}
+
+// serialPortListener listens for messages on the serial port.
+func serialPortListener(messages chan ControlPanelMsg, port io.ReadWriteCloser) {
 	// Make sure to close it later.
 	defer port.Close()
 
@@ -81,26 +85,81 @@ func SerialPortListener(messages chan ControlPanelMsg) {
 
 		msg, err := NewControlPanelMsg(msgBytes)
 
-		if err == nil {
-			messages <- *msg
+		if err != nil {
+			log.Printf("Failed to create msg: %v", err)
+			continue
 		}
+
+		messages <- *msg
 	}
 }
 
+// registerSignalHandler handles interrupt signals.
+func registerSignalHandler(c *websocket.Conn, port io.ReadWriteCloser) {
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, os.Interrupt)
+
+	go func() {
+		for range ch {
+			log.Println("\nReceived signal, exiting...")
+			c.Close()
+			os.Exit(0)
+		}
+	}()
+}
+
+func connectWebsocket(addr string) *websocket.Conn {
+	log.Printf("Connecting to %s...", addr)
+
+	conf, err := websocket.NewConfig(addr, addr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ws, err := websocket.DialConfig(conf)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return ws
+}
+
+var (
+	server = kingpin.Flag("server_url", "Websocket server url to connect to.").
+		Default("ws://localhost/ws/control_panel/").String()
+	serialPort = kingpin.Flag("serial_port", "The serial port to listen to.").String()
+	debug      = kingpin.Flag("debug", "Enable debug output").Bool()
+)
+
 func main() {
 	kingpin.UsageTemplate(kingpin.DefaultUsageTemplate).Version("1.0").Author("Joakim Soderberg")
-	kingpin.CommandLine.Help = "Siknas-skylt Control Panel Websocket Client."
+	kingpin.CommandLine.Help = "Siknas-skylt Control Panel Listener."
 	kingpin.Parse()
+
+	log.Println("Starting Siknas-skylt Control Panel listener...")
 
 	messages := make(chan ControlPanelMsg)
 
-	go SerialPortListener(messages)
+	ws := connectWebsocket(*server)
+	port := openSerialPort(*serialPort)
 
-	// TODO: Connect to websocket
+	registerSignalHandler(ws, port)
+
+	// Listen for serial port messages non-blocking.
+	go serialPortListener(messages, port)
 
 	for {
-		msg := <-messages
-		log.Println(msg)
-		// TODO: Send to websocket
+		select {
+		case msg := <-messages:
+			if *debug {
+				log.Println(msg)
+			}
+
+			err := websocket.JSON.Send(ws, msg)
+			if err != nil {
+				log.Fatalf("Failed to write to websocket: %v\n", err)
+			}
+		default:
+
+		}
 	}
 }
