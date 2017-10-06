@@ -1,15 +1,13 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 
-	"github.com/gobwas/ws"
-	"github.com/gobwas/ws/wsutil"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -20,12 +18,14 @@ type ControlPanelMsg struct {
 	Brightness int    `json:"brightness,omitempty"`
 }
 
+var upgrader = websocket.Upgrader{} // use default options
+
 // controlPanelWsListener listens on a websocket to messages from the control panel hardware.
 func controlPanelWsListener(controlPanel chan ControlPanelMsg) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		conn, _, _, err := ws.UpgradeHTTP(r, w, nil)
+		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
-			fmt.Printf("Failed to Ugrade websocket connection\n")
+			log.Printf("Failed to Ugrade websocket connection\n")
 			conn.Close()
 			return
 		}
@@ -35,22 +35,18 @@ func controlPanelWsListener(controlPanel chan ControlPanelMsg) http.HandlerFunc 
 		go func() {
 			defer conn.Close()
 
-			fmt.Printf("New Websocket Client\n")
+			log.Printf("Websocket Control Panel Client connected: %v\n", conn.RemoteAddr())
 
 			for {
-				msg, err := wsutil.ReadServerText(conn)
+				jsonMsg := ControlPanelMsg{}
+
+				err := conn.ReadJSON(&jsonMsg)
 				if err != nil {
 					log.Println("Failed to read control panel message: ", err)
 					continue
 				}
 
-				jsonMsg := ControlPanelMsg{}
-
-				err = json.Unmarshal(msg, &jsonMsg)
-				if err != nil {
-					log.Println("Failed to unpack control panel message: ", err)
-					continue
-				}
+				log.Println("Got control panel message: ", jsonMsg)
 
 				controlPanel <- jsonMsg
 			}
@@ -58,43 +54,68 @@ func controlPanelWsListener(controlPanel chan ControlPanelMsg) http.HandlerFunc 
 	})
 }
 
-func wsListener(w http.ResponseWriter, r *http.Request) {
-	conn, _, _, err := ws.UpgradeHTTP(r, w, nil)
-	if err != nil {
-		fmt.Printf("Failed to Ugrade websocket connection\n")
-		conn.Close()
-		return
-	}
+type clientMsg struct {
+	MessageType int
+	Message     []byte
+}
 
-	go func() {
-		defer conn.Close()
-
-		fmt.Printf("Websocket Client connected: %v\n", conn.RemoteAddr())
-
-		for {
-			msg, op, err := wsutil.ReadClientData(conn)
-			if err != nil {
-				// handle error
-			}
-
-			switch op {
-			case ws.OpClose:
-				log.Printf("Closing Websocket connection from: %v\n", conn.RemoteAddr())
-				return
-			}
-
-			err = wsutil.WriteServerMessage(conn, op, msg)
-			if err != nil {
-				// handle error
-			}
+func wsListener(controlPanel chan ControlPanelMsg) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		conn, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			log.Printf("Failed to Ugrade websocket connection\n")
+			conn.Close()
+			return
 		}
-	}()
+
+		clientMessages := make(chan clientMsg)
+
+		// Reader.
+		go func() {
+			defer conn.Close()
+
+			for {
+				mt, message, err := conn.ReadMessage()
+				if err != nil {
+					log.Println("read:", err)
+					break
+				}
+				log.Printf("recv: %s", message)
+				clientMessages <- clientMsg{mt, message}
+			}
+		}()
+
+		// Writer.
+		go func() {
+			defer conn.Close()
+
+			log.Printf("Websocket Client connected: %v\n", conn.RemoteAddr())
+
+			// Writer
+			for {
+				select {
+				case msg := <-clientMessages:
+					conn.WriteMessage(msg.MessageType, msg.Message)
+				case msg := <-controlPanel:
+					// TODO: This only sends it to one client...
+					log.Println("Broadcasting: ", msg)
+					conn.WriteJSON(msg)
+				}
+			}
+		}()
+	})
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
 	//fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
 	// TODO: Host aurelia webpage
 	homeTemplate.Execute(w, "ws://"+r.Host+"/ws")
+}
+
+func controlPanelClient(w http.ResponseWriter, r *http.Request) {
+	//fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
+	// TODO: Host aurelia webpage
+	homeTemplate.Execute(w, "ws://"+r.Host+"/ws/control_panel")
 }
 
 var (
@@ -110,7 +131,8 @@ func main() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", index)
-	router.HandleFunc("/ws", wsListener)
+	router.HandleFunc("/panel", controlPanelClient)
+	router.HandleFunc("/ws", wsListener(controlPanel))
 	router.HandleFunc("/ws/control_panel", controlPanelWsListener(controlPanel))
 
 	log.Println("Starting Siknas-skylt webserver...")
