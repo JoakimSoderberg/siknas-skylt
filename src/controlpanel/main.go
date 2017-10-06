@@ -73,7 +73,6 @@ func openSerialPort(serialPort string) io.ReadWriteCloser {
 
 // serialPortListener listens for messages on the serial port.
 func serialPortListener(messages chan ControlPanelMsg, port io.ReadWriteCloser) {
-	// Make sure to close it later.
 	defer port.Close()
 
 	reader := bufio.NewReader(port)
