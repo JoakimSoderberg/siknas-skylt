@@ -9,9 +9,10 @@ import (
 	"os/signal"
 	"strconv"
 	"strings"
+	"time"
 
+	"github.com/gorilla/websocket"
 	"github.com/jacobsa/go-serial/serial"
-	"golang.org/x/net/websocket"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -95,32 +96,86 @@ func serialPortListener(messages chan ControlPanelMsg, port io.ReadWriteCloser) 
 }
 
 // registerSignalHandler handles interrupt signals.
-func registerSignalHandler(c *websocket.Conn, port io.ReadWriteCloser) {
-	ch := make(chan os.Signal, 1)
-	signal.Notify(ch, os.Interrupt)
+func registerSignalHandler(c *websocket.Conn, port io.ReadWriteCloser) chan os.Signal {
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt)
 
 	go func() {
-		for range ch {
+		for range sigChan {
 			log.Println("\nReceived signal, exiting...")
 			c.Close()
 			os.Exit(0)
 		}
 	}()
+
+	return sigChan
 }
 
 func connectWebsocket(addr string) *websocket.Conn {
 	log.Printf("Connecting to %s...", addr)
 
-	conf, err := websocket.NewConfig(addr, addr)
+	ws, _, err := websocket.DefaultDialer.Dial(addr, nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Failed to connect to websocket server: ", err)
 	}
 
-	ws, err := websocket.DialConfig(conf)
-	if err != nil {
-		log.Fatal(err)
-	}
 	return ws
+}
+
+func websocketReader(ws *websocket.Conn, readDone chan struct{}) {
+	defer ws.Close()
+	defer close(readDone)
+
+	// The reader will responed to things like PING even though
+	// we don't care about any messages.
+	for {
+		if _, _, err := ws.NextReader(); err != nil {
+			break
+		}
+	}
+}
+
+// websocketWriter receives control panel messages and forwards them to the websocket server.
+func websocketWriter(ws *websocket.Conn,
+	messages chan ControlPanelMsg, interrupt chan os.Signal, readDone chan struct{}) {
+	defer ws.Close()
+
+	pingTicker := time.NewTicker(time.Second)
+	defer pingTicker.Stop()
+
+	for {
+		select {
+		case msg := <-messages:
+			// Receive a control panel message and forward it to the websocket.
+			if *debug {
+				log.Println(msg)
+			}
+
+			err := websocket.WriteJSON(ws, msg)
+			if err != nil {
+				log.Fatalf("Failed to write to websocket: %v\n", err)
+			}
+		case <-interrupt:
+			// User wants to close.
+
+			// To cleanly close a connection, a client should send a close
+			// frame and wait for the server to close the connection.
+			err := ws.WriteMessage(websocket.CloseMessage,
+				websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+			if err != nil {
+				log.Println("Failed to write:", err)
+				return
+			}
+
+			// Wait for the reader to be done or a timeout.
+			select {
+			case <-readDone:
+			case <-time.After(time.Second):
+			}
+			ws.Close()
+			return
+		}
+	}
 }
 
 var (
@@ -137,29 +192,26 @@ func main() {
 
 	log.Println("Starting Siknas-skylt Control Panel listener...")
 
-	messages := make(chan ControlPanelMsg)
+	port := openSerialPort(*serialPort)
+	defer port.Close()
 
 	ws := connectWebsocket(*server)
-	port := openSerialPort(*serialPort)
+	defer ws.Close()
 
-	registerSignalHandler(ws, port)
+	interrupt := registerSignalHandler(ws, port)
 
-	// Listen for serial port messages non-blocking.
+	// Channel receiving control panel messages via serial port.
+	messages := make(chan ControlPanelMsg)
+
+	// Listen for serial port messages.
 	go serialPortListener(messages, port)
 
-	for {
-		select {
-		case msg := <-messages:
-			if *debug {
-				log.Println(msg)
-			}
+	// When this is closed we are done reading from the websocket.
+	readDone := make(chan struct{})
 
-			err := websocket.JSON.Send(ws, msg)
-			if err != nil {
-				log.Fatalf("Failed to write to websocket: %v\n", err)
-			}
-		default:
+	// Websocket reader.
+	go websocketReader(ws, readDone)
 
-		}
-	}
+	// Websocket writer.
+	go websocketWriter(ws, messages, interrupt, readDone)
 }
