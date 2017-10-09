@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -137,7 +138,7 @@ type clientMsg struct {
 
 type clientSelectMsg struct {
 	clientMsg
-	Selected int `json:"selected,omitempty"`
+	Selected string `json:"selected,omitempty"`
 }
 
 type serverMsg struct {
@@ -154,6 +155,22 @@ type serverListMsg struct {
 	Anims []serverAnim `json:"anims,omitempty"`
 }
 
+type serverStatusMsg struct {
+	serverMsg
+	Success bool   `json:"success,omitempty"`
+	Text    string `json:"text,omitempty"`
+}
+
+func getAnimsListMsg() (serverListMsg, error) {
+	// TODO: Get a real list of files
+	msg := serverListMsg{
+		serverMsg: serverMsg{MessageType: "list"},
+		Anims:     []serverAnim{{Name: "hej"}, {Name: "hopp"}, {Name: "arne"}},
+	}
+
+	return msg, nil
+}
+
 // wsListener is the websocket handler for "normal" websocket clients that are not the control panel.
 func wsListener(bcast *controlPanelBroadcaster) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -164,7 +181,8 @@ func wsListener(bcast *controlPanelBroadcaster) http.HandlerFunc {
 			return
 		}
 
-		wsClientMessages := make(chan clientMsg)
+		// TODO: Does it have to be this generic?
+		serverMessages := make(chan interface{})
 
 		// Add this new client as a control panel broadcast listener.
 		ctrlPanelClient := controlPanelClient{
@@ -175,7 +193,7 @@ func wsListener(bcast *controlPanelBroadcaster) http.HandlerFunc {
 		// Reader.
 		go func() {
 			defer conn.Close()
-			defer close(wsClientMessages)
+			defer close(serverMessages)
 
 			// Clients needs to reply to Ping.
 			conn.SetReadDeadline(time.Now().Add(pongWait))
@@ -187,15 +205,41 @@ func wsListener(bcast *controlPanelBroadcaster) http.HandlerFunc {
 
 			// TODO: Make sure channel is closed
 			for {
-				var msg clientMsg
-				err := conn.ReadJSON(&msg)
+				_, data, err := conn.ReadMessage()
 				if err != nil {
 					log.Println("read:", err)
 					break
 				}
 
+				// TODO: Breakout into function
+				var msg clientMsg
+				err = json.Unmarshal(data, &msg)
+				if err != nil {
+					log.Printf("Failed to unmarshal JSON '%v': %v\n", string(data), err)
+					break
+				}
+
+				switch msg.MessageType {
+				default:
+					log.Println("Unexpected message type from client: ", msg.MessageType)
+					return
+				case "select":
+					var selectMsg clientSelectMsg
+					err := json.Unmarshal(data, &selectMsg)
+					if err != nil {
+						log.Printf("Failed to unmarshal JSON '%v':\n  %v\n", string(data), err)
+						return
+					}
+
+					log.Println("Select: ", selectMsg.Selected)
+					serverMessages <- serverStatusMsg{
+						serverMsg: serverMsg{MessageType: "status"},
+						Success:   true,
+						Text:      fmt.Sprint("Selected ", selectMsg.Selected),
+					}
+				}
+
 				log.Printf("recv: %s", msg)
-				wsClientMessages <- msg
 			}
 		}()
 
@@ -211,17 +255,17 @@ func wsListener(bcast *controlPanelBroadcaster) http.HandlerFunc {
 
 			log.Printf("Websocket Client connected: %v\n", conn.RemoteAddr())
 
-			// Start by sending a list of animations
-			// TODO: Get a real list of files
-			conn.WriteJSON(serverListMsg{
-				serverMsg: serverMsg{MessageType: "list"},
-				Anims:     []serverAnim{{Name: "hej"}, {Name: "hopp"}, {Name: "arne"}},
-			})
+			// Start by sending a list of animations.
+			anims, err := getAnimsListMsg()
+			if err != nil {
+				log.Println("Failed to get list of animations")
+				return
+			}
+			conn.WriteJSON(anims)
 
-			// Writer
 			for {
 				select {
-				case msg := <-wsClientMessages:
+				case msg := <-serverMessages:
 					conn.WriteJSON(msg)
 				case msg := <-ctrlPanelClient.controlPanel:
 					log.Println("Broadcasting: ", msg)
