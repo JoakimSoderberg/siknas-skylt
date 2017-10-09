@@ -140,6 +140,20 @@ type clientSelectMsg struct {
 	Selected int `json:"selected,omitempty"`
 }
 
+type serverMsg struct {
+	MessageType string `json:"message_type,omitempty"`
+}
+
+type serverAnim struct {
+	Name        string `json:"name,omitempty"`
+	Description string `json:"description,omitempty"`
+}
+
+type serverListMsg struct {
+	serverMsg
+	Anims []serverAnim `json:"anims,omitempty"`
+}
+
 // wsListener is the websocket handler for "normal" websocket clients that are not the control panel.
 func wsListener(bcast *controlPanelBroadcaster) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -187,23 +201,29 @@ func wsListener(bcast *controlPanelBroadcaster) http.HandlerFunc {
 
 		// Writer.
 		go func() {
+			pingTicker := time.NewTicker(pingPeriod)
+
 			defer func() {
 				conn.Close()
 				bcast.Pop(&ctrlPanelClient)
+				pingTicker.Stop()
 			}()
 
 			log.Printf("Websocket Client connected: %v\n", conn.RemoteAddr())
 
-			pingTicker := time.NewTicker(pingPeriod)
+			// Start by sending a list of animations
+			// TODO: Get a real list of files
+			conn.WriteJSON(serverListMsg{
+				serverMsg: serverMsg{MessageType: "list"},
+				Anims:     []serverAnim{{Name: "hej"}, {Name: "hopp"}, {Name: "arne"}},
+			})
 
 			// Writer
 			for {
 				select {
 				case msg := <-wsClientMessages:
-					//conn.WriteMessage(msg.MessageType, msg.Message)
 					conn.WriteJSON(msg)
 				case msg := <-ctrlPanelClient.controlPanel:
-					// TODO: This only sends it to one client...
 					log.Println("Broadcasting: ", msg)
 					conn.WriteJSON(msg)
 				case <-pingTicker.C:
