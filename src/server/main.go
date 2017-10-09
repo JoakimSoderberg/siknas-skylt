@@ -6,10 +6,22 @@ import (
 	"log"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"gopkg.in/alecthomas/kingpin.v2"
+)
+
+const (
+	// Time allowed to write the file to the client.
+	writeWait = 10 * time.Second
+
+	// Time allowed to read the next pong message from the client.
+	pongWait = 60 * time.Second
+
+	// Send pings to client with this period. Must be less than pongWait.
+	pingPeriod = (pongWait * 9) / 10
 )
 
 // ControlPanelMsg represents the state of the control panel hardware.
@@ -114,9 +126,18 @@ func controlPanelWsListener(bcast *controlPanelBroadcaster) http.HandlerFunc {
 	})
 }
 
-type clientMsg struct {
+type rawClientMsg struct {
 	MessageType int
 	Message     []byte
+}
+
+type clientMsg struct {
+	MessageType string `json:"message_type,omitempty"`
+}
+
+type clientSelectMsg struct {
+	clientMsg
+	Selected int `json:"selected,omitempty"`
 }
 
 // wsListener is the websocket handler for "normal" websocket clients that are not the control panel.
@@ -142,14 +163,25 @@ func wsListener(bcast *controlPanelBroadcaster) http.HandlerFunc {
 			defer conn.Close()
 			defer close(wsClientMessages)
 
+			// Clients needs to reply to Ping.
+			conn.SetReadDeadline(time.Now().Add(pongWait))
+			conn.SetPongHandler(func(string) error {
+				log.Println("Pong! ", conn.RemoteAddr())
+				conn.SetReadDeadline(time.Now().Add(pongWait))
+				return nil
+			})
+
+			// TODO: Make sure channel is closed
 			for {
-				mt, message, err := conn.ReadMessage()
+				var msg clientMsg
+				err := conn.ReadJSON(&msg)
 				if err != nil {
 					log.Println("read:", err)
 					break
 				}
-				log.Printf("recv: %s", message)
-				wsClientMessages <- clientMsg{mt, message}
+
+				log.Printf("recv: %s", msg)
+				wsClientMessages <- msg
 			}
 		}()
 
@@ -162,15 +194,24 @@ func wsListener(bcast *controlPanelBroadcaster) http.HandlerFunc {
 
 			log.Printf("Websocket Client connected: %v\n", conn.RemoteAddr())
 
+			pingTicker := time.NewTicker(pingPeriod)
+
 			// Writer
 			for {
 				select {
 				case msg := <-wsClientMessages:
-					conn.WriteMessage(msg.MessageType, msg.Message)
+					//conn.WriteMessage(msg.MessageType, msg.Message)
+					conn.WriteJSON(msg)
 				case msg := <-ctrlPanelClient.controlPanel:
 					// TODO: This only sends it to one client...
 					log.Println("Broadcasting: ", msg)
 					conn.WriteJSON(msg)
+				case <-pingTicker.C:
+					log.Println("Ping! ", conn.RemoteAddr())
+					conn.SetWriteDeadline(time.Now().Add(writeWait))
+					if err := conn.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
+						return
+					}
 				}
 			}
 		}()
