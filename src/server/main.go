@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"sync"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -18,10 +19,66 @@ type ControlPanelMsg struct {
 	Brightness int    `json:"brightness,omitempty"`
 }
 
+type controlPanelClient struct {
+	controlPanel chan ControlPanelMsg
+}
+
+type controlPanelBroadcaster struct {
+	sync.Mutex
+	clients []*controlPanelClient
+}
+
+// Push adds a new client as a broadcast listener to the control panel.
+func (bcast *controlPanelBroadcaster) Push(c *controlPanelClient) {
+	bcast.Lock()
+	defer bcast.Unlock()
+
+	bcast.clients = append(bcast.clients, c)
+
+	log.Println("Added control panel broadcast listening client")
+}
+
+// Pop removes a client from the control panel broadcast.
+func (bcast *controlPanelBroadcaster) Pop(c *controlPanelClient) {
+	bcast.Lock()
+	defer bcast.Unlock()
+
+	i := -1
+	for j, cur := range bcast.clients {
+		if cur == c {
+			i = j
+			break
+		}
+	}
+
+	if i < 0 {
+		return
+	}
+
+	// TODO: Keeping clients in a slice might not be the best solution?
+	copy(bcast.clients[i:], bcast.clients[i+1:])
+	bcast.clients[len(bcast.clients)-1] = nil // or the zero value of T
+	bcast.clients = bcast.clients[:len(bcast.clients)-1]
+
+	log.Println("Removed control panel broadcast listening client")
+}
+
+// Broadcast will send an incoming message from the control panel to all listening channels.
+func (bcast *controlPanelBroadcaster) Broadcast(routine func(*controlPanelClient)) {
+	bcast.Lock()
+	defer bcast.Unlock()
+
+	// Broadcasts to all clients.
+	for _, c := range bcast.clients {
+		log.Println("Broadcasting to ", c)
+		routine(c)
+	}
+}
+
 var upgrader = websocket.Upgrader{} // use default options
 
 // controlPanelWsListener listens on a websocket to messages from the control panel hardware.
-func controlPanelWsListener(controlPanel chan ControlPanelMsg) http.HandlerFunc {
+func controlPanelWsListener(bcast *controlPanelBroadcaster) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
@@ -32,6 +89,7 @@ func controlPanelWsListener(controlPanel chan ControlPanelMsg) http.HandlerFunc 
 
 		// TODO: Only allow one client.
 
+		// Reader.
 		go func() {
 			defer conn.Close()
 
@@ -48,7 +106,9 @@ func controlPanelWsListener(controlPanel chan ControlPanelMsg) http.HandlerFunc 
 
 				log.Println("Got control panel message: ", jsonMsg)
 
-				controlPanel <- jsonMsg
+				bcast.Broadcast(func(c *controlPanelClient) {
+					c.controlPanel <- jsonMsg
+				})
 			}
 		}()
 	})
@@ -59,7 +119,8 @@ type clientMsg struct {
 	Message     []byte
 }
 
-func wsListener(controlPanel chan ControlPanelMsg) http.HandlerFunc {
+// wsListener is the websocket handler for "normal" websocket clients that are not the control panel.
+func wsListener(bcast *controlPanelBroadcaster) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
@@ -68,11 +129,18 @@ func wsListener(controlPanel chan ControlPanelMsg) http.HandlerFunc {
 			return
 		}
 
-		clientMessages := make(chan clientMsg)
+		wsClientMessages := make(chan clientMsg)
+
+		// Add this new client as a control panel broadcast listener.
+		ctrlPanelClient := controlPanelClient{
+			controlPanel: make(chan ControlPanelMsg),
+		}
+		bcast.Push(&ctrlPanelClient)
 
 		// Reader.
 		go func() {
 			defer conn.Close()
+			defer close(wsClientMessages)
 
 			for {
 				mt, message, err := conn.ReadMessage()
@@ -81,22 +149,25 @@ func wsListener(controlPanel chan ControlPanelMsg) http.HandlerFunc {
 					break
 				}
 				log.Printf("recv: %s", message)
-				clientMessages <- clientMsg{mt, message}
+				wsClientMessages <- clientMsg{mt, message}
 			}
 		}()
 
 		// Writer.
 		go func() {
-			defer conn.Close()
+			defer func() {
+				conn.Close()
+				bcast.Pop(&ctrlPanelClient)
+			}()
 
 			log.Printf("Websocket Client connected: %v\n", conn.RemoteAddr())
 
 			// Writer
 			for {
 				select {
-				case msg := <-clientMessages:
+				case msg := <-wsClientMessages:
 					conn.WriteMessage(msg.MessageType, msg.Message)
-				case msg := <-controlPanel:
+				case msg := <-ctrlPanelClient.controlPanel:
 					// TODO: This only sends it to one client...
 					log.Println("Broadcasting: ", msg)
 					conn.WriteJSON(msg)
@@ -112,7 +183,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 	homeTemplate.Execute(w, "ws://"+r.Host+"/ws")
 }
 
-func controlPanelClient(w http.ResponseWriter, r *http.Request) {
+func controlPanelClientHandler(w http.ResponseWriter, r *http.Request) {
 	//fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
 	// TODO: Host aurelia webpage
 	homeTemplate.Execute(w, "ws://"+r.Host+"/ws/control_panel")
@@ -127,11 +198,17 @@ func main() {
 	kingpin.CommandLine.Help = "Siknas-skylt Webserver"
 	kingpin.Parse()
 
-	controlPanel := make(chan ControlPanelMsg)
+	// Broadcast channel for control panel.
+	//controlPanel := make(chan ControlPanelMsg)
+	controlPanel := &controlPanelBroadcaster{
+		clients: make([]*controlPanelClient, 0, 1),
+	}
 
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", index)
-	router.HandleFunc("/panel", controlPanelClient)
+	router.HandleFunc("/panel", controlPanelClientHandler)
+
+	// Websocket handlers.
 	router.HandleFunc("/ws", wsListener(controlPanel))
 	router.HandleFunc("/ws/control_panel", controlPanelWsListener(controlPanel))
 
