@@ -54,6 +54,33 @@ func getAnimsListMsg() (serverListMsg, error) {
 	return msg, nil
 }
 
+// Unmarshals a client message and returns a server status.
+func unmarshalClientMsg(data []byte) (string, error) {
+	var msg clientMsg
+	err := json.Unmarshal(data, &msg)
+	if err != nil {
+		return "", fmt.Errorf("failed to unmarshal JSON '%v': %v", string(data), err)
+	}
+
+	switch msg.MessageType {
+	default:
+		return "", fmt.Errorf("unexpected message type from client: %v", msg.MessageType)
+	case "select":
+		var selectMsg clientSelectMsg
+		err := json.Unmarshal(data, &selectMsg)
+		if err != nil {
+			return "", fmt.Errorf("failed to unmarshal JSON '%v':\n  %v", string(data), err)
+		}
+
+		// TODO: Selecting a new sketch should broadcast the selection to all ws clients
+
+		log.Println("Select: ", selectMsg.Selected)
+		// TODO: Close any existing process
+		// TODO: Start the selected process
+		return fmt.Sprint("Selected ", selectMsg.Selected), nil
+	}
+}
+
 // WsListener is the websocket handler for "normal" websocket clients that are not the control panel.
 func WsListener(bcast *ControlPanelBroadcaster) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -95,35 +122,16 @@ func WsListener(bcast *ControlPanelBroadcaster) http.HandlerFunc {
 					break
 				}
 
-				// TODO: Breakout into function
-				var msg clientMsg
-				err = json.Unmarshal(data, &msg)
+				statusText, err := unmarshalClientMsg(data)
 				if err != nil {
-					log.Printf("Failed to unmarshal JSON '%v': %v\n", string(data), err)
-					break
+					statusText = err.Error()
 				}
 
-				switch msg.MessageType {
-				default:
-					log.Println("Unexpected message type from client: ", msg.MessageType)
-					return
-				case "select":
-					var selectMsg clientSelectMsg
-					err := json.Unmarshal(data, &selectMsg)
-					if err != nil {
-						log.Printf("Failed to unmarshal JSON '%v':\n  %v\n", string(data), err)
-						return
-					}
-
-					log.Println("Select: ", selectMsg.Selected)
-					serverMessages <- serverStatusMsg{
-						serverMsg: serverMsg{MessageType: "status"},
-						Success:   true,
-						Text:      fmt.Sprint("Selected ", selectMsg.Selected),
-					}
+				serverMessages <- serverStatusMsg{
+					serverMsg: serverMsg{MessageType: "status"},
+					Success:   (err != nil),
+					Text:      statusText,
 				}
-
-				log.Printf("recv: %s", msg)
 			}
 		}()
 

@@ -12,14 +12,19 @@ type ControlPanelMsg struct {
 	Brightness int    `json:"brightness,omitempty"`
 }
 
+// ControlPanelClient is a client that wants to listen to control panel messages.
 type ControlPanelClient struct {
 	controlPanel chan ControlPanelMsg
 }
 
+// ControlPanelBroadcaster is the context for keeping track of the clients we should
+// broadcast control panel messages to.
 type ControlPanelBroadcaster struct {
 	sync.Mutex
 	clients []*ControlPanelClient
 }
+
+// TODO: The broadcaster can be more generic and not tied only to the control panel.
 
 // Push adds a new client as a broadcast listener to the control panel.
 func (bcast *ControlPanelBroadcaster) Push(c *ControlPanelClient) {
