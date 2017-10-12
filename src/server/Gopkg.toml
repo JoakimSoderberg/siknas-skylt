@@ -24,3 +24,8 @@
 [[constraint]]
   branch = "master"
   name = "github.com/gobwas/ws"
+
+[[constraint]]
+  branch="allow_override"
+  name="github.com/kellydunn/go-opc"
+  source="https://github.com/JoakimSoderberg/go-opc"

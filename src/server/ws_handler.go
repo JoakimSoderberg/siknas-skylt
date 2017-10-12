@@ -10,34 +10,36 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type rawClientMsg struct {
-	MessageType int
-	Message     []byte
-}
-
+// clientMsg is a message is a message sent by clients.
 type clientMsg struct {
 	MessageType string `json:"message_type,omitempty"`
 }
 
+// clientSelectMsg is sent by clients when selecting an animation
+// from the list of available animations returned in servListMsg.
 type clientSelectMsg struct {
 	clientMsg
 	Selected string `json:"selected,omitempty"`
 }
 
+// serverMsg is a message returned over the websocket.
 type serverMsg struct {
 	MessageType string `json:"message_type,omitempty"`
 }
 
+// serverAnim represents a processing animation sketch.
 type serverAnim struct {
 	Name        string `json:"name,omitempty"`
 	Description string `json:"description,omitempty"`
 }
 
+// servListMsg is a message containing a list of processing Animations available to choose from.
 type serverListMsg struct {
 	serverMsg
 	Anims []serverAnim `json:"anims,omitempty"`
 }
 
+// serverStatusMsg is a status message for any action a client performed.
 type serverStatusMsg struct {
 	serverMsg
 	Success bool   `json:"success,omitempty"`

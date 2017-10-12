@@ -32,6 +32,13 @@
   version = "v1.2.0"
 
 [[projects]]
+  branch = "allow_override"
+  name = "github.com/kellydunn/go-opc"
+  packages = ["."]
+  revision = "92e799f1991f898388336c22833f4217fb4b663c"
+  source = "https://github.com/JoakimSoderberg/go-opc"
+
+[[projects]]
   name = "gopkg.in/alecthomas/kingpin.v2"
   packages = ["."]
   revision = "1087e65c9441605df944fb12c33f0fe7072d18ca"
@@ -40,6 +47,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9455f2e5d61877b4ee2e27239312f2c3ffdf0cbe4ad68b57422892c2f6390acb"
+  inputs-digest = "1e069f6cdc6bbe99d1e83a2dadd3c3c62ac5bbceb481d437a193be033f6d5fc8"
   solver-name = "gps-cdcl"
   solver-version = 1
