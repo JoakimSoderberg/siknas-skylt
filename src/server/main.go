@@ -46,7 +46,7 @@ func main() {
 	// Broadcast channel for control panel.
 	// TODO: Create a new function instead
 	controlPanel := &ControlPanelBroadcaster{
-		clients: make([]*ControlPanelClient, 0, 1),
+		clients: make([]*ControlPanelReceiver, 0, 1),
 	}
 
 	router := mux.NewRouter().StrictSlash(true)

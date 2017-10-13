@@ -37,7 +37,7 @@ func ControlPanelWsListener(bcast *ControlPanelBroadcaster) http.HandlerFunc {
 
 				log.Println("Got control panel message: ", jsonMsg)
 
-				bcast.Broadcast(func(c *ControlPanelClient) {
+				bcast.Broadcast(func(c *ControlPanelReceiver) {
 					c.controlPanel <- jsonMsg
 				})
 			}

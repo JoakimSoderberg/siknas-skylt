@@ -98,7 +98,7 @@ func WsListener(bcast *ControlPanelBroadcaster) http.HandlerFunc {
 		serverMessages := make(chan interface{})
 
 		// Add this new client as a control panel broadcast listener.
-		ctrlPanelClient := ControlPanelClient{
+		ctrlPanelClient := ControlPanelReceiver{
 			controlPanel: make(chan ControlPanelMsg),
 		}
 		bcast.Push(&ctrlPanelClient)
