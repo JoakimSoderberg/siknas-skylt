@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/kellydunn/go-opc"
-
 	"github.com/gorilla/websocket"
 )
 
@@ -25,10 +23,8 @@ func OpcWsHandler(bcast *OpcBroadcaster) http.HandlerFunc {
 		log.Println("OPC WS Client connected: ", conn.RemoteAddr())
 
 		// Start listening to the OPC broadcasts.
-		opcReceiver := OpcReceiver{
-			opcMessages: make(chan *opc.Message),
-		}
-		bcast.Push(&opcReceiver)
+		opcReceiver := NewOpcReceiver()
+		bcast.Push(opcReceiver)
 
 		// Clients needs to reply to Ping.
 		conn.SetReadDeadline(time.Now().Add(pongWait))
@@ -43,7 +39,7 @@ func OpcWsHandler(bcast *OpcBroadcaster) http.HandlerFunc {
 
 			defer func() {
 				conn.Close()
-				bcast.Pop(&opcReceiver)
+				bcast.Pop(opcReceiver)
 				pingTicker.Stop()
 				close(opcReceiver.opcMessages)
 			}()

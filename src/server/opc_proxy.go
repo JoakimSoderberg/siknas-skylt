@@ -15,6 +15,13 @@ type OpcReceiver struct {
 	opcMessages chan *opc.Message
 }
 
+// NewOpcReceiver creates a new OpcReceiver.
+func NewOpcReceiver() *OpcReceiver {
+	return &OpcReceiver{
+		opcMessages: make(chan *opc.Message),
+	}
+}
+
 // OpcSink is the interface that the OPC proxy uses to write an OPC message to some end point.
 type OpcSink interface {
 	Write(msg *opc.Message) error
