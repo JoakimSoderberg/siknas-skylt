@@ -6,20 +6,20 @@ import (
 )
 
 // {{ .Name }}Broadcaster is the context for keeping track of the clients we should
-// broadcast control panel messages to.
+// broadcast messages to.
 type {{ .Name }}Broadcaster struct {
 	sync.Mutex
 	clients []*{{ .Name }}Receiver
 }
 
-
+// New{{ .Name }}Broadcaster creates a new {{ .Name }}Broadcaster.
 func New{{ .Name }}Broadcaster() *{{ .Name }}Broadcaster {
-	return &ControlPanelBroadcaster{
+	return &{{ .Name }}Broadcaster{
 		clients: make([]*{{ .Name }}Receiver, 0, 1),
 	}
 }
 
-// Push adds a new client as a broadcast listener to the control panel.
+// Push adds a new receiver to the {{ .Name }} broadcaster.
 func (bcast *{{ .Name }}Broadcaster) Push(c *{{ .Name }}Receiver) {
 	bcast.Lock()
 	defer bcast.Unlock()
@@ -27,7 +27,7 @@ func (bcast *{{ .Name }}Broadcaster) Push(c *{{ .Name }}Receiver) {
 	bcast.clients = append(bcast.clients, c)
 }
 
-// Pop removes a client from the control panel broadcast.
+// Pop removes a receiver from the {{ .Name }} broadcast.
 func (bcast *{{ .Name }}Broadcaster) Pop(c *{{ .Name }}Receiver) {
 	bcast.Lock()
 	defer bcast.Unlock()
@@ -50,7 +50,7 @@ func (bcast *{{ .Name }}Broadcaster) Pop(c *{{ .Name }}Receiver) {
 	bcast.clients = bcast.clients[:len(bcast.clients)-1]
 }
 
-// Broadcast will send an incoming message from the control panel to all listening channels.
+// Broadcast calls the given routine for all receivers listening to the broadcast.
 func (bcast *{{ .Name }}Broadcaster) Broadcast(routine func(*{{ .Name }}Receiver)) {
 	bcast.Lock()
 	defer bcast.Unlock()

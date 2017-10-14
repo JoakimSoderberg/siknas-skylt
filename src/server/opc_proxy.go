@@ -1,5 +1,7 @@
 package main
 
+//go:generate go run broadcaster/gen.go Opc broadcaster/broadcast.tmpl
+
 import (
 	"log"
 	"net"
@@ -10,7 +12,13 @@ import (
 // TODO: Make the broadcaster in control_panel.go generic so we can use it here also
 // for both websocket clients and other OPC receivers.
 
-type OpcReceiver interface {
+// OpcReceiver is the context used by the OpcBroadcaster.
+type OpcReceiver struct {
+	opcMessages chan *opc.Message
+}
+
+// OpcSink is the interface to write an Opc message to some end point.
+type OpcSink interface {
 	Write(msg *opc.Message, channel int)
 }
 

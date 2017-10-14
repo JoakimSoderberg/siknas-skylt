@@ -5,30 +5,30 @@ import (
 	"sync"
 )
 
-// ControlPanelBroadcaster is the context for keeping track of the clients we should
+// OpcBroadcaster is the context for keeping track of the clients we should
 // broadcast messages to.
-type ControlPanelBroadcaster struct {
+type OpcBroadcaster struct {
 	sync.Mutex
-	clients []*ControlPanelReceiver
+	clients []*OpcReceiver
 }
 
-// NewControlPanelBroadcaster creates a new ControlPanelBroadcaster.
-func NewControlPanelBroadcaster() *ControlPanelBroadcaster {
-	return &ControlPanelBroadcaster{
-		clients: make([]*ControlPanelReceiver, 0, 1),
+// NewOpcBroadcaster creates a new OpcBroadcaster.
+func NewOpcBroadcaster() *OpcBroadcaster {
+	return &OpcBroadcaster{
+		clients: make([]*OpcReceiver, 0, 1),
 	}
 }
 
-// Push adds a new receiver to the ControlPanel broadcaster.
-func (bcast *ControlPanelBroadcaster) Push(c *ControlPanelReceiver) {
+// Push adds a new receiver to the Opc broadcaster.
+func (bcast *OpcBroadcaster) Push(c *OpcReceiver) {
 	bcast.Lock()
 	defer bcast.Unlock()
 
 	bcast.clients = append(bcast.clients, c)
 }
 
-// Pop removes a receiver from the ControlPanel broadcast.
-func (bcast *ControlPanelBroadcaster) Pop(c *ControlPanelReceiver) {
+// Pop removes a receiver from the Opc broadcast.
+func (bcast *OpcBroadcaster) Pop(c *OpcReceiver) {
 	bcast.Lock()
 	defer bcast.Unlock()
 
@@ -51,7 +51,7 @@ func (bcast *ControlPanelBroadcaster) Pop(c *ControlPanelReceiver) {
 }
 
 // Broadcast calls the given routine for all receivers listening to the broadcast.
-func (bcast *ControlPanelBroadcaster) Broadcast(routine func(*ControlPanelReceiver)) {
+func (bcast *OpcBroadcaster) Broadcast(routine func(*OpcReceiver)) {
 	bcast.Lock()
 	defer bcast.Unlock()
 
