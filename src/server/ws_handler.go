@@ -83,8 +83,8 @@ func unmarshalClientMsg(data []byte) (string, error) {
 	}
 }
 
-// WsListener is the websocket handler for "normal" websocket clients that are not the control panel.
-func WsListener(bcast *ControlPanelBroadcaster) http.HandlerFunc {
+// WsHandler is the websocket handler for "normal" websocket clients that are not the control panel.
+func WsHandler(bcast *ControlPanelBroadcaster) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var upgrader = websocket.Upgrader{} // use default options
 		conn, err := upgrader.Upgrade(w, r, nil)

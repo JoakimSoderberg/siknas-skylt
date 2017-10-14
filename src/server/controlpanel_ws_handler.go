@@ -7,8 +7,8 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-// ControlPanelWsListener listens on a websocket to messages from the control panel hardware.
-func ControlPanelWsListener(bcast *ControlPanelBroadcaster) http.HandlerFunc {
+// ControlPanelWsHandler listens on a websocket to messages from the control panel hardware.
+func ControlPanelWsHandler(bcast *ControlPanelBroadcaster) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var upgrader = websocket.Upgrader{} // use default options
 		conn, err := upgrader.Upgrade(w, r, nil)
