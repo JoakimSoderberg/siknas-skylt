@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/kellydunn/go-opc"
+
 	"github.com/gorilla/websocket"
 )
 
@@ -16,5 +18,15 @@ func OpcWsHandler(bcast *OpcBroadcaster) http.HandlerFunc {
 			conn.Close()
 			return
 		}
+
+		// Start listening to the OPC broadcasts.
+		opcReceiver := OpcReceiver{
+			opcMessages: make(chan *opc.Message),
+		}
+		bcast.Push(&opcReceiver)
+
+		go func() {
+			defer bcast.Pop(&opcReceiver)
+		}()
 	})
 }

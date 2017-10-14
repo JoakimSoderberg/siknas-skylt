@@ -9,23 +9,36 @@ import (
 	"github.com/kellydunn/go-opc"
 )
 
-// TODO: Make the broadcaster in control_panel.go generic so we can use it here also
-// for both websocket clients and other OPC receivers.
-
-// OpcReceiver is the context used by the OpcBroadcaster.
+// OpcReceiver is the context used by the OpcBroadcaster, it contains the channel
+// that the OPC messages is broadcasted to.
 type OpcReceiver struct {
 	opcMessages chan *opc.Message
 }
 
-// OpcSink is the interface to write an Opc message to some end point.
+// OpcSink is the interface that the OPC proxy uses to write an OPC message to some end point.
 type OpcSink interface {
-	Write(msg *opc.Message, channel int)
+	Write(msg *opc.Message) error
 }
 
-// RunOPCServer runs an Open Pixel Protocol server.
-func RunOPCServer(protocol string, port string) error {
-	// TODO: Once
+// OpcBroadcastSink implements the OpcSink interface to broadcast all OPC messages on an OpcBroadcaster.
+type OpcBroadcastSink struct {
+	broadcaster *OpcBroadcaster
+}
 
+// Write broadcasts the OPC messages to all connected broadcast receivers.
+func (o *OpcBroadcastSink) Write(msg *opc.Message) error {
+	o.broadcaster.Broadcast(func(c *OpcReceiver) {
+		c.opcMessages <- msg
+	})
+
+	return nil
+}
+
+// RunOPCProxy runs an Open Pixel Protocol proxy server that writes any incoming
+// OPC messages on the listening port to a set of OpcSinks.
+func RunOPCProxy(protocol string, port string, sinks []OpcSink) error {
+
+	// Channel used to pass on incoming OPC messages.
 	messages := make(chan *opc.Message)
 
 	// Reads OPC messages.
@@ -47,11 +60,12 @@ func RunOPCServer(protocol string, port string) error {
 	}()
 
 	// Process the OPC messages.
-	//go processOpc(messages) // TODO: Fix
+	go processOpc(messages, sinks)
 
 	return nil
 }
 
+// handleOpcCon handles connections from OPC clients.
 func handleOpcCon(messages chan *opc.Message, conn net.Conn) {
 	defer conn.Close()
 	defer close(messages)
@@ -69,15 +83,16 @@ func handleOpcCon(messages chan *opc.Message, conn net.Conn) {
 }
 
 // processOpc receives the incoming OPC messages and dispatches them
-func processOpc(messages chan *opc.Message, receivers OpcReceiver) {
+func processOpc(messages chan *opc.Message, sinks []OpcSink) {
 	defer func() {
 		close(messages)
 	}()
 
 	for {
-		//msg := <-messages
+		msg := <-messages
 
-		// TODO: Send to websocket clients
-		// TODO: Send to other OPC servers
+		for _, s := range sinks {
+			s.Write(msg)
+		}
 	}
 }
