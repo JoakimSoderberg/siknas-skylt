@@ -29,3 +29,11 @@
   branch="allow_override"
   name="github.com/kellydunn/go-opc"
   source="https://github.com/JoakimSoderberg/go-opc"
+
+[[constraint]]
+  name = "github.com/cenkalti/backoff"
+  version = "1.1.0"
+
+[[constraint]]
+  name = "github.com/spf13/viper"
+  version = "1.0.0"
