@@ -49,7 +49,11 @@ func OpcWsHandler(bcast *OpcBroadcaster) http.HandlerFunc {
 			for {
 				select {
 				case msg := <-opcReceiver.opcMessages:
-					conn.WriteMessage(websocket.BinaryMessage, msg.Data)
+					err := conn.WriteMessage(websocket.BinaryMessage, msg.Data)
+					if err != nil {
+						log.Printf("Failed to write to websocket client %v: %v\n", conn.RemoteAddr(), err)
+						return
+					}
 				case <-pingTicker.C:
 					log.Println("OPC WS Ping!", conn.RemoteAddr())
 					conn.SetWriteDeadline(time.Now().Add(writeWait))

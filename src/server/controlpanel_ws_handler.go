@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -20,9 +21,24 @@ func ControlPanelWsHandler(bcast *ControlPanelBroadcaster) http.HandlerFunc {
 
 		// TODO: Only allow one client.
 
+		// Clients needs to reply to Ping.
+		conn.SetReadDeadline(time.Now().Add(pongWait))
+		conn.SetPongHandler(func(string) error {
+			log.Println("OPC WS Pong! ", conn.RemoteAddr())
+			conn.SetReadDeadline(time.Now().Add(pongWait))
+			return nil
+		})
+
 		// Reader.
 		go func() {
-			defer conn.Close()
+
+			defer func() {
+				conn.Close()
+
+				bcast.Broadcast(func(c *ControlPanelReceiver) {
+					close(c.controlPanel)
+				})
+			}()
 
 			log.Printf("Websocket Control Panel Client connected: %v\n", conn.RemoteAddr())
 
@@ -32,7 +48,7 @@ func ControlPanelWsHandler(bcast *ControlPanelBroadcaster) http.HandlerFunc {
 				err := conn.ReadJSON(&jsonMsg)
 				if err != nil {
 					log.Println("Failed to read control panel message: ", err)
-					continue
+					return
 				}
 
 				log.Println("Got control panel message: ", jsonMsg)
@@ -40,6 +56,27 @@ func ControlPanelWsHandler(bcast *ControlPanelBroadcaster) http.HandlerFunc {
 				bcast.Broadcast(func(c *ControlPanelReceiver) {
 					c.controlPanel <- jsonMsg
 				})
+			}
+		}()
+
+		// Writer
+		go func() {
+			pingTicker := time.NewTicker(pingPeriod)
+
+			defer func() {
+				conn.Close()
+				pingTicker.Stop()
+			}()
+
+			for {
+				select {
+				case <-pingTicker.C:
+					log.Println("Control Panel Ping!", conn.RemoteAddr())
+					conn.SetWriteDeadline(time.Now().Add(writeWait))
+					if err := conn.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
+						return
+					}
+				}
 			}
 		}()
 	})
