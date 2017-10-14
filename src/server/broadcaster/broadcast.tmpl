@@ -12,6 +12,13 @@ type {{ .Name }}Broadcaster struct {
 	clients []*{{ .Name }}Receiver
 }
 
+
+func New{{ .Name }}Broadcaster() *{{ .Name }}Broadcaster {
+	return &ControlPanelBroadcaster{
+		clients: make([]*{{ .Name }}Receiver, 0, 1),
+	}
+}
+
 // Push adds a new client as a broadcast listener to the control panel.
 func (bcast *{{ .Name }}Broadcaster) Push(c *{{ .Name }}Receiver) {
 	bcast.Lock()

@@ -44,10 +44,8 @@ func main() {
 	kingpin.Parse()
 
 	// Broadcast channel for control panel.
-	// TODO: Create a new function instead
-	controlPanel := &ControlPanelBroadcaster{
-		clients: make([]*ControlPanelReceiver, 0, 1),
-	}
+	controlPanel := NewControlPanelBroadcaster()
+	// TODO: Create an OPC broadcaster
 
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", index)
@@ -55,6 +53,8 @@ func main() {
 
 	// Websocket handlers.
 	router.HandleFunc("/ws", WsListener(controlPanel))
+	// TODO: Create an OPC websocket handler
+	//router.HandleFunc("/ws/opc", WsListener(controlPanel))
 	router.HandleFunc("/ws/control_panel", ControlPanelWsListener(controlPanel))
 
 	log.Println("Starting Siknas-skylt webserver...")
