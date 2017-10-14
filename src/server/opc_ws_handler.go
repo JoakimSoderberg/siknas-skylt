@@ -22,6 +22,8 @@ func OpcWsHandler(bcast *OpcBroadcaster) http.HandlerFunc {
 			return
 		}
 
+		log.Println("OPC WS Client connected: ", conn.RemoteAddr())
+
 		// Start listening to the OPC broadcasts.
 		opcReceiver := OpcReceiver{
 			opcMessages: make(chan *opc.Message),

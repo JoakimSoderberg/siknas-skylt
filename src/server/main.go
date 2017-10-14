@@ -43,12 +43,19 @@ func main() {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", index)
 	router.HandleFunc("/debug", WsDebugHandler)
+	router.HandleFunc("/debug/opc", WsDebugOpcHandler)
 	router.HandleFunc("/debug/control_panel", WsDebugControlPanelHandler)
 
 	// Websocket handlers.
 	router.HandleFunc("/ws", WsHandler(controlPanelBroadcaster))
 	router.HandleFunc("/ws/opc", OpcWsHandler(opcBroadcaster))
 	router.HandleFunc("/ws/control_panel", ControlPanelWsHandler(controlPanelBroadcaster))
+
+	// OPC Proxy.
+	wsOpcClientsSink := NewOpcBroadcastSink(opcBroadcaster)
+	opcSinks := make([]OpcSink, 1)
+	opcSinks[0] = wsOpcClientsSink
+	go RunOPCProxy("tcp", ":7890", opcSinks)
 
 	log.Println("Starting Siknas-skylt webserver...")
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", *port), router))

@@ -25,6 +25,13 @@ type OpcBroadcastSink struct {
 	broadcaster *OpcBroadcaster
 }
 
+// NewOpcBroadcastSink creates a new OPC broadcaster sink that the OPC proxy can forward messages to.
+func NewOpcBroadcastSink(bcast *OpcBroadcaster) *OpcBroadcastSink {
+	return &OpcBroadcastSink{
+		broadcaster: bcast,
+	}
+}
+
 // Write broadcasts the OPC messages to all connected broadcast receivers.
 func (o *OpcBroadcastSink) Write(msg *opc.Message) error {
 	o.broadcaster.Broadcast(func(c *OpcReceiver) {
@@ -38,8 +45,14 @@ func (o *OpcBroadcastSink) Write(msg *opc.Message) error {
 // OPC messages on the listening port to a set of OpcSinks.
 func RunOPCProxy(protocol string, port string, sinks []OpcSink) error {
 
+	log.Println("Starting Open Pixel Control proxy server...")
+
 	// Channel used to pass on incoming OPC messages.
 	messages := make(chan *opc.Message)
+
+	// TODO: when no client is sending us messages we should send our own.
+	// We can save the last message and fade out from that state to full black
+	// Then on a new client connection we should fade in instead.
 
 	// Reads OPC messages.
 	go func() {
@@ -48,6 +61,10 @@ func RunOPCProxy(protocol string, port string, sinks []OpcSink) error {
 			log.Fatalln("Failed to start OPC server: ", err)
 		}
 
+		log.Println("Listening for OPC connections...")
+
+		// TODO: Keep track of current OPC client, once it disconnects fade out
+
 		for {
 			conn, err := listener.Accept()
 			if err != nil {
@@ -55,6 +72,9 @@ func RunOPCProxy(protocol string, port string, sinks []OpcSink) error {
 				continue
 			}
 
+			log.Println("OPC client connected: ", conn.RemoteAddr())
+
+			// Reads from the OPC messages into the channel.
 			go handleOpcCon(messages, conn)
 		}
 	}()
@@ -78,6 +98,7 @@ func handleOpcCon(messages chan *opc.Message, conn net.Conn) {
 			break
 		}
 
+		// TODO: When a new OPC client connects, fade in the brightness.
 		messages <- msg
 	}
 }
