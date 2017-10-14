@@ -94,7 +94,6 @@ func WsHandler(bcast *ControlPanelBroadcaster) http.HandlerFunc {
 			return
 		}
 
-		// TODO: Does it have to be this generic?
 		serverMessages := make(chan interface{})
 
 		// Add this new client as a control panel broadcast listener.
@@ -103,18 +102,21 @@ func WsHandler(bcast *ControlPanelBroadcaster) http.HandlerFunc {
 		}
 		bcast.Push(&ctrlPanelClient)
 
+		// Clients needs to reply to Ping.
+		conn.SetReadDeadline(time.Now().Add(pongWait))
+		conn.SetPongHandler(func(string) error {
+			log.Println("Pong! ", conn.RemoteAddr())
+			conn.SetReadDeadline(time.Now().Add(pongWait))
+			return nil
+		})
+
 		// Reader.
 		go func() {
-			defer conn.Close()
-			defer close(serverMessages)
-
-			// Clients needs to reply to Ping.
-			conn.SetReadDeadline(time.Now().Add(pongWait))
-			conn.SetPongHandler(func(string) error {
-				log.Println("Pong! ", conn.RemoteAddr())
-				conn.SetReadDeadline(time.Now().Add(pongWait))
-				return nil
-			})
+			defer func() {
+				conn.Close()
+				close(serverMessages)
+				close(ctrlPanelClient.controlPanel)
+			}()
 
 			// TODO: Make sure channel is closed
 			for {
