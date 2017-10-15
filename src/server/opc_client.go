@@ -27,7 +27,6 @@ func RunOpcClient(protocol string, host string, maxBackoff time.Duration, bcast 
 		bcast.Push(opcReceiver)
 		log.Println("[OPC outgoing client] Added as OPC broadcast receiver:", host)
 		defer func() {
-			log.Println("[OPC outgoing client] Cleanup")
 			bcast.Pop(opcReceiver)
 			log.Println("[OPC outgoing client] Removed as OPC broadcast receiver:", host)
 			conn.Close()
@@ -36,8 +35,6 @@ func RunOpcClient(protocol string, host string, maxBackoff time.Duration, bcast 
 
 		for {
 			select {
-			// NOTE! This locks the list of clients in bcast when being sent
-			// so we can't use bcast.Pop on cleanup since it creates a deadlock.
 			case msg := <-opcReceiver.opcMessages:
 				conn.SetWriteDeadline(time.Now().Add(time.Second))
 				_, err := conn.Write(msg.ByteArray())

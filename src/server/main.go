@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// TODO: Add more constants for hard coded things
 const (
 	// Time allowed to write the file to the client.
 	writeWait = 10 * time.Second
@@ -70,8 +71,10 @@ func main() {
 	// TODO: Move to function
 	// Add OPC servers we should send to.
 	for name := range opcServers {
+		// TODO: Unmarshal into struct instead. And pass on to ws handler so clients can list these
 		opcHost := viper.GetString(fmt.Sprintf("opc-servers.%v.host", name))
 		opcPort := viper.GetString(fmt.Sprintf("opc-servers.%v.port", name))
+		// TODO: Enable setting connection backoff in config
 
 		opcAddr := fmt.Sprintf("%v:%v", opcHost, opcPort)
 		log.Println(opcAddr)

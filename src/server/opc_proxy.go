@@ -30,7 +30,11 @@ type OpcSink interface {
 // Write will broadcast the OPC message to all listeners.
 func (b *OpcBroadcaster) Write(msg *opc.Message) error {
 	b.Broadcast(func(c *OpcReceiver) {
-		c.opcMessages <- msg
+		select {
+		case c.opcMessages <- msg:
+		default:
+			// We should not block if a client stops receiving.
+		}
 	})
 
 	return nil
@@ -49,7 +53,7 @@ func RunOPCProxy(protocol string, port string, sink OpcSink) error {
 	// We can save the last message and fade out from that state to full black
 	// Then on a new client connection we should fade in instead.
 
-	// Reads OPC messages.
+	// Listen for incoming OPC clients.
 	go func() {
 		listener, err := net.Listen(protocol, port)
 		if err != nil {
@@ -90,6 +94,7 @@ func handleOpcCon(messages chan *opc.Message, conn net.Conn) {
 	for {
 		msg, err := opc.ReadOpc(conn)
 		if err != nil {
+			log.Println("[OPC incoming client] Failed to read OPC:", conn.RemoteAddr())
 			return
 		}
 
@@ -103,6 +108,8 @@ func handleOpcCon(messages chan *opc.Message, conn net.Conn) {
 func processOpc(messages chan *opc.Message, sink OpcSink) {
 	for {
 		msg := <-messages
+
+		// This will broadcast the messages.
 		sink.Write(msg)
 	}
 }
