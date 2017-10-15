@@ -27,21 +27,9 @@ type OpcSink interface {
 	Write(msg *opc.Message) error
 }
 
-// OpcBroadcastSink implements the OpcSink interface to broadcast all OPC messages on an OpcBroadcaster.
-type OpcBroadcastSink struct {
-	broadcaster *OpcBroadcaster
-}
-
-// NewOpcBroadcastSink creates a new OPC broadcaster sink that the OPC proxy can forward messages to.
-func NewOpcBroadcastSink(bcast *OpcBroadcaster) *OpcBroadcastSink {
-	return &OpcBroadcastSink{
-		broadcaster: bcast,
-	}
-}
-
-// Write broadcasts the OPC messages to all connected broadcast receivers.
-func (o *OpcBroadcastSink) Write(msg *opc.Message) error {
-	o.broadcaster.Broadcast(func(c *OpcReceiver) {
+// Write will broadcast the OPC message to all listeners.
+func (b *OpcBroadcaster) Write(msg *opc.Message) error {
+	b.Broadcast(func(c *OpcReceiver) {
 		c.opcMessages <- msg
 	})
 
@@ -50,7 +38,7 @@ func (o *OpcBroadcastSink) Write(msg *opc.Message) error {
 
 // RunOPCProxy runs an Open Pixel Protocol proxy server that writes any incoming
 // OPC messages on the listening port to a set of OpcSinks.
-func RunOPCProxy(protocol string, port string, sinks []OpcSink) error {
+func RunOPCProxy(protocol string, port string, sink OpcSink) error {
 
 	log.Println("Starting Open Pixel Control proxy server...")
 
@@ -87,7 +75,7 @@ func RunOPCProxy(protocol string, port string, sinks []OpcSink) error {
 	}()
 
 	// Process the OPC messages.
-	go processOpc(messages, sinks)
+	go processOpc(messages, sink)
 
 	return nil
 }
@@ -111,16 +99,13 @@ func handleOpcCon(messages chan *opc.Message, conn net.Conn) {
 }
 
 // processOpc receives the incoming OPC messages and dispatches them
-func processOpc(messages chan *opc.Message, sinks []OpcSink) {
+func processOpc(messages chan *opc.Message, sink OpcSink) {
 	defer func() {
 		close(messages)
 	}()
 
 	for {
 		msg := <-messages
-
-		for _, s := range sinks {
-			s.Write(msg)
-		}
+		sink.Write(msg)
 	}
 }

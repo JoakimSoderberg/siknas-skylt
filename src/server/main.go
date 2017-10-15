@@ -79,11 +79,7 @@ func main() {
 	}
 
 	// OPC Proxy.
-	// TODO: Get rid of the sink stuff
-	opcBroadcastSink := NewOpcBroadcastSink(opcBroadcaster)
-	opcSinks := make([]OpcSink, 1)
-	opcSinks[0] = opcBroadcastSink
-	go RunOPCProxy("tcp", ":7890", opcSinks)
+	go RunOPCProxy("tcp", ":7890", opcBroadcaster)
 
 	log.Printf("Starting Siknas-skylt webserver on %v...\n", port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", port), router))
