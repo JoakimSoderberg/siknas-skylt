@@ -29,7 +29,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	var rootCmd = &cobra.Command{Use: "siknas-skylt"}
+	var rootCmd = &cobra.Command{Use: "siknas-skylt", Run: func(c *cobra.Command, args []string) {}}
 	rootCmd.Flags().Int("port", 8080, "The port the webserver should listen on")
 
 	if err := rootCmd.Execute(); err != nil {

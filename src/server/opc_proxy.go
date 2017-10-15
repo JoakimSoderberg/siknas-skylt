@@ -82,28 +82,25 @@ func RunOPCProxy(protocol string, port string, sink OpcSink) error {
 
 // handleOpcCon handles connections from OPC clients.
 func handleOpcCon(messages chan *opc.Message, conn net.Conn) {
-	defer conn.Close()
-	defer close(messages)
+	defer func() {
+		log.Println("OPC Client disconnected: ", conn.RemoteAddr())
+		conn.Close()
+	}()
 
 	for {
 		msg, err := opc.ReadOpc(conn)
 		if err != nil {
-			// If we encounter an error reading from the connection,
-			// "break" out of the loop and stop reading.
-			break
+			return
 		}
 
 		// TODO: When a new OPC client connects, fade in the brightness.
+
 		messages <- msg
 	}
 }
 
 // processOpc receives the incoming OPC messages and dispatches them
 func processOpc(messages chan *opc.Message, sink OpcSink) {
-	defer func() {
-		close(messages)
-	}()
-
 	for {
 		msg := <-messages
 		sink.Write(msg)
