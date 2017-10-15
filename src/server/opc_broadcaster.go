@@ -57,7 +57,6 @@ func (bcast *OpcBroadcaster) Broadcast(routine func(*OpcReceiver)) {
 
 	// Broadcasts to all clients.
 	for _, c := range bcast.clients {
-		//log.Println("Broadcasting to ", c)
 		routine(c)
 	}
 }

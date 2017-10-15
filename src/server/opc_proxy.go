@@ -67,10 +67,10 @@ func RunOPCProxy(protocol string, port string, sink OpcSink) error {
 				continue
 			}
 
-			log.Println("OPC client connected: ", conn.RemoteAddr())
+			log.Println("[OPC incoming client] Connected:", conn.RemoteAddr())
 
 			// Reads from the OPC messages into the channel.
-			go handleOpcCon(messages, conn)
+			handleOpcCon(messages, conn)
 		}
 	}()
 
@@ -83,7 +83,7 @@ func RunOPCProxy(protocol string, port string, sink OpcSink) error {
 // handleOpcCon handles connections from OPC clients.
 func handleOpcCon(messages chan *opc.Message, conn net.Conn) {
 	defer func() {
-		log.Println("OPC Client disconnected: ", conn.RemoteAddr())
+		log.Println("[OPC incoming client] Disconnected:", conn.RemoteAddr())
 		conn.Close()
 	}()
 
