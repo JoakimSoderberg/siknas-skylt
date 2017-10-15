@@ -8,7 +8,8 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"gopkg.in/alecthomas/kingpin.v2"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 const (
@@ -27,14 +28,29 @@ func index(w http.ResponseWriter, r *http.Request) {
 	// TODO: Host aurelia webpage
 }
 
-var (
-	port = kingpin.Flag("port", "The port the webserver should listen on").Default("8080").Int()
-)
-
 func main() {
-	kingpin.UsageTemplate(kingpin.DefaultUsageTemplate).Version("1.0").Author("Joakim Soderberg")
-	kingpin.CommandLine.Help = "Siknas-skylt Webserver"
-	kingpin.Parse()
+	var rootCmd = &cobra.Command{Use: "siknas-skylt"}
+	rootCmd.Flags().Int("port", 8080, "The port the webserver should listen on")
+
+	if err := rootCmd.Execute(); err != nil {
+		log.Fatalln(err)
+	}
+
+	// Allow viper to parse the command line flags also.
+	viper.BindPFlags(rootCmd.Flags())
+	//viper.BindPFlag("port", rootCmd.Flags().Lookup("port"))
+
+	viper.SetConfigName("siknas")
+	viper.AddConfigPath("/etc/siknas/")
+	viper.AddConfigPath(".")
+	err := viper.ReadInConfig() // Find and read the config file
+	if err != nil {
+		log.Fatalf("Fatal error config file: %s \n", err)
+	}
+
+	port := viper.GetInt("port")
+	opcServers := viper.GetStringMap("opc-servers")
+	log.Println(opcServers)
 
 	// Broadcast channel for control panel.
 	controlPanelBroadcaster := NewControlPanelBroadcaster()
@@ -51,12 +67,24 @@ func main() {
 	router.HandleFunc("/ws/opc", OpcWsHandler(opcBroadcaster))
 	router.HandleFunc("/ws/control_panel", ControlPanelWsHandler(controlPanelBroadcaster))
 
+	// TODO: Move to function
+	// Add OPC servers we should send to.
+	for name := range opcServers {
+		opcHost := viper.GetString(fmt.Sprintf("opc-servers.%v.host", name))
+		opcPort := viper.GetString(fmt.Sprintf("opc-servers.%v.port", name))
+
+		opcAddr := fmt.Sprintf("%v:%v", opcHost, opcPort)
+		log.Println(opcAddr)
+		go RunOpcClient("tcp", opcAddr, 30*time.Second, opcBroadcaster)
+	}
+
 	// OPC Proxy.
-	wsOpcClientsSink := NewOpcBroadcastSink(opcBroadcaster)
+	// TODO: Get rid of the sink stuff
+	opcBroadcastSink := NewOpcBroadcastSink(opcBroadcaster)
 	opcSinks := make([]OpcSink, 1)
-	opcSinks[0] = wsOpcClientsSink
+	opcSinks[0] = opcBroadcastSink
 	go RunOPCProxy("tcp", ":7890", opcSinks)
 
-	log.Println("Starting Siknas-skylt webserver...")
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", *port), router))
+	log.Printf("Starting Siknas-skylt webserver on %v...\n", port)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", port), router))
 }

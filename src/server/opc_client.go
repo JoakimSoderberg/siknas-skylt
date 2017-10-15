@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/cenkalti/backoff"
@@ -14,6 +15,8 @@ func RunOpcClient(protocol string, host string, maxBackoff time.Duration, bcast 
 	c := opc.NewClient()
 
 	opcConnect := func() error {
+		log.Printf("OPC client connecting to %v...", host)
+
 		err := c.Connect(protocol, host)
 		if err != nil {
 			return fmt.Errorf("failed to connect to OPC server %v: %v", host, err)

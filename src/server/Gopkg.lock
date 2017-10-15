@@ -86,6 +86,12 @@
   revision = "42e33e2d55a0ff1d6263f738896ea8c13571a8d0"
 
 [[projects]]
+  name = "github.com/inconshreveable/mousetrap"
+  packages = ["."]
+  revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
+  version = "v1.0"
+
+[[projects]]
   branch = "allow_override"
   name = "github.com/kellydunn/go-opc"
   packages = ["."]
@@ -139,6 +145,12 @@
   packages = ["."]
   revision = "acbeb36b902d72a7a4c18e8f3241075e7ab763e4"
   version = "v1.1.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/spf13/cobra"
+  packages = ["."]
+  revision = "7b2c5ac9fc04fc5efafb60700713d4fa609b777b"
 
 [[projects]]
   branch = "master"
@@ -227,6 +239,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9f35159e91291b487f5c7121055bf0828ce2aaddfb1988b12ac4ddb91701e9ca"
+  inputs-digest = "e211ff103679596366bb954bc3c03b4ccd68ed061365551ce5d359f2ac55bee8"
   solver-name = "gps-cdcl"
   solver-version = 1
