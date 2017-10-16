@@ -46,18 +46,24 @@ type serverStatusMsg struct {
 	Text    string `json:"text,omitempty"`
 }
 
-func getAnimsListMsg() (serverListMsg, error) {
-	// TODO: Get a real list of files
+// getAnimsListMsg returns a list of available animation processes.
+func getAnimsListMsg(opcManager *OpcProcessManager) (serverListMsg, error) {
 	msg := serverListMsg{
 		serverMsg: serverMsg{MessageType: "list"},
-		Anims:     []serverAnim{{Name: "hej"}, {Name: "hopp"}, {Name: "arne"}},
+	}
+
+	msg.Anims = make([]serverAnim, len(opcManager.Processes))
+	i := 0
+	for name, val := range opcManager.Processes {
+		msg.Anims[i].Name = name
+		msg.Anims[i].Description = val.Description
 	}
 
 	return msg, nil
 }
 
 // Unmarshals a client message and returns a server status.
-func unmarshalClientMsg(data []byte) (string, error) {
+func unmarshalClientMsg(data []byte, opcManager *OpcProcessManager) (string, error) {
 	var msg clientMsg
 	err := json.Unmarshal(data, &msg)
 	if err != nil {
@@ -68,6 +74,7 @@ func unmarshalClientMsg(data []byte) (string, error) {
 	default:
 		return "", fmt.Errorf("unexpected message type from client: %v", msg.MessageType)
 	case "select":
+		// TODO: Make into function.
 		var selectMsg clientSelectMsg
 		err := json.Unmarshal(data, &selectMsg)
 		if err != nil {
@@ -76,15 +83,14 @@ func unmarshalClientMsg(data []byte) (string, error) {
 
 		// TODO: Selecting a new sketch should broadcast the selection to all ws clients
 
-		log.Println("Select: ", selectMsg.Selected)
-		// TODO: Close any existing process
-		// TODO: Start the selected process
-		return fmt.Sprint("Selected ", selectMsg.Selected), nil
+		opcManager.StartAnim(selectMsg.Selected)
+
+		return fmt.Sprint("Started animation %v", selectMsg.Selected), nil
 	}
 }
 
 // WsHandler is the websocket handler for "normal" websocket clients that are not the control panel.
-func WsHandler(bcast *ControlPanelBroadcaster) http.HandlerFunc {
+func WsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProcessManager) http.HandlerFunc {
 	// TODO: Break out go functions
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var upgrader = websocket.Upgrader{} // use default options
@@ -126,7 +132,7 @@ func WsHandler(bcast *ControlPanelBroadcaster) http.HandlerFunc {
 					break
 				}
 
-				statusText, err := unmarshalClientMsg(data)
+				statusText, err := unmarshalClientMsg(data, opcManager)
 				if err != nil {
 					statusText = err.Error()
 				}
@@ -152,7 +158,7 @@ func WsHandler(bcast *ControlPanelBroadcaster) http.HandlerFunc {
 			log.Printf("Websocket Client connected: %v\n", conn.RemoteAddr())
 
 			// Start by sending a list of animations.
-			anims, err := getAnimsListMsg()
+			anims, err := getAnimsListMsg(opcManager)
 			if err != nil {
 				log.Println("Failed to get list of animations")
 				return

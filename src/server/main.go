@@ -53,7 +53,7 @@ func main() {
 	controlPanelBroadcaster := NewControlPanelBroadcaster()
 	opcBroadcaster := NewOpcBroadcaster()
 
-	_, err = NewOpcProcessManager()
+	opcProcessManager, err := NewOpcProcessManager()
 	if err != nil {
 		log.Fatalln("Failed to create OPC process manager:", err)
 	}
@@ -65,7 +65,7 @@ func main() {
 	router.HandleFunc("/debug/control_panel", WsDebugControlPanelHandler)
 
 	// Websocket handlers.
-	router.HandleFunc("/ws", WsHandler(controlPanelBroadcaster))
+	router.HandleFunc("/ws", WsHandler(controlPanelBroadcaster, opcProcessManager))
 	router.HandleFunc("/ws/opc", OpcWsHandler(opcBroadcaster))
 	router.HandleFunc("/ws/control_panel", ControlPanelWsHandler(controlPanelBroadcaster))
 
