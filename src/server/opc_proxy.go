@@ -99,6 +99,12 @@ func handleOpcCon(messages chan *opc.Message, conn net.Conn) {
 		}
 
 		// TODO: When a new OPC client connects, fade in the brightness.
+		// TODO: Make it possible to ignore incoming messages (don't forward them)
+
+		// TODO: Create a standalone color correction Go-server that can be started and listens to
+		// websocket connections. The webpage can then connect to that and perform color
+		// correction. Like this:
+		// https://github.com/scanlime/fadecandy/blob/686ab1f5570e563a287474424565bfbf8d8fe4a8/examples/python/color-correction-ui.py#L19-L30
 
 		messages <- msg
 	}

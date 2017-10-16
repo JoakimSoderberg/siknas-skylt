@@ -85,6 +85,7 @@ func unmarshalClientMsg(data []byte) (string, error) {
 
 // WsHandler is the websocket handler for "normal" websocket clients that are not the control panel.
 func WsHandler(bcast *ControlPanelBroadcaster) http.HandlerFunc {
+	// TODO: Break out go functions
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var upgrader = websocket.Upgrader{} // use default options
 		conn, err := upgrader.Upgrade(w, r, nil)
@@ -118,7 +119,6 @@ func WsHandler(bcast *ControlPanelBroadcaster) http.HandlerFunc {
 				close(ctrlPanelClient.controlPanel)
 			}()
 
-			// TODO: Make sure channel is closed
 			for {
 				_, data, err := conn.ReadMessage()
 				if err != nil {
@@ -162,7 +162,11 @@ func WsHandler(bcast *ControlPanelBroadcaster) http.HandlerFunc {
 			for {
 				select {
 				case msg := <-serverMessages:
-					conn.WriteJSON(msg)
+					err := conn.WriteJSON(msg)
+					if err != nil {
+						log.Printf("Failed to write to websocket client %v: %v\n", conn.RemoteAddr(), err)
+						return
+					}
 				case msg := <-ctrlPanelClient.controlPanel:
 					log.Println("Broadcasting: ", msg)
 					conn.WriteJSON(msg)

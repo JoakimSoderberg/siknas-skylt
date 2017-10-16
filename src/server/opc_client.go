@@ -8,6 +8,8 @@ import (
 	"github.com/cenkalti/backoff"
 )
 
+// TODO: Have a special connection for sending fadecandy specific instructions? Or just broadcast
+
 // RunOpcClient will start an OPC client that continues to reconnect with an exponential
 // backoff to the given server.
 func RunOpcClient(protocol string, host string, maxBackoff time.Duration, bcast *OpcBroadcaster) {
