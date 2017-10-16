@@ -49,13 +49,14 @@ func main() {
 		log.Fatalf("Fatal error config file: %s \n", err)
 	}
 
-	port := viper.GetInt("port")
-	opcServers := viper.GetStringMap("opc-servers")
-	log.Println(opcServers)
-
 	// Broadcast channel for control panel.
 	controlPanelBroadcaster := NewControlPanelBroadcaster()
 	opcBroadcaster := NewOpcBroadcaster()
+
+	_, err = NewOpcProcessManager()
+	if err != nil {
+		log.Fatalln("Failed to create OPC process manager:", err)
+	}
 
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", index)
@@ -70,6 +71,7 @@ func main() {
 
 	// TODO: Move to function
 	// Add OPC servers we should send to.
+	opcServers := viper.GetStringMap("opc-servers")
 	for name := range opcServers {
 		// TODO: Unmarshal into struct instead. And pass on to ws handler so clients can list these
 		opcHost := viper.GetString(fmt.Sprintf("opc-servers.%v.host", name))
@@ -84,6 +86,7 @@ func main() {
 	// OPC Proxy.
 	go RunOPCProxy("tcp", ":7890", opcBroadcaster)
 
+	port := viper.GetInt("port")
 	log.Printf("Starting Siknas-skylt webserver on %v...\n", port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", port), router))
 }
