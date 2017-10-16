@@ -85,7 +85,7 @@ func unmarshalClientMsg(data []byte, opcManager *OpcProcessManager) (string, err
 
 		opcManager.StartAnim(selectMsg.Selected)
 
-		return fmt.Sprint("Started animation %v", selectMsg.Selected), nil
+		return fmt.Sprintf("Started animation %v", selectMsg.Selected), nil
 	}
 }
 
@@ -118,32 +118,7 @@ func WsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProcessManager) ht
 		})
 
 		// Reader.
-		go func() {
-			defer func() {
-				conn.Close()
-				close(serverMessages)
-				close(ctrlPanelClient.controlPanel)
-			}()
-
-			for {
-				_, data, err := conn.ReadMessage()
-				if err != nil {
-					log.Println("read:", err)
-					break
-				}
-
-				statusText, err := unmarshalClientMsg(data, opcManager)
-				if err != nil {
-					statusText = err.Error()
-				}
-
-				serverMessages <- serverStatusMsg{
-					serverMsg: serverMsg{MessageType: "status"},
-					Success:   (err != nil),
-					Text:      statusText,
-				}
-			}
-		}()
+		go readOpcWsConn(conn, serverMessages, &ctrlPanelClient, opcManager)
 
 		// Writer.
 		go func() {
@@ -186,4 +161,34 @@ func WsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProcessManager) ht
 			}
 		}()
 	})
+}
+
+// readOpcWsConn reads incoming Websocket client messages.
+func readOpcWsConn(conn *websocket.Conn, serverMessages chan interface{},
+	ctrlPanelClient *ControlPanelReceiver, opcManager *OpcProcessManager) {
+
+	defer func() {
+		conn.Close()
+		close(serverMessages)
+		close(ctrlPanelClient.controlPanel)
+	}()
+
+	for {
+		_, data, err := conn.ReadMessage()
+		if err != nil {
+			log.Println("read:", err)
+			break
+		}
+
+		statusText, err := unmarshalClientMsg(data, opcManager)
+		if err != nil {
+			statusText = err.Error()
+		}
+
+		serverMessages <- serverStatusMsg{
+			serverMsg: serverMsg{MessageType: "status"},
+			Success:   (err != nil),
+			Text:      statusText,
+		}
+	}
 }
