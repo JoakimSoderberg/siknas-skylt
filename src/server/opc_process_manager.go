@@ -69,9 +69,8 @@ func (o *OpcProcessManager) ReadConfig() error {
 func (o *OpcProcessManager) StopAnim() error {
 	defer func() {
 		o.cmd = nil
+		o.currentName = ""
 	}()
-
-	o.currentName = ""
 
 	if o.cmd == nil {
 		return nil
@@ -86,7 +85,7 @@ func (o *OpcProcessManager) StopAnim() error {
 		return err
 	}
 
-	log.Println("Killed process:", o.currentName)
+	log.Println("Killed animation process:", o.currentName)
 
 	return nil
 }
@@ -99,14 +98,20 @@ func (o *OpcProcessManager) StartAnim(processName string) error {
 		return nil
 	}
 
+	if processName == o.currentName {
+		return fmt.Errorf("already running %v", processName)
+	}
+
 	log.Println("Starting process: ", processName)
 
 	process, ok := o.Processes[processName]
 	if !ok {
-		return fmt.Errorf("no animation process named %v exists", processName)
+		return fmt.Errorf("no animation named '%v' exists", processName)
 	}
 
 	o.StopAnim()
+
+	o.currentName = processName
 
 	// Start the new process and monitor it.
 	o.killed = make(chan bool)
@@ -130,7 +135,7 @@ func (o *OpcProcessManager) runAndMonitorCommand() {
 		return
 	}
 
-	// Monitor and restar the process if it dies.
+	// Monitor and restart the process if it dies.
 	for {
 		select {
 		case <-o.killed:

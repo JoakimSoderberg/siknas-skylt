@@ -12,19 +12,19 @@ import (
 
 // clientMsg is a message is a message sent by clients.
 type clientMsg struct {
-	MessageType string `json:"message_type,omitempty"`
+	MessageType string `json:"message_type"`
 }
 
 // clientSelectMsg is sent by clients when selecting an animation
 // from the list of available animations returned in servListMsg.
 type clientSelectMsg struct {
 	clientMsg
-	Selected string `json:"selected,omitempty"`
+	Selected string `json:"selected"`
 }
 
 // serverMsg is a message returned over the websocket.
 type serverMsg struct {
-	MessageType string `json:"message_type,omitempty"`
+	MessageType string `json:"message_type"`
 }
 
 // serverAnim represents a processing animation sketch.
@@ -76,14 +76,16 @@ func unmarshalClientMsg(data []byte, opcManager *OpcProcessManager) (string, err
 	case "select":
 		// TODO: Make into function.
 		var selectMsg clientSelectMsg
-		err := json.Unmarshal(data, &selectMsg)
+		err := json.Unmarshal(data, &selectMsg) // TODO: Does not fail if "selected" is missing
 		if err != nil {
 			return "", fmt.Errorf("failed to unmarshal JSON '%v':\n  %v", string(data), err)
 		}
 
 		// TODO: Selecting a new sketch should broadcast the selection to all ws clients
 
-		opcManager.StartAnim(selectMsg.Selected)
+		if err := opcManager.StartAnim(selectMsg.Selected); err != nil {
+			return "", err
+		}
 
 		return fmt.Sprintf("Started animation %v", selectMsg.Selected), nil
 	}
