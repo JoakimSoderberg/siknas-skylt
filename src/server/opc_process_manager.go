@@ -15,7 +15,7 @@ type OpcProcessesMap map[string]OpcProcessConfig
 type OpcProcessManager struct {
 	Processes   OpcProcessesMap
 	currentName string
-	cmd         *exec.Cmd
+	isRunning   bool
 	killed      chan bool
 }
 
@@ -66,28 +66,15 @@ func (o *OpcProcessManager) ReadConfig() error {
 }
 
 // StopAnim stops the currently running animation process (if any).
-func (o *OpcProcessManager) StopAnim() error {
+func (o *OpcProcessManager) StopAnim() {
 	defer func() {
-		o.cmd = nil
 		o.currentName = ""
 	}()
 
-	if o.cmd == nil {
-		return nil
-	}
-
 	// Signal the channel keeping the process alive to chill.
-	close(o.killed)
-
-	err := o.cmd.Process.Kill()
-	if err != nil {
-		log.Println("Error on kill:", err)
-		return err
+	if o.isRunning {
+		close(o.killed)
 	}
-
-	log.Println("Killed animation process:", o.currentName)
-
-	return nil
 }
 
 // StartAnim starts a given animation process by name.
@@ -112,38 +99,49 @@ func (o *OpcProcessManager) StartAnim(processName string) error {
 	o.StopAnim()
 
 	o.currentName = processName
+	o.isRunning = true
 
 	// Start the new process and monitor it.
 	o.killed = make(chan bool)
-	args := strings.Split(process.Exec, " ")
-	o.cmd = exec.Command(args[0], args[1:]...)
-	//o.cmd.Stdout = os.Stdout
-	//o.cmd.Stderr = os.Stderr
-
-	go o.runAndMonitorCommand()
+	go o.runAndMonitorCommand(process)
 
 	return nil
 }
 
 // runAndMonitorCommand keeps the command running if it succeeds at least once.
 // This is inteded to run in a go routine.
-func (o *OpcProcessManager) runAndMonitorCommand() {
+func (o *OpcProcessManager) runAndMonitorCommand(process OpcProcessConfig) {
+	defer func() {
+		o.isRunning = false
+	}()
 
-	if err := o.cmd.Run(); err != nil {
+	args := strings.Split(process.Exec, " ")
+	cmd := exec.Command(args[0], args[1:]...)
+	//cmd.Stdout = os.Stdout
+	//cmd.Stderr = os.Stderr
+
+	if err := cmd.Run(); err != nil {
 		log.Printf("Failed to start animation process %v: %v\n", o.currentName, err)
-		o.StopAnim()
 		return
 	}
+
+	o.isRunning = true
 
 	// Monitor and restart the process if it dies.
 	for {
 		select {
 		case <-o.killed:
+			err := cmd.Process.Kill()
+			if err != nil {
+				log.Println("Error on kill:", err)
+			}
+
+			log.Println("Killed animation process:", o.currentName)
 			return
 		case <-time.After(time.Second): // TODO: Make this configurable
-			if o.cmd.ProcessState.Exited() {
+			if cmd.ProcessState.Exited() {
 				log.Println("Process exited, attempting restart:", o.currentName)
-				if err := o.cmd.Run(); err != nil {
+				if err := cmd.Run(); err != nil {
 					log.Println("Failed to restart process:", err)
 				}
 			}
