@@ -5,7 +5,6 @@ import (
 	"log"
 	"os/exec"
 	"strings"
-	"time"
 
 	"github.com/spf13/viper"
 )
@@ -15,8 +14,8 @@ type OpcProcessesMap map[string]OpcProcessConfig
 type OpcProcessManager struct {
 	Processes   OpcProcessesMap
 	currentName string
-	isRunning   bool
-	killed      chan bool
+	stopped     bool
+	cmd         *exec.Cmd
 }
 
 type OpcProcessConfig struct {
@@ -32,11 +31,6 @@ func NewOpcProcessManager() (*OpcProcessManager, error) {
 		return nil, err
 	}
 	return &o, nil
-}
-
-// IsRunning reports if any animation proccess is currently running.
-func (o *OpcProcessManager) IsRunning() bool {
-	return (o.currentName != "")
 }
 
 // ReadConfig reads the config needed by the process manager.
@@ -71,15 +65,23 @@ func (o *OpcProcessManager) StopAnim() {
 		o.currentName = ""
 	}()
 
-	// Signal the channel keeping the process alive to chill.
-	if o.isRunning {
-		close(o.killed)
+	o.stopped = true
+	if (o.cmd != nil) && (o.cmd.Process != nil) {
+		err := o.cmd.Process.Kill()
+		if err != nil {
+			log.Printf("Failed to kill process '%v': %v\n", o.currentName, err)
+			return
+		}
+		o.cmd = nil
+
+		log.Printf("Killed process: %v\n", o.currentName)
 	}
 }
 
 // StartAnim starts a given animation process by name.
 func (o *OpcProcessManager) StartAnim(processName string) error {
 
+	// Empty name means to stop.
 	if processName == "" {
 		o.StopAnim()
 		return nil
@@ -89,8 +91,6 @@ func (o *OpcProcessManager) StartAnim(processName string) error {
 		return fmt.Errorf("already running %v", processName)
 	}
 
-	log.Println("Starting process: ", processName)
-
 	process, ok := o.Processes[processName]
 	if !ok {
 		return fmt.Errorf("no animation named '%v' exists", processName)
@@ -98,11 +98,12 @@ func (o *OpcProcessManager) StartAnim(processName string) error {
 
 	o.StopAnim()
 
-	o.currentName = processName
-	o.isRunning = true
+	log.Println("Starting process: ", processName)
 
-	// Start the new process and monitor it.
-	o.killed = make(chan bool)
+	o.currentName = processName
+	o.stopped = false
+
+	// Start the new process.
 	go o.runAndMonitorCommand(process)
 
 	return nil
@@ -111,40 +112,18 @@ func (o *OpcProcessManager) StartAnim(processName string) error {
 // runAndMonitorCommand keeps the command running if it succeeds at least once.
 // This is inteded to run in a go routine.
 func (o *OpcProcessManager) runAndMonitorCommand(process OpcProcessConfig) {
-	defer func() {
-		o.isRunning = false
-	}()
 
 	args := strings.Split(process.Exec, " ")
-	cmd := exec.Command(args[0], args[1:]...)
-	//cmd.Stdout = os.Stdout
-	//cmd.Stderr = os.Stderr
+	o.cmd = exec.Command(args[0], args[1:]...)
 
-	if err := cmd.Run(); err != nil {
-		log.Printf("Failed to start animation process %v: %v\n", o.currentName, err)
-		return
-	}
-
-	o.isRunning = true
-
-	// Monitor and restart the process if it dies.
 	for {
-		select {
-		case <-o.killed:
-			err := cmd.Process.Kill()
-			if err != nil {
-				log.Println("Error on kill:", err)
+		if err := o.cmd.Run(); err != nil {
+			if o.stopped {
+				log.Println(err)
+				return
 			}
-
-			log.Println("Killed animation process:", o.currentName)
-			return
-		case <-time.After(time.Second): // TODO: Make this configurable
-			if cmd.ProcessState.Exited() {
-				log.Println("Process exited, attempting restart:", o.currentName)
-				if err := cmd.Run(); err != nil {
-					log.Println("Failed to restart process:", err)
-				}
-			}
+			log.Println("Animation process died unexpectedly restarting...:", err)
+			continue
 		}
 	}
 }

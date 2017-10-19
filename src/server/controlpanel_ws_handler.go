@@ -20,6 +20,8 @@ func ControlPanelWsHandler(bcast *ControlPanelBroadcaster) http.HandlerFunc {
 		}
 
 		// TODO: Only allow one client.
+		// TODO: When this client is connected ignore selection via webpage if not "custom program" is selected.
+		// TODO: Enable connectin
 
 		// Clients needs to reply to Ping.
 		conn.SetReadDeadline(time.Now().Add(pongWait))
