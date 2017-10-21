@@ -74,21 +74,42 @@
           },
           "text",
           {
+            "name": "aurelia-validation",
+            "path": "../node_modules/aurelia-validation/dist/amd",
+            "main": "aurelia-validation"
+          }
+        ]
+      },
+      {
+        "name": "materialize-bundle.js",
+        "dependencies": [
+          "jquery",
+          {
             "name": "materialize-css",
-            "main": "dist/js/materialize.js",
-            "path": "../node_modules/materialize-css",
+            "path": "../node_modules/materialize-css/dist",
+            "main": "js/materialize.amd",
+            "deps": [
+              "jquery"
+            ],
             "resources": [
-              "dist/css/materialize.css",
-              "dist/css/materialize.min.css"
-            ]
+              "css/materialize.css"
+            ],
+            "exports": "Materialize"
           },
           {
             "name": "aurelia-materialize-bridge",
             "path": "../node_modules/aurelia-materialize-bridge/dist/amd",
-            "main": "index"
+            "main": "index",
+            "deps": [
+              "jquery"
+            ],
+            "resources": [
+              "**/*.{css,html}",
+              "index.js"
+            ]
           }
         ]
-      }
+      }      
     ],
     "loader": {
       "type": "require",

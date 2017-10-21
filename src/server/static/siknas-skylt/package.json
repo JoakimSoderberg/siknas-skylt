@@ -6,6 +6,9 @@
     "type": "???",
     "url": "???"
   },
+  "scripts": {
+    "postinstall": "au prepare-materialize && ./build_materialize_amd.sh"
+  },
   "license": "MIT",
   "dependencies": {
     "aurelia-animator-css": "^1.0.2",
@@ -13,6 +16,7 @@
     "aurelia-materialize-bridge": "^0.31.0",
     "aurelia-ui-framework": "^3.4.5",
     "bluebird": "^3.4.1",
+    "jquery": "^3.2.1",
     "materialize-css": "^0.100.1",
     "requirejs": "^2.3.2",
     "text": "github:requirejs/text#latest"
