@@ -16,7 +16,8 @@
     "aurelia-materialize-bridge": "^0.31.0",
     "aurelia-ui-framework": "^3.4.5",
     "bluebird": "^3.4.1",
-    "jquery": "^3.2.1",
+    "bootstrap": "^3.3.7",
+    "jquery": "^2.2.4",
     "materialize-css": "^0.100.1",
     "requirejs": "^2.3.2",
     "text": "github:requirejs/text#latest"

@@ -1,0 +1,14 @@
+<template>
+    <span>Tuuut</span>
+    <div class="animation-list">
+        <ul class="list-group">
+        <h1>${animations.Length}</h1>
+        <li repeat.for="animation of animations" class="list-group-item ${animation.name === $parent.selectedName ? 'active' : ''}">
+            <a route-href="route: animations; params.bind: {name:animation.name}" click.delegate="$parent.select(animation)">
+            <h4 class="list-group-item-heading">${animation.name}</h4>
+            <p class="list-group-item-text">${animation.description}</p>
+            </a>
+        </li>
+        </ul>
+    </div>
+</template>

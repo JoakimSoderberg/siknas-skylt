@@ -77,6 +77,17 @@
             "name": "aurelia-validation",
             "path": "../node_modules/aurelia-validation/dist/amd",
             "main": "aurelia-validation"
+          },
+          "jquery",
+          {
+            "name": "bootstrap",
+            "path": "../node_modules/bootstrap/dist",
+            "main": "js/bootstrap.min",
+            "deps": ["jquery"],
+            "exports": "$",
+            "resources": [
+              "css/bootstrap.css"
+            ]
           }
         ]
       },
