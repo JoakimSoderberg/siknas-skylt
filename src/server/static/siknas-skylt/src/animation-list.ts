@@ -2,7 +2,7 @@ import { EventAggregator } from 'aurelia-event-aggregator';
 import { WSAPI } from './ws-api';
 import {
     WebsocketConnected, WebsocketDisconnected, WebsocketMessageReceived,
-    WebsocketError, WebsocketAnimationList
+    WebsocketError, WebsocketAnimationList, AnimationSelectionChanged
 } from './messages';
 import { inject } from 'aurelia-framework';
 import { Animation, AnimationListMessage } from "./types";
@@ -40,11 +40,7 @@ export class AnimationList {
         }`;
 
         let data = JSON.parse(jsonData);
-
         let animations: AnimationListMessage = data;
-        //animations.anims = data["anims"] as Array<Animation>;
-
-        console.log("before anims:", animations);
         this.ea.publish(new WebsocketAnimationList(animations));
     }
 
@@ -54,6 +50,7 @@ export class AnimationList {
         } else {
             this.selectedName = null;
         }
+        this.ea.publish(new AnimationSelectionChanged(animation));
         return true;
     }
 }
