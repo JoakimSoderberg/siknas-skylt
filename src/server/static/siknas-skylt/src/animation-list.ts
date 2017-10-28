@@ -9,7 +9,7 @@ import { Animation, AnimationListMessage } from "./types";
 
 @inject(WSAPI, EventAggregator)
 export class AnimationList {
-    animations: Array<Animation>;
+    animations;
     selectedName: string = null;
     isActive: boolean = false;
     ea: EventAggregator;
@@ -22,10 +22,8 @@ export class AnimationList {
 
         // Once the websocket is connected we'll receive a list of animations.
         ea.subscribe(WebsocketAnimationList, msg => {
-            // TODO: Why?
-            this.animations = msg.msg.anims;
-            console.log("msg: ", msg);
-            console.log("Animations: ", this.animations);
+            this.animations = msg.data.anims;
+            console.log("Animations sub:", this.animations);
         });
     }
 

@@ -19,6 +19,6 @@ export class WebsocketMessageReceived {
 }
 
 export class WebsocketAnimationList {
-    constructor(public msg) { }
+    constructor(public data) { }
 }
 

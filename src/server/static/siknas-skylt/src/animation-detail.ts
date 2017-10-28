@@ -1,0 +1,62 @@
+import {inject} from 'aurelia-framework';
+import {EventAggregator} from 'aurelia-event-aggregator';
+import {WSAPI} from './ws-api';
+import {WebsocketConnected, WebsocketDisconnected} from './messages';
+import { Animation } from "./types";
+
+interface Contact {
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
+@inject(WSAPI, EventAggregator)
+export class AnimationDetail {
+  routeConfig;
+  animation: Animation;
+
+  constructor(private api: WSAPI, private ea: EventAggregator) { }
+
+  activate(params, routeConfig) {
+    this.routeConfig = routeConfig;
+    this.animation = params.animation;
+    /*
+    return this.api.getContactDetails(params.id).then(contact => {
+      this.contact = <Contact>contact;
+      this.routeConfig.navModel.setTitle(this.contact.firstName);
+      this.originalContact = JSON.parse(JSON.stringify(this.contact));
+      this.ea.publish(new ContactViewed(this.contact));
+    });
+    */
+  }
+
+  /*
+  get canSave() {
+    return this.contact.firstName && this.contact.lastName && !this.api.isRequesting;
+  }*/
+
+  /*
+  save() {
+    this.api.saveContact(this.contact).then(contact => {
+      this.contact = <Contact>contact;
+      this.routeConfig.navModel.setTitle(this.contact.firstName);
+      this.originalContact = JSON.parse(JSON.stringify(this.contact));
+      this.ea.publish(new ContactUpdated(this.contact));
+    });
+  }*/
+
+  /*
+  canDeactivate() {
+    if(!areEqual(this.originalContact, this.contact)){
+      let result = confirm('You have unsaved changes. Are you sure you wish to leave?');
+
+      if(!result) {
+        this.ea.publish(new ContactViewed(this.contact));
+      }
+
+      return result;
+    }
+
+    return true;
+  }*/
+}
