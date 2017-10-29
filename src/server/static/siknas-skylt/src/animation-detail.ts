@@ -1,28 +1,19 @@
-import {inject} from 'aurelia-framework';
+import {autoinject} from 'aurelia-framework';
 import {EventAggregator} from 'aurelia-event-aggregator';
-import {WSAPI} from './ws-api';
 import {WebsocketConnected, WebsocketDisconnected, AnimationSelectionChanged} from './messages';
 import { Animation } from "./types";
-import { AnimationList } from "./animation-list";
+import { AnimationListService } from "./animation-list-service";
 
-interface Contact {
-  firstName: string;
-  lastName: string;
-  email: string;
-}
-
-@inject(WSAPI, EventAggregator, AnimationList)
+@autoinject()
 export class AnimationDetail {
   routeConfig;
   animation: Animation;
 
-  constructor(private api: WSAPI, private ea: EventAggregator) { }
+  constructor(private ea: EventAggregator, private service: AnimationListService) { }
 
   activate(params, routeConfig) {
     this.routeConfig = routeConfig;
-    this.ea.subscribe(AnimationSelectionChanged, msg => {
-        console.log("Animation selection changed:", msg);
-        this.animation = msg.data.animation;
-    });
+    this.animation = this.service.getByName(params.name)
+    // TODO: Send event that we selected the given name.
   }
 }
