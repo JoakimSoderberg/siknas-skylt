@@ -25,3 +25,7 @@ export class WebsocketAnimationList {
 export class AnimationSelectionChanged {
     constructor(public data: Animation) { }
 }
+
+export class AnimationViewed {
+    constructor(public animation: Animation) { }
+}
