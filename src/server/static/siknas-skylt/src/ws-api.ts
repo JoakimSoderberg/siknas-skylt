@@ -1,4 +1,4 @@
-import { inject } from 'aurelia-framework';
+import { autoinject } from 'aurelia-framework';
 import { EventAggregator } from 'aurelia-event-aggregator';
 import {
     WebsocketDisconnected, WebsocketConnected, WebsocketError,
@@ -9,19 +9,14 @@ import { Animation } from "./types";
 const MAX_BACKOFF = 5000;
 const BACKOFF_INCR = 500;
 
-// TODO: Try using autoinject
-@inject(EventAggregator)
+@autoinject()
 export class WSAPI {
 
-    events: EventAggregator;
     backoff: number
     socket: WebSocket;
     active: boolean;
 
-    constructor(events: EventAggregator) {
-        //this.connect();
-        this.events = events;
-    }
+    constructor(private events: EventAggregator) { }
 
     connect() {
         this.socket = new WebSocket(`ws://${location.host}/ws`);
@@ -30,16 +25,15 @@ export class WSAPI {
         this.socket.onerror = (e: ErrorEvent) => { this.onerror(e); };
         this.socket.onopen = (e: Event) => { this.onopen(e); };
     }
-
+    
     onmessage(e: MessageEvent) {
         // Raise the raw message.
         this.events.publish(new WebsocketMessageReceived(e));
 
         if (e.data["message_type"] == "list") {
             // http://choly.ca/post/typescript-json/
-            // TODO: Is this even possible??
-            //let anims = new Array<Animation>(e.data["anims"]);
-            //this.events.publish(new WebsocketAnimationList(anims));
+            // TODO: Would be nice if this was typesafe instead.
+            this.events.publish(new WebsocketAnimationList(e.data));
         }
     }
 

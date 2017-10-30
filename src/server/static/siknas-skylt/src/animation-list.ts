@@ -1,7 +1,7 @@
 import { EventAggregator } from 'aurelia-event-aggregator';
 import {
     WebsocketConnected, WebsocketDisconnected, WebsocketMessageReceived,
-    WebsocketError, WebsocketAnimationList, AnimationSelectionChanged, AnimationViewed
+    WebsocketError, WebsocketAnimationList, AnimationViewed
 } from './messages';
 import { autoinject } from 'aurelia-framework';
 import { Animation, AnimationListMessage } from "./types";

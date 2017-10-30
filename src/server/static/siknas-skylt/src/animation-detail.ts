@@ -1,6 +1,6 @@
 import { autoinject } from 'aurelia-framework';
 import { EventAggregator } from 'aurelia-event-aggregator';
-import { WebsocketConnected, WebsocketDisconnected, AnimationSelectionChanged, AnimationViewed } from './messages';
+import { WebsocketConnected, WebsocketDisconnected, AnimationViewed } from './messages';
 import { Animation } from "./types";
 import { AnimationListService } from "./animation-list-service";
 

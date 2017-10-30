@@ -20,6 +20,6 @@ export class App {
 
   created() {
     // TODO: Connect Websocket
-    //this.api.connect();
+    this.api.connect();
   }
 }
