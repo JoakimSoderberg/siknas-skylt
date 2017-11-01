@@ -43,6 +43,8 @@ func main() {
 		log.Fatalf("Fatal error config file: %s \n", err)
 	}
 
+	// TODO: Move the config parsing here and pass as arguments.
+
 	// Broadcast channel for control panel.
 	controlPanelBroadcaster := NewControlPanelBroadcaster()
 	opcBroadcaster := NewOpcBroadcaster()
@@ -62,6 +64,8 @@ func main() {
 	router.HandleFunc("/ws", WsHandler(controlPanelBroadcaster, opcProcessManager))
 	router.HandleFunc("/ws/opc", OpcWsHandler(opcBroadcaster))
 	router.HandleFunc("/ws/control_panel", ControlPanelWsHandler(controlPanelBroadcaster))
+
+	// Must be last so we don't shadow the other routes.
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("static/siknas-skylt")))
 
 	// TODO: Move to function

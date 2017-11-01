@@ -67,12 +67,14 @@ export class WSAPI {
     }
 
     onclose(e: CloseEvent) {
+        console.log("Websocket disconnected (reconnect in " + this.backoff + "s) " + e.reason);
         this.incrementBackoff();
         setTimeout(
             () => {
+                console.log("Websocket attempting reconnect...");
                 this.connect();
             },
-            this.backoff * 1000
+            this.backoff
         );
         this.events.publish(new WebsocketDisconnected(e))
     }
