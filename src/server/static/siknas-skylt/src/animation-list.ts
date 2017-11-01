@@ -23,11 +23,7 @@ export class AnimationList {
     }
 
     select(animation: Animation | null) {
-        if (animation != null) {
-            this.selectedName = animation.name;
-        } else {
-            this.selectedName = null;
-        }
+        this.selectedName = (animation != null) ? animation.name : null;
         return true;
     }
 }

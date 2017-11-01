@@ -16,7 +16,7 @@ export class AnimationListService {
         });
 
         // TODO: Remove test code...
-        let jsonData: string = `
+        /*let jsonData: string = `
         {
             "message_type": "list",
             "anims": [
@@ -27,7 +27,7 @@ export class AnimationListService {
 
         let data = JSON.parse(jsonData);
         let animations: AnimationListMessage = data;
-        this.events.publish(new WebsocketAnimationList(animations));
+        this.events.publish(new WebsocketAnimationList(animations));*/
     }
 
     getByName(name: string): Animation {
@@ -39,5 +39,13 @@ export class AnimationListService {
                 return animation;
         }
         return null;
+    }
+
+    setSelectedAnimation(name: string) {
+        this.api.sendSelectMessage(name);
+    }
+
+    get isConnected(): boolean {
+        return this.api.isConnected;
     }
 }

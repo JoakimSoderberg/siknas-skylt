@@ -5,6 +5,7 @@ import (
 	"log"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -35,6 +36,7 @@ func NewOpcProcessManager() (*OpcProcessManager, error) {
 
 // ReadConfig reads the config needed by the process manager.
 func (o *OpcProcessManager) ReadConfig() error {
+	// TODO: Get rid of this and pass as argument to NewProcessManager instead.
 	opcProcessesStringMap := viper.GetStringMap("processes")
 
 	log.Println("Animation process list:")
@@ -114,15 +116,16 @@ func (o *OpcProcessManager) StartAnim(processName string) error {
 func (o *OpcProcessManager) runAndMonitorCommand(process OpcProcessConfig) {
 
 	args := strings.Split(process.Exec, " ")
-	o.cmd = exec.Command(args[0], args[1:]...)
 
 	for {
+		o.cmd = exec.Command(args[0], args[1:]...)
 		if err := o.cmd.Run(); err != nil {
 			if o.stopped {
 				log.Println(err)
 				return
 			}
 			log.Println("Animation process died unexpectedly restarting...:", err)
+			time.Sleep(1 * time.Second)
 			continue
 		}
 	}

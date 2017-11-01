@@ -7,13 +7,18 @@
       <div class="navbar-header">
         <a class="navbar-brand" href="#">
           <i class="fa fa-user"></i>
-          <span>Animationer</span>
+          <span>Siknäs-skylt</span>
         </a>
       </div>
     </div>
   </nav>
 
   <div class="container">
+    <div class="row">
+      <span class="alert ${api.isConnected ? 'alert-success' : 'alert-danger'}">
+        ${api.isConnected ? "Connected" : "Disconnected"}
+      </span>
+    </div>
     <div class="row">
       <animation-list class="col-md-4"></animation-list>
       <router-view class="col-md-8"></router-view>

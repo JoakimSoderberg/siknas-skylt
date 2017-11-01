@@ -17,4 +17,12 @@ export class AnimationDetail {
         // TODO: Send event that we selected the given name.
         this.events.publish(new AnimationViewed(this.animation));
     }
+
+    play() {
+        this.service.setSelectedAnimation(this.animation.name);
+    }
+
+    stop() {
+        this.service.setSelectedAnimation("");
+    }
 }

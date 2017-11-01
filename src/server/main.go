@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"html"
 	"log"
 	"net/http"
 	"time"
@@ -23,11 +22,6 @@ const (
 	// Send pings to client with this period. Must be less than pongWait.
 	pingPeriod = (pongWait * 9) / 10
 )
-
-func index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
-	// TODO: Host aurelia webpage
-}
 
 func main() {
 	var rootCmd = &cobra.Command{Use: "siknas-skylt", Run: func(c *cobra.Command, args []string) {}}
@@ -59,7 +53,7 @@ func main() {
 	}
 
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/", index)
+
 	router.HandleFunc("/debug", WsDebugHandler)
 	router.HandleFunc("/debug/opc", WsDebugOpcHandler)
 	router.HandleFunc("/debug/control_panel", WsDebugControlPanelHandler)
@@ -68,6 +62,7 @@ func main() {
 	router.HandleFunc("/ws", WsHandler(controlPanelBroadcaster, opcProcessManager))
 	router.HandleFunc("/ws/opc", OpcWsHandler(opcBroadcaster))
 	router.HandleFunc("/ws/control_panel", ControlPanelWsHandler(controlPanelBroadcaster))
+	router.PathPrefix("/").Handler(http.FileServer(http.Dir("static/siknas-skylt")))
 
 	// TODO: Move to function
 	// Add OPC servers we should send to.

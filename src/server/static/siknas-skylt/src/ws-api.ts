@@ -4,7 +4,7 @@ import {
     WebsocketDisconnected, WebsocketConnected, WebsocketError,
     WebsocketMessageReceived, WebsocketAnimationList
 } from "./messages";
-import { Animation } from "./types";
+import { Animation, AnimationListMessage } from "./types";
 
 const MAX_BACKOFF = 5000;
 const BACKOFF_INCR = 500;
@@ -14,26 +14,41 @@ export class WSAPI {
 
     backoff: number
     socket: WebSocket;
-    active: boolean;
 
     constructor(private events: EventAggregator) { }
 
     connect() {
-        this.socket = new WebSocket(`ws://${location.host}/ws`);
-        this.socket.onmessage = (e: MessageEvent) => { this.onmessage(e); };
-        this.socket.onclose = (e: CloseEvent) => { this.onclose(e); };
-        this.socket.onerror = (e: ErrorEvent) => { this.onerror(e); };
-        this.socket.onopen = (e: Event) => { this.onopen(e); };
+        try {
+            this.socket = new WebSocket(`ws://${location.host}/ws`);
+            this.socket.onmessage = (e: MessageEvent) => { this.onmessage(e); };
+            this.socket.onclose = (e: CloseEvent) => { this.onclose(e); };
+            this.socket.onerror = (e: ErrorEvent) => { this.onerror(e); };
+            this.socket.onopen = (e: Event) => { this.onopen(e); };
+        }
+        catch (ex) {
+            console.log(ex);
+        }
     }
-    
+
     onmessage(e: MessageEvent) {
-        // Raise the raw message.
+        console.log("Websocket message:", e);
         this.events.publish(new WebsocketMessageReceived(e));
 
-        if (e.data["message_type"] == "list") {
-            // http://choly.ca/post/typescript-json/
-            // TODO: Would be nice if this was typesafe instead.
-            this.events.publish(new WebsocketAnimationList(e.data));
+        // http://choly.ca/post/typescript-json/
+        // TODO: Would be nice if this was typesafe instead.
+        let data = JSON.parse(e.data);
+
+        switch (data["message_type"]) {
+            case "list":
+                let animations: AnimationListMessage = data;
+                this.events.publish(new WebsocketAnimationList(animations));
+                break;
+            case "status":
+                console.log("Status: " + data["text"]);
+                break
+            default:
+                console.log("Unknown message:", e.data);
+                break;
         }
     }
 
@@ -43,6 +58,8 @@ export class WSAPI {
 
     onopen(e: Event) {
         this.events.publish(new WebsocketConnected())
+        this.backoff = 0;
+        console.log("Websocket connected");
     }
 
     incrementBackoff() {
@@ -53,10 +70,32 @@ export class WSAPI {
         this.incrementBackoff();
         setTimeout(
             () => {
-                if (this.active) this.connect();
+                this.connect();
             },
             this.backoff * 1000
         );
         this.events.publish(new WebsocketDisconnected(e))
+    }
+
+    sendJSONMessage(msg: Object) {
+        if (!this.socket)
+            return;
+
+        this.socket.send(JSON.stringify(msg));
+    }
+
+    sendSelectMessage(name: string) {
+        this.sendJSONMessage({
+            "message_type": "select",
+            "selected": name
+        });
+    }
+
+    get isConnected(): boolean {
+        if (this.socket) {
+            return (this.socket.readyState == WebSocket.OPEN);
+        }
+
+        return false;
     }
 }
