@@ -47,7 +47,7 @@ func OpcWsHandler(bcast *OpcBroadcaster) http.HandlerFunc {
 			for {
 				select {
 				case msg := <-opcReceiver.opcMessages:
-					err := conn.WriteMessage(websocket.BinaryMessage, msg.Data)
+					err := conn.WriteMessage(websocket.BinaryMessage, msg.ByteArray())
 					if err != nil {
 						log.Printf("Failed to write to websocket client %v: %v\n", conn.RemoteAddr(), err)
 						return
