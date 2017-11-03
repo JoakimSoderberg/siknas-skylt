@@ -17,6 +17,7 @@ export class WSOPCAPI {
     connect() {
         try {
             this.socket = new WebSocket(`ws://${location.host}/ws/opc`);
+            this.socket.binaryType = 'arraybuffer';
             this.socket.onmessage = (e: MessageEvent) => { this.onmessage(e); };
             this.socket.onclose = (e: CloseEvent) => { this.onclose(e); };
             this.socket.onerror = (e: ErrorEvent) => { this.onerror(e); };
