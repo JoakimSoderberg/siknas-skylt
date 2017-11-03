@@ -26,8 +26,7 @@ export class SiknasSkylt {
     skylt: any;
 
     layout: OPCPixel[];
-    //pixels: OPCPixel[];
-    pixel: any;
+    pixels: any;
 
     constructor(private opc: WSOPCAPI, private events: EventAggregator, private client: HttpClient) {
         this.events.subscribe(WebsocketOPCMessage, msg => {
@@ -37,8 +36,6 @@ export class SiknasSkylt {
             let highLen = d[2];
             let lowLen = d[3];
             let length = (highLen << 8) | lowLen;
-            //console.log("length:" + length + " high: " + highLen + " low: " + lowLen);
-
             console.log("length: " + length + " length layout: " + this.layout.length);
 
             for (let i = OPC_HEADER_LEN, j = 0; i < length; i += 3, j++) {
@@ -48,7 +45,11 @@ export class SiknasSkylt {
 
                 this.layout[j].color = [r, g, b];
             }
-            this.updatePixels();
+
+            // Change color for all pixels.
+            this.pixels.style("fill", function (p: OPCPixel) {
+                return `rgb(${p.color[0]},${p.color[1]},${p.color[2]})`
+            });
         })
     }
 
@@ -56,14 +57,14 @@ export class SiknasSkylt {
         this.opc.connect();
     }
 
-    updatePixels() {
+    createPixels() {
         if (!this.layout)
             return;
 
         let w = parseInt(this.svg.style("width"), 10);
         let h = parseInt(this.svg.style("height"), 10);
 
-        this.pixel = this.svg.selectAll("circle").data(this.layout)
+        this.pixels = this.svg.selectAll("circle").data(this.layout)
             .enter()
             .append("circle")
             .attr("cx", function (p: OPCPixel) {
@@ -79,7 +80,7 @@ export class SiknasSkylt {
         //.style("stroke", "black")
         //.style("stroke-width", 1.0);
 
-        this.pixel.exit().remove();
+        this.pixels.exit().remove();
     }
 
     attached() {
@@ -96,7 +97,7 @@ export class SiknasSkylt {
                     p.color = [0, 0, 0];
                 }
                 console.log("Got layout: ", this.layout);
-                this.updatePixels();
+                this.createPixels();
             });
 
         this.skylt = this.svg.append("image").attr("href", "images/siknas-skylt.svg")
