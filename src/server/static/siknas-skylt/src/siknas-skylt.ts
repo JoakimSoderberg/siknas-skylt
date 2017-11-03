@@ -71,7 +71,7 @@ export class SiknasSkylt {
         var filter = defs.append("filter")
             .attr("id", "glow")
             .append("feGaussianBlur")
-            .attr("stdDeviation", "0.5")
+            .attr("stdDeviation", "2.5")
             .attr("result", "coloredBlur");
 
         // Merge the original shape with the blur.
@@ -81,9 +81,12 @@ export class SiknasSkylt {
         feMerge.append("feMergeNode")
             .attr("in", "SourceGraphic");
 
-        //this.svg.select("#Siknas").selectAll("path")
+        // Change the color of the Siknäs text of the SVG.
+        this.svg.select("#Siknas").selectAll("path").style("fill", "black");
 
-        this.pixels = this.svg.selectAll("circle").data(this.layout)
+        // TODO: Fix mask
+        let grp = this.svg.append("g").attr("mask", "url(#Siknas)");
+        this.pixels = grp.selectAll("circle").data(this.layout)
             .enter()
             .append("circle")
             // These values are hand tweaked to be placed over the logo properly.
@@ -95,13 +98,11 @@ export class SiknasSkylt {
             })
             .attr("r", 10)
             .attr("filter", "url(#glow)")
-            //.attr("mask", "url(#Siknas)")
             .style("fill", function (p: OPCPixel) {
                 return `rgb(${p.color[0]},${p.color[1]},${p.color[2]})`
             });
 
         this.pixels.exit().remove();
-
         this.pixelsCreated = true;
     }
 
