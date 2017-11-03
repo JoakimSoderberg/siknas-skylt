@@ -60,8 +60,12 @@ export class SiknasSkylt {
         if (!this.layout)
             return;
 
-        let w = parseInt(this.svg.style("width"), 10);
-        let h = parseInt(this.svg.style("height"), 10);
+        let viewBox = this.svg.attr("viewBox").split(" ");
+        let size = viewBox.slice(2);
+        let w = size[0];
+        let h = size[1];
+        let aspect = w / h;
+        console.log("w: " + w + " h: " + h);
 
         var defs = this.svg.append("defs");
         var filter = defs.append("filter")
@@ -77,6 +81,8 @@ export class SiknasSkylt {
         feMerge.append("feMergeNode")
             .attr("in", "SourceGraphic");
 
+        //this.svg.select("#Siknas").selectAll("path")
+
         this.pixels = this.svg.selectAll("circle").data(this.layout)
             .enter()
             .append("circle")
@@ -87,8 +93,9 @@ export class SiknasSkylt {
             .attr("cy", function (p: OPCPixel) {
                 return (p.point[1] * h * 0.55) + (h * 0.20);
             })
-            .attr("r", 2)
+            .attr("r", 10)
             .attr("filter", "url(#glow)")
+            //.attr("mask", "url(#Siknas)")
             .style("fill", function (p: OPCPixel) {
                 return `rgb(${p.color[0]},${p.color[1]},${p.color[2]})`
             });
@@ -99,26 +106,32 @@ export class SiknasSkylt {
     }
 
     attached() {
-        this.svg = d3.select("#siknas-skylt").append('svg')
-            .attr('width', 300)
-            .attr('height', 300);
-
-        this.client.fetch("misc/layout.json")
-            .then(response => response.json())
+        // Read the SVG as XML instead of adding it as an <image>
+        // so we can manipulate parts of it directly.
+        this.client.fetch("images/siknas-skylt.svg")
+            .then(response => response.text())
+            .then(str => (new DOMParser()).parseFromString(str, "image/svg+xml"))
             .then(data => {
-                this.layout = data;
+                // Add SVG to DOM.
+                document.getElementById("siknas-skylt")
+                    .appendChild(data.documentElement);
 
-                for (let p of this.layout) {
-                    p.color = [0, 0, 0];
-                }
-                console.log("Got layout: ", this.layout);
-                this.createPixels();
+                this.svg = d3.select("#siknas-skylt svg")
+                    .attr('width', 300)
+                    .attr('height', 300);
+
+                // Get the Pixel layout and add them to the SVG.
+                this.client.fetch("misc/layout.json")
+                    .then(response => response.json())
+                    .then(data => {
+                        this.layout = data;
+
+                        for (let p of this.layout) {
+                            p.color = [0, 0, 0];
+                        }
+                        console.log("Got layout: ", this.layout);
+                        this.createPixels();
+                    });
             });
-
-        this.skylt = this.svg.append("image").attr("href", "images/siknas-skylt.svg")
-            .attr("x", 0)
-            .attr("y", 0)
-            .attr('width', 300)
-            .attr('height', 300);
     }
 }
