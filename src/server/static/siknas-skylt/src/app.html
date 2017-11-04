@@ -2,27 +2,22 @@
   <require from="./animation-list"></require>
   <require from="./siknas-skylt"></require>
 
-  <nav class="navbar navbar-default" role="navigation">
+  <nav class="navbar navbar-default navbar-dark" role="navigation">
     <div class="container-fluid">
       <div class="navbar-header">
-        <a class="navbar-brand" href="#">
-          <i class="fa fa-user"></i>
-          <span>Siknäs-skylt</span>
-        </a>
+        <span class="badge badge-pill ${api.isConnected ? 'badge-success' : 'badge-danger'}">
+          &nbsp;
+        </span>
+        Siknäs-skylt
       </div>
     </div>
   </nav>
 
   <div class="container">
-    <div class="row">
-      <span class="alert ${api.isConnected ? 'alert-success' : 'alert-danger'}">
-        ${api.isConnected ? "Connected" : "Disconnected"}
-      </span>
-    </div>
+    <siknas-skylt></siknas-skylt>
     <div class="row">
       <animation-list class="col-md-4"></animation-list>
       <router-view class="col-md-8"></router-view>
     </div>
-    <siknas-skylt></siknas-skylt>
   </div>
 </template>

@@ -84,8 +84,11 @@ export class SiknasSkylt {
         // Change the color of the Siknäs text of the SVG.
         this.svg.select("#Siknas").selectAll("path").style("fill", "black");
 
-        // TODO: Fix mask
-        let grp = this.svg.append("g").attr("mask", "url(#Siknas)");
+        let grp = this.svg.append("g")
+            // A copy of the "Siknäs" text paths exists in the SVG defined as a clip-path
+            // we want the pixels to be stay inside of this.
+            .attr("clip-path", "url(#SiknasClipPath)");
+
         this.pixels = grp.selectAll("circle").data(this.layout)
             .enter()
             .append("circle")
