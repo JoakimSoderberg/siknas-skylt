@@ -86,10 +86,7 @@
             "deps": [
               "jquery"
             ],
-            "exports": "$",
-            "resources": [
-              "css/bootstrap.css"
-            ]
+            "exports": "$"
           },
           "d3-array",
           "d3-axis",
