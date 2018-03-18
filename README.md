@@ -7,7 +7,20 @@ This repository contains code for running a custom interactive LED display, toge
 The display uses the Fadecandy LED controller board https://github.com/scanlime/fadecandy that supports
 the OpenPixelControl (OPC).
 
-To use this software, a **Fadecandy** server needs to run and be connected ot the display.
+To use this software, a **Fadecandy** server needs to run and be connected to the display via **Fadecandy USB controller boards**.
+
+Display
+-------
+
+![Siknäs skylt](docs/images/siknas-skylt.jpg)
+
+Simulator
+---------
+
+To enable development and testing animations on the display a simulator was created in [Unity](https://unity3d.com/):
+https://github.com/JoakimSoderberg/OPCSim
+
+![Siknäs skylt simulator](docs/images/simulator.png)
 
 Repository structure
 --------------------
