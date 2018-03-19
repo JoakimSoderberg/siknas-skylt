@@ -11,8 +11,9 @@ To build:
 docker build -t siknas-skylt-aurelia -f ../../Dockerfile.aurelia .
 docker run -it --rm -v $(pwd):/shared -w /shared siknas-skylt-aurelia au build
 
-# For an interactive
+# For interactive use of au-cli
 docker run -it --rm -v $(pwd):/shared -w /shared siknas-skylt-aurelia /bin/sh
+au help
 ```
 
 # Troubleshooting:
