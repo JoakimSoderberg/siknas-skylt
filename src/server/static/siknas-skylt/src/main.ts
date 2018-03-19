@@ -4,7 +4,6 @@ import environment from './environment';
 export function configure(aurelia: Aurelia) {
   aurelia.use
     .standardConfiguration()
-    .plugin('aurelia-materialize-bridge', bridge => bridge.useAll())
     .feature('resources');
 
   if (environment.debug) {
