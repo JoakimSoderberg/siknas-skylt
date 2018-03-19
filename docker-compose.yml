@@ -1,0 +1,18 @@
+version: "3"
+services:
+
+  server:
+    build: ./src/server
+    volumes:
+      - "./src/server:/go/src/app"
+    ports:
+      - "3000:3000"
+      - "7890:7890"
+
+  aurelia:
+    build: ./src/server/static/siknas-skylt
+    volumes:
+      - "./src/server/static/siknas-skylt:/shared"
+    working_dir: /shared
+    command: /bin/sh -c "yarn --no-bin-links && aurelia build --watch"
+
