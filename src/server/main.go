@@ -26,6 +26,7 @@ const (
 func main() {
 	var rootCmd = &cobra.Command{Use: "siknas-skylt", Run: func(c *cobra.Command, args []string) {}}
 	rootCmd.Flags().Int("port", 8080, "The port the webserver should listen on")
+	rootCmd.Flags().Int("opc-listen-port", 7890, "The port to listen for OpenPixelControl protocol data on")
 
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatalln(err)
@@ -40,7 +41,7 @@ func main() {
 	viper.AddConfigPath(".")
 	err := viper.ReadInConfig() // Find and read the config file
 	if err != nil {
-		log.Fatalf("Fatal error config file: %s \n", err)
+		log.Println("No config file: %s \n", err)
 	}
 
 	// TODO: Move the config parsing here and pass as arguments.
@@ -83,7 +84,8 @@ func main() {
 	}
 
 	// OPC Proxy.
-	go RunOPCProxy("tcp", ":7890", opcBroadcaster)
+	opcListenPort := viper.GetInt("opc-listen-port")
+	go RunOPCProxy("tcp", fmt.Sprintf(":%v", opcListenPort), opcBroadcaster)
 
 	port := viper.GetInt("port")
 	log.Printf("Starting Siknas-skylt webserver on %v...\n", port)

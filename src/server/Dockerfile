@@ -14,5 +14,7 @@ RUN go-wrapper install
 EXPOSE 8080
 EXPOSE 3000
 
+# gin rebuild automatically if a file change is detected.
+# (meant for development).
 CMD ["gin", "--appPort", "8080", "run"]
 #CMD [ "go-wrapper", "run" ]

@@ -38,3 +38,4 @@ System overview
 ---------------
 
 ![System overview](docs/system-design/siknas-skylt.svg)
+

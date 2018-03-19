@@ -44,7 +44,7 @@ func (b *OpcBroadcaster) Write(msg *opc.Message) error {
 // OPC messages on the listening port to a set of OpcSinks.
 func RunOPCProxy(protocol string, port string, sink OpcSink) error {
 
-	log.Println("Starting Open Pixel Control proxy server...")
+	log.Printf("Starting Open Pixel Control proxy server on port %s...", port)
 
 	// Channel used to pass on incoming OPC messages.
 	messages := make(chan *opc.Message)
