@@ -41,7 +41,9 @@ func main() {
 	viper.AddConfigPath(".")
 	err := viper.ReadInConfig() // Find and read the config file
 	if err != nil {
-		log.Println("No config file: %s \n", err)
+		log.Printf("No config file: %s\n", err)
+	} else {
+		log.Printf("Found config file: %s\n", viper.ConfigFileUsed())
 	}
 
 	// TODO: Move the config parsing here and pass as arguments.

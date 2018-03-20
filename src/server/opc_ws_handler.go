@@ -23,6 +23,7 @@ func OpcWsHandler(bcast *OpcBroadcaster) http.HandlerFunc {
 		log.Println("OPC WS Client connected: ", conn.RemoteAddr())
 
 		// Start listening to the OPC broadcasts.
+		// TODO: Race condition, use a channel here
 		opcReceiver := NewOpcReceiver()
 		bcast.Push(opcReceiver)
 

@@ -1,4 +1,4 @@
 opc-servers:
-    - simulator:
-        host: 192.168.56.1
-        port: 
+    simulator:
+        host: 192.168.1.75
+        port: 7890

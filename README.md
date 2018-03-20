@@ -9,6 +9,20 @@ the OpenPixelControl (OPC).
 
 To use this software, a **Fadecandy** server needs to run and be connected to the display via **Fadecandy USB controller boards**.
 
+Quickstart
+----------
+
+```bash
+docker-compose up -d
+docker logs -f server   # Depending what you want to follow.
+docker logs -f aurelia
+
+
+# Get error on starting aurelia?
+cd src/server/static/siknas-skylt/node_modules/
+rm -rf npm
+```
+
 Display
 -------
 

@@ -8,6 +8,8 @@ services:
     ports:
       - "3000:3000"
       - "7890:7890"
+      - "8080:8080"
+    command: /bin/sh -c "go run *.go"
 
   aurelia:
     build: ./src/server/static/siknas-skylt
