@@ -74,6 +74,7 @@ func main() {
 	// TODO: Move to function
 	// Add OPC servers we should send to.
 	opcServers := viper.GetStringMap("opc-servers")
+
 	for name := range opcServers {
 		// TODO: Unmarshal into struct instead. And pass on to ws handler so clients can list these
 		opcHost := viper.GetString(fmt.Sprintf("opc-servers.%v.host", name))
