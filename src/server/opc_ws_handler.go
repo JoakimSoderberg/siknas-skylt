@@ -45,9 +45,18 @@ func OpcWsHandler(bcast *OpcBroadcaster) http.HandlerFunc {
 				close(opcReceiver.opcMessages)
 			}()
 
+			//timeSinceLastMsg := time.Now()
+
 			for {
 				select {
 				case msg := <-opcReceiver.opcMessages:
+					// TODO: Make a setting to tweak this throttling.
+					/*if time.Since(timeSinceLastMsg) < 100*time.Millisecond {
+						continue
+					}
+					timeSinceLastMsg = time.Now()*/
+
+					conn.SetWriteDeadline(time.Now().Add(writeWait))
 					err := conn.WriteMessage(websocket.BinaryMessage, msg.ByteArray())
 					if err != nil {
 						log.Printf("Failed to write to websocket client %v: %v\n", conn.RemoteAddr(), err)

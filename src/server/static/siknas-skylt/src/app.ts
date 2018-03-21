@@ -20,5 +20,6 @@ export class App {
 
   created() {
     this.api.connect();
+    // TODO: Add button to turn off animation.
   }
 }

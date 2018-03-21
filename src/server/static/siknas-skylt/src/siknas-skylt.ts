@@ -68,7 +68,8 @@ export class SiknasSkylt {
         console.log("w: " + w + " h: " + h);
 
         var defs = this.svg.append("defs");
-        var filter = defs.append("filter")
+        // These filters costs A LOT (painting 22000ms vs 192.3ms in a 30s span)
+        /*var filter = defs.append("filter")
             .attr("id", "glow")
             .append("feGaussianBlur")
             .attr("stdDeviation", "2.5")
@@ -79,7 +80,7 @@ export class SiknasSkylt {
         feMerge.append("feMergeNode")
             .attr("in", "coloredBlur");
         feMerge.append("feMergeNode")
-            .attr("in", "SourceGraphic");
+            .attr("in", "SourceGraphic");*/
 
         // Change the color of the Siknäs text of the SVG.
         this.svg.select("#Siknas").selectAll("path").style("fill", "black");
@@ -100,7 +101,7 @@ export class SiknasSkylt {
                 return (p.point[1] * h * 0.55) + (h * 0.20);
             })
             .attr("r", 10)
-            .attr("filter", "url(#glow)")
+            //.attr("filter", "url(#glow)")
             .style("fill", function (p: OPCPixel) {
                 return `rgb(${p.color[0]},${p.color[1]},${p.color[2]})`
             });
