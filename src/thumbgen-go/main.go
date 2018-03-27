@@ -1,11 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"strconv"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -32,15 +35,21 @@ func main() {
 	doc := xmldom.Must(xmldom.ParseFile(svgLogoPath))
 	svg := doc.Root
 
-	// Make the text black by default.
+	width, err := strconv.ParseFloat(svg.GetAttributeValue("width"), 32)
+	if err != nil {
+		log.Fatalln("Failed to parse SVG width: ", width)
+	}
+
+	height, err := strconv.ParseFloat(svg.GetAttributeValue("height"), 32)
+	if err != nil {
+		log.Fatalln("Failed to parse SVG height: ", height)
+	}
+
+	// Make the text black as a background to the LEDs.
 	svg.QueryEach("//g[@id = 'Siknas']//path",
 		func(i int, node *xmldom.Node) {
 			node.SetAttributeValue("style", "fill: black")
 		})
-
-	// TODO: Check error
-	width, err := strconv.ParseFloat(svg.GetAttributeValue("width"), 32)
-	height, err := strconv.ParseFloat(svg.GetAttributeValue("height"), 32)
 
 	// Create a group for the LEDs
 	ledGroupNode := svg.CreateNode("g")
@@ -54,17 +63,27 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	for _, pos := range ledPositions {
-		//log.Printf("x, y, z = %f, %f, %f\n", pos.Point[0], pos.Point[1], pos.Point[2])
+	cssNode := svg.QueryOne("//defs//style")
 
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	var buffer bytes.Buffer
+	buffer.WriteString(cssNode.Text)
+
+	for i, _ := range ledPositions {
+		buffer.WriteString(fmt.Sprintf("\n#led%d { fill: rgb(%d,%d,%d) }", i, r.Int()%255, r.Int()%255, r.Int()%255))
+	}
+
+	cssNode.Text = buffer.String()
+
+	for i, pos := range ledPositions {
 		circleNode := ledGroupNode.CreateNode("circle")
+		circleNode.SetAttributeValue("id", fmt.Sprintf("led%d", i))
 		circleNode.SetAttributeValue("cx", fmt.Sprintf("%f", (pos.Point[0]*width*0.81)+(width*0.05)))
 		circleNode.SetAttributeValue("cy", fmt.Sprintf("%f", (pos.Point[1]*height*0.55)+(height*0.20)))
 		circleNode.SetAttributeValue("r", "10")
-		circleNode.SetAttributeValue("style", "fill: rgb(255,255,255)")
+		//circleNode.SetAttributeValue("style", "fill: rgb(255,255,255)")
 	}
 
-	//print(doc.XMLPretty())
 	ioutil.WriteFile("changed.svg", []byte(doc.XML()), 0644)
 }
 
