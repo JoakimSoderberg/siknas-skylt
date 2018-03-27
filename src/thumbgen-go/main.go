@@ -1,13 +1,13 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"math/rand"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -16,12 +16,19 @@ import (
 	xmldom "github.com/subchen/go-xmldom"
 )
 
+var r *rand.Rand
+
+func init() {
+	r = rand.New(rand.NewSource(time.Now().UnixNano()))
+}
+
 func main() {
 	var rootCmd = &cobra.Command{Use: "siknas-skylt thumbnail generator", Run: func(c *cobra.Command, args []string) {}}
-	rootCmd.Flags().String("logo-svg", "", "Path to Siknäs logo")
-	rootCmd.MarkFlagRequired("logo-svg")
-	rootCmd.Flags().String("led-layout", "", "Path to the LED layout.json")
-	rootCmd.MarkFlagRequired("led-layout")
+	rootCmd.Flags().String("logo-svg", "siknas-skylt.svg", "Path to Siknäs logo")
+	rootCmd.Flags().String("led-layout", "layout.json", "Path to the LED layout.json")
+	rootCmd.Flags().String("host", "localhost:7890", "OPC server host including port")
+	rootCmd.Flags().Int("capture-duration", 10, "Duration of data we should capture (in seconds)")
+	rootCmd.Flags().String("output", "output.svg", "Output filename")
 
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatalln(err)
@@ -31,6 +38,7 @@ func main() {
 
 	svgLogoPath := viper.GetString("logo-svg")
 	ledLayoutPath := viper.GetString("led-layout")
+	outputPath := viper.GetString("output")
 
 	doc := xmldom.Must(xmldom.ParseFile(svgLogoPath))
 	svg := doc.Root
@@ -63,17 +71,16 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	cssNode := svg.QueryOne("//defs//style")
+	//cssNode := svg.QueryOne("//defs//style")
+	/*
+		var buffer bytes.Buffer
+		buffer.WriteString(cssNode.Text)
 
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	var buffer bytes.Buffer
-	buffer.WriteString(cssNode.Text)
+		for i, _ := range ledPositions {
+			buffer.WriteString(fmt.Sprintf("\n#led%d { fill: rgb(%d,%d,%d) }", i, r.Int()%255, r.Int()%255, r.Int()%255))
+		}
 
-	for i, _ := range ledPositions {
-		buffer.WriteString(fmt.Sprintf("\n#led%d { fill: rgb(%d,%d,%d) }", i, r.Int()%255, r.Int()%255, r.Int()%255))
-	}
-
-	cssNode.Text = buffer.String()
+		cssNode.Text = buffer.String()*/
 
 	for i, pos := range ledPositions {
 		circleNode := ledGroupNode.CreateNode("circle")
@@ -81,10 +88,27 @@ func main() {
 		circleNode.SetAttributeValue("cx", fmt.Sprintf("%f", (pos.Point[0]*width*0.81)+(width*0.05)))
 		circleNode.SetAttributeValue("cy", fmt.Sprintf("%f", (pos.Point[1]*height*0.55)+(height*0.20)))
 		circleNode.SetAttributeValue("r", "10")
+
+		addLedAnimation(i, circleNode)
+		addLedAnimation(i, circleNode)
+
 		//circleNode.SetAttributeValue("style", "fill: rgb(255,255,255)")
 	}
 
-	ioutil.WriteFile("changed.svg", []byte(doc.XML()), 0644)
+	ioutil.WriteFile(outputPath, []byte(doc.XMLPretty()), 0644)
+}
+
+func addLedAnimation(i int, circleNode *xmldom.Node) {
+	animNode := circleNode.CreateNode("animate")
+	animNode.SetAttributeValue("attributeName", "fill")
+	animNode.SetAttributeValue("dur", "0.1s") // TODO: Get avreage time between frames
+	animNode.SetAttributeValue("repeatCount", "indefinite")
+
+	colors := make([]string, 2)
+	for i := 0; i < 2; i++ {
+		colors[i] = fmt.Sprintf("rgb(%d,%d,%d)", r.Int()%255, r.Int()%255, r.Int()%255)
+	}
+	animNode.SetAttributeValue("values", strings.Join(colors, ";"))
 }
 
 // LedPosition is a point for a LED.
@@ -98,7 +122,6 @@ func readLEDLayout(path string) ([]LedPosition, error) {
 		return nil, fmt.Errorf("failed to read %s: %s", path, err)
 	}
 
-	//var ledPositions LedPositions
 	ledPositions := make([]LedPosition, 0)
 	err = json.Unmarshal(bytes, &ledPositions)
 	if err != nil {
