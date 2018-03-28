@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/binary"
 	"encoding/json"
@@ -9,7 +8,8 @@ import (
 	"io/ioutil"
 	"log"
 	"math/rand"
-	"net"
+	"os"
+	"os/signal"
 	"strconv"
 	"strings"
 	"time"
@@ -17,7 +17,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/JoakimSoderberg/go-opc"
+	"github.com/gorilla/websocket"
 	xmldom "github.com/subchen/go-xmldom"
 )
 
@@ -31,7 +31,7 @@ func main() {
 	var rootCmd = &cobra.Command{Use: "siknas-skylt thumbnail generator", Run: func(c *cobra.Command, args []string) {}}
 	rootCmd.Flags().String("logo-svg", "siknas-skylt.svg", "Path to Siknäs logo")
 	rootCmd.Flags().String("led-layout", "layout.json", "Path to the LED layout.json")
-	rootCmd.Flags().String("host", "localhost:7890", "OPC server host including port")
+	rootCmd.Flags().String("host", "ws://localhost:8080/ws/opc", "OPC websocket server host including port")
 	rootCmd.Flags().Duration("capture-duration", 10, "Duration of data we should capture (in seconds)")
 	rootCmd.Flags().String("output", "output.svg", "Output filename")
 
@@ -44,45 +44,143 @@ func main() {
 	loadSvg()
 
 	host := viper.GetString("host")
+	// TODO: Build URL
 	captureDuration := viper.GetDuration("capture-duration")
 
-	log.Println("Connecting to ", host)
+	ws := connectWebsocket(host)
+	defer ws.Close()
 
-	c := opc.NewClient()
+	interrupt := registerSignalHandler(ws)
 
-	conn, err := net.DialTimeout("tcp", host, time.Second*10)
+	done := make(chan struct{})
+
+	// Websocket reader.
+	go websocketReader(ws, interrupt, done)
+
+	// Websocket writer.
+	go websocketWriter(ws, interrupt, done)
+
+	time.Sleep(time.Second * captureDuration)
+	log.Printf("Finished capturing after %s\n", time.Second*captureDuration)
+	close(done)
+	time.Sleep(1 * time.Second)
+}
+
+var signalCount int
+
+// registerSignalHandler handles interrupt signals.
+func registerSignalHandler(c *websocket.Conn) chan os.Signal {
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt)
+	signalCount++
+
+	go func() {
+		for range sigChan {
+			log.Println("\nReceived signal, exiting...")
+
+			if signalCount > 1 {
+				c.Close()
+				os.Exit(0)
+			}
+		}
+	}()
+
+	return sigChan
+}
+
+func connectWebsocket(addr string) *websocket.Conn {
+	log.Printf("Connecting to %s...", addr)
+
+	ws, _, err := websocket.DefaultDialer.Dial(addr, nil)
 	if err != nil {
-		log.Fatalln("Failed to connect: ", err)
+		log.Fatal("Failed to connect to websocket server: ", err)
 	}
-	defer conn.Close()
 
-	bufReader := bufio.NewReader(conn)
+	return ws
+}
 
-	timeoutTicker := time.NewTicker(time.Second * 10)
-	defer timeoutTicker.Stop()
+// OpcMessageHeader defines the header of the Open Pixel Control (OPC) Protocol
+type OpcMessageHeader struct {
+	Channel byte
+	Command byte
+	Length  uint16
+}
 
-	var msg opc.Message
+func websocketReader(ws *websocket.Conn, interrupt chan os.Signal, done chan struct{}) {
+	var opcMsgHdr OpcMessageHeader
+
+	log.Println("Starting websocket reader")
 
 	for {
 		select {
-		case <-time.After(time.Second * captureDuration):
-			break
 		default:
-			headerBytes := make([]byte, 4)
-			n, err := bufReader.Read(headerBytes)
+			messageType, messageData, err := ws.ReadMessage()
 			if err != nil {
+				log.Println("Failed to read: ", err)
+				return
+			}
+
+			if messageType != websocket.BinaryMessage {
+				log.Println("ERROR: Got a Text message on the OPC Websocket, expected Binary")
 				break
 			}
 
-			buffer := bytes.NewBuffer(headerBytes)
-			err = binary.Read(buffer, binary.BigEndian, &msg)
+			buf := bytes.NewBuffer(messageData[0:binary.Size(opcMsgHdr)])
+			err = binary.Read(buf, binary.BigEndian, &opcMsgHdr)
 			if err != nil {
-				log.Fatal("binary.Read failed", err)
+				log.Println("ERROR: Failed to read OPC message: ", err)
+				break
 			}
 
-			dataBytes := make([]byte, msg.Length())
-			n, err = bufReader.Read(dataBytes)
-			log.Println("Read ", n)
+			realMsgLength := uint16(len(messageData) - binary.Size(opcMsgHdr))
+
+			if opcMsgHdr.Length != realMsgLength {
+				log.Printf("ERROR: Got a %d byte invalid OPC message. Header says %d, got %d bytes\n", opcMsgHdr.Length, opcMsgHdr.Length, realMsgLength)
+				break
+			}
+
+			log.Printf("Msg %d bytes\n", opcMsgHdr.Length)
+		case <-interrupt:
+			// TODO: Fix this
+			log.Println("Reader got interrupted...")
+			return
+		case <-done:
+			log.Println("Reader done...")
+			return
+		}
+	}
+}
+
+// websocketWriter receives control panel messages and forwards them to the websocket server.
+func websocketWriter(ws *websocket.Conn, interrupt chan os.Signal, done chan struct{}) {
+	defer ws.Close()
+	//defer close(done)
+
+	pingTicker := time.NewTicker(time.Second)
+	defer pingTicker.Stop()
+
+	for {
+		select {
+		case <-done:
+		case <-interrupt:
+			// User wants to close.
+			log.Println("Writer got interrupted, attempting clean Websocket close...")
+
+			// To cleanly close a connection, a client should send a close
+			// frame and wait for the server to close the connection.
+			err := ws.WriteMessage(websocket.CloseMessage,
+				websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+			if err != nil {
+				log.Println("Failed to write:", err)
+				return
+			}
+
+			// Wait for the reader to be done or a timeout.
+			select {
+			case <-done:
+			case <-time.After(time.Second):
+			}
+			return
 		}
 	}
 }
