@@ -1,11 +1,15 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"math/rand"
+	"net"
 	"strconv"
 	"strings"
 	"time"
@@ -13,6 +17,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/JoakimSoderberg/go-opc"
 	xmldom "github.com/subchen/go-xmldom"
 )
 
@@ -27,7 +32,7 @@ func main() {
 	rootCmd.Flags().String("logo-svg", "siknas-skylt.svg", "Path to Siknäs logo")
 	rootCmd.Flags().String("led-layout", "layout.json", "Path to the LED layout.json")
 	rootCmd.Flags().String("host", "localhost:7890", "OPC server host including port")
-	rootCmd.Flags().Int("capture-duration", 10, "Duration of data we should capture (in seconds)")
+	rootCmd.Flags().Duration("capture-duration", 10, "Duration of data we should capture (in seconds)")
 	rootCmd.Flags().String("output", "output.svg", "Output filename")
 
 	if err := rootCmd.Execute(); err != nil {
@@ -36,6 +41,53 @@ func main() {
 
 	viper.BindPFlags(rootCmd.Flags())
 
+	loadSvg()
+
+	host := viper.GetString("host")
+	captureDuration := viper.GetDuration("capture-duration")
+
+	log.Println("Connecting to ", host)
+
+	c := opc.NewClient()
+
+	conn, err := net.DialTimeout("tcp", host, time.Second*10)
+	if err != nil {
+		log.Fatalln("Failed to connect: ", err)
+	}
+	defer conn.Close()
+
+	bufReader := bufio.NewReader(conn)
+
+	timeoutTicker := time.NewTicker(time.Second * 10)
+	defer timeoutTicker.Stop()
+
+	var msg opc.Message
+
+	for {
+		select {
+		case <-time.After(time.Second * captureDuration):
+			break
+		default:
+			headerBytes := make([]byte, 4)
+			n, err := bufReader.Read(headerBytes)
+			if err != nil {
+				break
+			}
+
+			buffer := bytes.NewBuffer(headerBytes)
+			err = binary.Read(buffer, binary.BigEndian, &msg)
+			if err != nil {
+				log.Fatal("binary.Read failed", err)
+			}
+
+			dataBytes := make([]byte, msg.Length())
+			n, err = bufReader.Read(dataBytes)
+			log.Println("Read ", n)
+		}
+	}
+}
+
+func loadSvg() {
 	svgLogoPath := viper.GetString("logo-svg")
 	ledLayoutPath := viper.GetString("led-layout")
 	outputPath := viper.GetString("output")
@@ -71,17 +123,6 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	//cssNode := svg.QueryOne("//defs//style")
-	/*
-		var buffer bytes.Buffer
-		buffer.WriteString(cssNode.Text)
-
-		for i, _ := range ledPositions {
-			buffer.WriteString(fmt.Sprintf("\n#led%d { fill: rgb(%d,%d,%d) }", i, r.Int()%255, r.Int()%255, r.Int()%255))
-		}
-
-		cssNode.Text = buffer.String()*/
-
 	for i, pos := range ledPositions {
 		circleNode := ledGroupNode.CreateNode("circle")
 		circleNode.SetAttributeValue("id", fmt.Sprintf("led%d", i))
@@ -89,8 +130,7 @@ func main() {
 		circleNode.SetAttributeValue("cy", fmt.Sprintf("%f", (pos.Point[1]*height*0.55)+(height*0.20)))
 		circleNode.SetAttributeValue("r", "10")
 
-		addLedAnimation(i, circleNode)
-		addLedAnimation(i, circleNode)
+		//addLedAnimation(i, circleNode)
 
 		//circleNode.SetAttributeValue("style", "fill: rgb(255,255,255)")
 	}

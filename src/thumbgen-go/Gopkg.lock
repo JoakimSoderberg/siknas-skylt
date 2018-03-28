@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "github.com/JoakimSoderberg/go-opc"
+  packages = ["."]
+  revision = "2ff613c32b3fd7a5d9171a665da5b7b107bb7322"
+  version = "v0.2.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/antchfx/xpath"
   packages = ["."]
@@ -87,15 +93,9 @@
 
 [[projects]]
   branch = "master"
-  name = "golang.org/x/net"
-  packages = ["html","html/atom"]
-  revision = "6078986fec03a1dcc236c34816c71b0e05018fda"
-
-[[projects]]
-  branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "91ee8cde435411ca3f1cd365e8f20131aed4d0a1"
+  revision = "13d03a9a82fba647c21a0ef8fba44a795d0f0835"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -106,12 +106,12 @@
 [[projects]]
   name = "gopkg.in/yaml.v2"
   packages = ["."]
-  revision = "7f97868eec74b32b0982dd158a51a446d1da7eb5"
-  version = "v2.1.1"
+  revision = "86f5ed62f8a0ee96bd888d2efdfd6d4fb100a4eb"
+  version = "v2.2.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "645ea5a8d94835772952195b5335c78864ce45534e8bb07a6833b5adf00f2d0d"
+  inputs-digest = "2dc7ce4152130ecbb29f437510460c81b1f52c8aeb4f0c32f85ee99482b377d3"
   solver-name = "gps-cdcl"
   solver-version = 1
