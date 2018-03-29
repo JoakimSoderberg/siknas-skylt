@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"math/rand"
+	"net/url"
 	"os"
 	"os/signal"
 	"strconv"
@@ -21,18 +21,34 @@ import (
 	xmldom "github.com/subchen/go-xmldom"
 )
 
-var r *rand.Rand
-
-func init() {
-	r = rand.New(rand.NewSource(time.Now().UnixNano()))
+// OpcMessageHeader defines the header of the Open Pixel Control (OPC) Protocol.
+type OpcMessageHeader struct {
+	Channel byte
+	Command byte
+	Length  uint16
 }
+
+// OpcMessage defines a OPC message including header.
+type OpcMessage struct {
+	Header OpcMessageHeader
+	Data   []byte
+}
+
+// RGB returns the Red, Green and Blue values between 0-255 for a given pixel.
+func (m *OpcMessage) RGB(ledIndex int) (uint8, uint8, uint8) {
+	i := 3 * ledIndex
+	return m.Data[i], m.Data[i+1], m.Data[i+2]
+}
+
+var opcMessages []OpcMessage
 
 func main() {
 	var rootCmd = &cobra.Command{Use: "siknas-skylt thumbnail generator", Run: func(c *cobra.Command, args []string) {}}
 	rootCmd.Flags().String("logo-svg", "siknas-skylt.svg", "Path to Siknäs logo")
 	rootCmd.Flags().String("led-layout", "layout.json", "Path to the LED layout.json")
-	rootCmd.Flags().String("host", "ws://localhost:8080/ws/opc", "OPC websocket server host including port")
-	rootCmd.Flags().Duration("capture-duration", 10, "Duration of data we should capture (in seconds)")
+	rootCmd.Flags().String("host", "localhost:8080", "OPC websocket server host including port")
+	rootCmd.Flags().String("ws-path", "/ws/opc", "OPC websocket path to connect to")
+	rootCmd.Flags().Duration("capture-duration", 10*time.Second, "Duration of data we should capture (in seconds)")
 	rootCmd.Flags().String("output", "output.svg", "Output filename")
 
 	if err := rootCmd.Execute(); err != nil {
@@ -41,13 +57,10 @@ func main() {
 
 	viper.BindPFlags(rootCmd.Flags())
 
-	loadSvg()
-
-	host := viper.GetString("host")
-	// TODO: Build URL
+	url := url.URL{Scheme: "ws", Host: viper.GetString("host"), Path: viper.GetString("ws-path")}
 	captureDuration := viper.GetDuration("capture-duration")
 
-	ws := connectWebsocket(host)
+	ws := connectWebsocket(url.String())
 	defer ws.Close()
 
 	interrupt := registerSignalHandler(ws)
@@ -60,28 +73,24 @@ func main() {
 	// Websocket writer.
 	go websocketWriter(ws, interrupt, done)
 
-	time.Sleep(time.Second * captureDuration)
-	log.Printf("Finished capturing after %s\n", time.Second*captureDuration)
+	// TODO: Fix closing down nicely.
+	time.Sleep(captureDuration)
+	log.Printf("Finished capturing after %s\n", captureDuration)
 	close(done)
-	time.Sleep(1 * time.Second)
-}
 
-var signalCount int
+	createOutputSVG()
+}
 
 // registerSignalHandler handles interrupt signals.
 func registerSignalHandler(c *websocket.Conn) chan os.Signal {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt)
-	signalCount++
 
 	go func() {
 		for range sigChan {
 			log.Println("\nReceived signal, exiting...")
-
-			if signalCount > 1 {
-				c.Close()
-				os.Exit(0)
-			}
+			c.Close()
+			os.Exit(0)
 		}
 	}()
 
@@ -99,17 +108,12 @@ func connectWebsocket(addr string) *websocket.Conn {
 	return ws
 }
 
-// OpcMessageHeader defines the header of the Open Pixel Control (OPC) Protocol
-type OpcMessageHeader struct {
-	Channel byte
-	Command byte
-	Length  uint16
-}
-
 func websocketReader(ws *websocket.Conn, interrupt chan os.Signal, done chan struct{}) {
-	var opcMsgHdr OpcMessageHeader
+	var opcMsg OpcMessage
 
 	log.Println("Starting websocket reader")
+
+	started := false
 
 	for {
 		select {
@@ -120,26 +124,34 @@ func websocketReader(ws *websocket.Conn, interrupt chan os.Signal, done chan str
 				return
 			}
 
+			if !started {
+				started = true
+				log.Printf("Started capturing %s of animation\n", viper.GetDuration("capture-duration"))
+			}
+
 			if messageType != websocket.BinaryMessage {
 				log.Println("ERROR: Got a Text message on the OPC Websocket, expected Binary")
 				break
 			}
 
-			buf := bytes.NewBuffer(messageData[0:binary.Size(opcMsgHdr)])
-			err = binary.Read(buf, binary.BigEndian, &opcMsgHdr)
+			buf := bytes.NewBuffer(messageData[0:binary.Size(opcMsg.Header)])
+			err = binary.Read(buf, binary.BigEndian, &opcMsg.Header)
 			if err != nil {
 				log.Println("ERROR: Failed to read OPC message: ", err)
 				break
 			}
 
-			realMsgLength := uint16(len(messageData) - binary.Size(opcMsgHdr))
+			realMsgLength := uint16(len(messageData) - binary.Size(opcMsg.Header))
 
-			if opcMsgHdr.Length != realMsgLength {
-				log.Printf("ERROR: Got a %d byte invalid OPC message. Header says %d, got %d bytes\n", opcMsgHdr.Length, opcMsgHdr.Length, realMsgLength)
+			if opcMsg.Header.Length != realMsgLength {
+				log.Printf("ERROR: Got a %d byte invalid OPC message. Header says %d, got %d bytes\n", opcMsg.Header.Length, opcMsg.Header.Length, realMsgLength)
 				break
 			}
 
-			log.Printf("Msg %d bytes\n", opcMsgHdr.Length)
+			opcMsg.Data = messageData[binary.Size(opcMsg.Header):]
+
+			opcMessages = append(opcMessages, opcMsg)
+
 		case <-interrupt:
 			// TODO: Fix this
 			log.Println("Reader got interrupted...")
@@ -154,7 +166,6 @@ func websocketReader(ws *websocket.Conn, interrupt chan os.Signal, done chan str
 // websocketWriter receives control panel messages and forwards them to the websocket server.
 func websocketWriter(ws *websocket.Conn, interrupt chan os.Signal, done chan struct{}) {
 	defer ws.Close()
-	//defer close(done)
 
 	pingTicker := time.NewTicker(time.Second)
 	defer pingTicker.Stop()
@@ -185,7 +196,8 @@ func websocketWriter(ws *websocket.Conn, interrupt chan os.Signal, done chan str
 	}
 }
 
-func loadSvg() {
+// Creates the output SVG including the animation recorded.
+func createOutputSVG() {
 	svgLogoPath := viper.GetString("logo-svg")
 	ledLayoutPath := viper.GetString("led-layout")
 	outputPath := viper.GetString("output")
@@ -221,6 +233,7 @@ func loadSvg() {
 		log.Fatalln(err)
 	}
 
+	// Create the circles that represents the LED:s
 	for i, pos := range ledPositions {
 		circleNode := ledGroupNode.CreateNode("circle")
 		circleNode.SetAttributeValue("id", fmt.Sprintf("led%d", i))
@@ -228,23 +241,23 @@ func loadSvg() {
 		circleNode.SetAttributeValue("cy", fmt.Sprintf("%f", (pos.Point[1]*height*0.55)+(height*0.20)))
 		circleNode.SetAttributeValue("r", "10")
 
-		//addLedAnimation(i, circleNode)
-
-		//circleNode.SetAttributeValue("style", "fill: rgb(255,255,255)")
+		addLedAnimation(i, circleNode)
 	}
 
 	ioutil.WriteFile(outputPath, []byte(doc.XMLPretty()), 0644)
 }
 
-func addLedAnimation(i int, circleNode *xmldom.Node) {
+func addLedAnimation(ledIndex int, circleNode *xmldom.Node) {
 	animNode := circleNode.CreateNode("animate")
 	animNode.SetAttributeValue("attributeName", "fill")
-	animNode.SetAttributeValue("dur", "0.1s") // TODO: Get avreage time between frames
+	animNode.SetAttributeValue("dur", fmt.Sprintf("%.2fs", viper.GetDuration("capture-duration").Seconds()))
 	animNode.SetAttributeValue("repeatCount", "indefinite")
 
-	colors := make([]string, 2)
-	for i := 0; i < 2; i++ {
-		colors[i] = fmt.Sprintf("rgb(%d,%d,%d)", r.Int()%255, r.Int()%255, r.Int()%255)
+	colors := make([]string, len(opcMessages))
+
+	for i := 0; i < len(opcMessages); i++ {
+		r, g, b := opcMessages[i].RGB(ledIndex)
+		colors[i] = fmt.Sprintf("rgb(%d,%d,%d)", r, g, b)
 	}
 	animNode.SetAttributeValue("values", strings.Join(colors, ";"))
 }
