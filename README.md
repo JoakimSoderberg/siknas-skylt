@@ -12,19 +12,90 @@ To use this software, a **Fadecandy** server needs to run and be connected to th
 Quickstart
 ----------
 
-```bash
-docker-compose up -d
-docker logs -f server   # Depending what you want to follow.
-docker logs -f aurelia
+This quickstart uses **Docker**, see below on how to **build** a final build instead.
 
+1. Install Docker. (On Windows use [**Docker toolbox**](https://docs.docker.com/toolbox/toolbox_install_windows/)).
 
-# Get error on starting aurelia?
-cd src/server/static/siknas-skylt/node_modules/
-rm -rf npm
-```
+2. Start the server. (On Windows run in the **Docker console**):
+
+    ```bash
+    docker-compose up -d
+    docker logs -f server   # Depending what you want to follow.
+    docker logs -f aurelia
+
+    # Get error on starting aurelia?
+    cd src/server/static/siknas-skylt/node_modules/
+    rm -rf npm
+    docker-compose up -d aurelia
+    ```
+
+3. Now you can surf to the server: http://localhost:8080 (Use `docker-machine ip` to get IP on Windows instead of `localhost`)
+    ```bash
+    start http://$(docker-machine ip):8080  # To open the webpage from the console on Windows.
+    ```
+    Which looks like this:
+
+    ![Siknäs skylt website](docs/images/website.png)
+
+4. Download and install [**Processing**](https://processing.org/).
+
+5. Open the [**flames**](examples/flames/flames.pde) example sketch.
+
+    **NOTE** If using the **Processing GUI** on Windows you must edit the `host` variable at the top of the sketch to connect to the `docker-machine ip` instead of `localhost`
+
+    ```bash
+    # Assuming you are standing in the root of this repository.
+    /c/path/to/processing-3.3.5/processing-java --help
+
+    # To run the example sketch (Note, must be the full path)
+    /c/path/to/processing-3.3.5/processing-java --sketch=$(pwd)/examples/flames/ --run
+
+    # On Windows you have to specify the OPC host to connect to since it is not localhost.
+    /c/path/to/processing-3.3.5/processing-java --sketch=$(pwd)/examples/flames/ --run $(docker-machine ip):8080
+    ```
+
+6. Now if you don't have a real display built yet, you can test with the [**Simulator**](https://github.com/JoakimSoderberg/OPCSim). Download the latest version here: TODO
+
+    Once you have the simulator running, you must configure the server so that it knows how to connect to it. To do this there's a [config file example](src/server/siknas.yaml.example).
+
+    The server will look for this file in either the same path, or under `/etc/siknas/` on the system.
+
+    So create a copy of it:
+
+    ```bash
+    cd src/server/
+    cp siknas.yaml.example siknas.yaml
+    cat siknas.yaml
+    cd ../..
+    ```
+
+    Example contents:
+    ```yaml
+    opc-servers:
+        simulator:
+            host: 192.168.1.75
+            port: 7890
+    ```
+
+    Edit this to connect to the correct ip. (On **Windows** this is your docker host IP, see `ipconfig`, on **Linux** most likely `localhost`).
+
+    You can make the server forward the traffic both towards the real display, as well as the simualtor by adding a second entry in the config.
+
+    Now restart the server to reload the config:
+
+    ```bash
+    docker-compose restart server
+    ```
+
+7. Steps 5-6 side steps choosing the animation via the webpage, since we are starting the animation sketch manually. 
+
+    Normally the server would manage the sketch processes based on what the user has choosen via the control panel or Webapp.
+
 
 Display
 -------
+
+Example image of the real world display.
 
 ![Siknäs skylt](docs/images/siknas-skylt.jpg)
 

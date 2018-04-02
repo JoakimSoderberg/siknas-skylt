@@ -19,20 +19,30 @@ void setup()
   // Load a sample image
   im = loadImage("flames.jpeg");
 
+  if (args != null) {
+    String[] parts = split(args[0], ":");
+    host = parts[0];
+    port = Integer.parseInt(parts[1]);
+  }
+
   // Connect to the local instance of fcserver
-  opc = new OPC(this, "127.0.0.1", 7890);
+  opc = new OPC(this, host, port);
 
   load_layout(0,0, 200);
 }
 
+int imHeight;
+float speed;
+float y;
+
 void draw()
 {
   // Scale the image so that it matches the width of the window
-  int imHeight = im.height * width / im.width;
+  imHeight = im.height * width / im.width;
 
   // Scroll down slowly, and wrap around
-  float speed = 0.05;
-  float y = (millis() * -speed) % imHeight;
+  speed = 0.05;
+  y = (millis() * -speed) % imHeight;
   
   // Use two copies of the image, so it seems to repeat infinitely  
   image(im, 0, y, width, imHeight);

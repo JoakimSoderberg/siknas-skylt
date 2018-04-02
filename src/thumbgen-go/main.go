@@ -43,7 +43,7 @@ func (m *OpcMessage) RGB(ledIndex int) (uint8, uint8, uint8) {
 var opcMessages []OpcMessage
 
 func main() {
-	var rootCmd = &cobra.Command{Use: "siknas-skylt thumbnail generator", Run: func(c *cobra.Command, args []string) {}}
+	var rootCmd = &cobra.Command{Use: "thumbgen", Run: func(c *cobra.Command, args []string) {}}
 	rootCmd.Flags().String("logo-svg", "siknas-skylt.svg", "Path to Siknäs logo")
 	rootCmd.Flags().String("led-layout", "layout.json", "Path to the LED layout.json")
 	rootCmd.Flags().String("host", "localhost:8080", "OPC websocket server host including port")
@@ -148,6 +148,8 @@ func websocketReader(ws *websocket.Conn, interrupt chan os.Signal, done chan str
 				break
 			}
 
+			// Note we don't really need the OPC Length here, since this is Websockets
+			// and we already have a known message length.
 			opcMsg.Data = messageData[binary.Size(opcMsg.Header):]
 
 			opcMessages = append(opcMessages, opcMsg)
