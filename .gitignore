@@ -1,0 +1,5 @@
+pkg/
+bin/
+image-gui/.vs/
+image-gui/obj/
+image-gui/packages/
