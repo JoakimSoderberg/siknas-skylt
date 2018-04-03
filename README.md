@@ -39,19 +39,21 @@ This quickstart uses **Docker**, see below on how to **build** a final build ins
 
 4. Download and install [**Processing**](https://processing.org/).
 
+    Make sure the installation directory is added to the **Path** in Windows (Or write the full path in the examples below for `processing-java`).
+
 5. Open the [**flames**](examples/flames/flames.pde) example sketch.
 
     **NOTE** If using the **Processing GUI** on Windows you must edit the `host` variable at the top of the sketch to connect to the `docker-machine ip` instead of `localhost`
 
     ```bash
     # Assuming you are standing in the root of this repository.
-    /c/path/to/processing-3.3.5/processing-java --help
+    processing-java --help
 
     # To run the example sketch (Note, must be the full path)
-    /c/path/to/processing-3.3.5/processing-java --sketch=$(pwd)/examples/flames/ --run
+    processing-java --sketch=$(pwd)/examples/flames/ --run
 
     # On Windows you have to specify the OPC host to connect to since it is not localhost.
-    /c/path/to/processing-3.3.5/processing-java --sketch=$(pwd)/examples/flames/ --run $(docker-machine ip):8080
+    processing-java --sketch=$(pwd)/examples/flames/ --run $(docker-machine ip):7890
     ```
 
 6. Now if you don't have a real display built yet, you can test with the [**Simulator**](https://github.com/JoakimSoderberg/OPCSim). Download the latest version here: TODO
@@ -75,6 +77,10 @@ This quickstart uses **Docker**, see below on how to **build** a final build ins
         simulator:
             host: 192.168.1.75
             port: 7890
+    #processes:
+    #    Flames:
+    #        description: Cool flames
+    #        Exec: /path/to/sketch/executable
     ```
 
     Edit this to connect to the correct ip. (On **Windows** this is your docker host IP, see `ipconfig`, on **Linux** most likely `localhost`).
@@ -87,9 +93,42 @@ This quickstart uses **Docker**, see below on how to **build** a final build ins
     docker-compose restart server
     ```
 
-7. Steps 5-6 side steps choosing the animation via the webpage, since we are starting the animation sketch manually. 
+7. With the above steps, running **Processing** manually means we are not using the webserver to choose the animation. To enable that we can add a list of processes in the config file:
 
-    Normally the server would manage the sketch processes based on what the user has choosen via the control panel or Webapp.
+    ```yaml
+    # ...
+    processes:
+        Flames:
+            description: Cool flames
+            Exec: /path/to/sketch/executable
+    ```
+
+    Since this will run inside of docker you'll need to export a Processing sketch
+
+
+Building
+--------
+
+### Export Processing to be standalone
+
+Examples assuming you are standing in the root of this repository (and using **git bash** or **docker console** on Windows).
+
+To export a single Processing sketch to a standalone including an embedded **Java**:
+
+**Windows**
+
+```bash
+# Add --no-java to not include Java (a lot smaller but you are responsible for Java to work).
+processing-java --sketch=$(pwd)/examples/flames/ --platform=windows --output=animations/flames --export
+```
+
+**Linux**
+
+```bash
+# Note, running on Windows --no-java must be used.
+processing-java --sketch=$(pwd)/examples/flames/ --platform=linux --output=$(pwd)/animations/flames --no-java --export
+
+```
 
 
 Display

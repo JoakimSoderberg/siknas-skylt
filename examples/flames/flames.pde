@@ -1,5 +1,7 @@
 OPC opc;
 PImage im;
+String host = "127.0.0.1";
+int port = 7890;
 
 void load_layout(int x_offset, int y_offset, float scale)
 {
@@ -24,6 +26,8 @@ void setup()
     host = parts[0];
     port = Integer.parseInt(parts[1]);
   }
+
+  println("Connecting to ", host, ":", port);
 
   // Connect to the local instance of fcserver
   opc = new OPC(this, host, port);

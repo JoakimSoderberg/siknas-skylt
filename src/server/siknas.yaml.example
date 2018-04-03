@@ -2,3 +2,7 @@ opc-servers:
     simulator:
         host: 192.168.1.75
         port: 7890
+#processes:
+#    Flames:
+#        description: Cool flames
+#        Exec: /path/to/sketch/executable
