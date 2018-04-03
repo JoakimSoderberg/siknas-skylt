@@ -95,15 +95,44 @@ This quickstart uses **Docker**, see below on how to **build** a final build ins
 
 7. With the above steps, running **Processing** manually means we are not using the webserver to choose the animation. To enable that we can add a list of processes in the config file:
 
+    Since this will run inside of docker you'll need to export the Processing sketch you want to run.
+
+    ```bash
+    processing-java --sketch=$(pwd)/examples/flames/ --platform=linux --export
+    ```
+
+    The [`docker-compose.yml`](docker-compose.yml) project will mount the `/examples` directory under `/animations`
+
     ```yaml
     # ...
     processes:
         Flames:
             description: Cool flames
-            Exec: /path/to/sketch/executable
+            Exec: /animations/flames/application.linux64/flames
     ```
 
-    Since this will run inside of docker you'll need to export a Processing sketch
+    Restart the server so the config is reloaded:
+
+    ```bash
+    docker-compose restart server
+    ```
+
+    It won't work yet. The processing sketch must run in **headless mode**. To do that we must use `Xvfb` (a virtual X server), in production we can set this up at system startup.
+
+    When running in docker we need to start it manually (before attempting to start any process).
+
+    ```bash
+    docker-compose exec server sh
+
+    # Inside docker.
+    Xvfb :1 -screen 0, 1024x768x16 &
+    export DISPLAY=:1
+
+    # Not sure why the DISPLAY env-var is not getting set
+    # by docker-compose, but the above works.
+    ```
+
+8. Surf to http://localhost:8080 and select the animation and press play. The logo should start animating.
 
 
 Building
@@ -115,19 +144,34 @@ Examples assuming you are standing in the root of this repository (and using **g
 
 To export a single Processing sketch to a standalone including an embedded **Java**:
 
-**Windows**
+**NOTE** The Processing CLI is really bad. Using `--output` will not allow you to output for all Platforms! Don't use it!
+
+#### Windows
+
+This produces all versions under the sketch folder.
 
 ```bash
 # Add --no-java to not include Java (a lot smaller but you are responsible for Java to work).
-processing-java --sketch=$(pwd)/examples/flames/ --platform=windows --output=animations/flames --export
+processing-java --sketch=$(pwd)/examples/flames/ --platform=windows --export
 ```
 
-**Linux**
+#### Linux
+
+This produces all versions under the sketch folder (yes the CLI is buggy).
 
 ```bash
-# Note, running on Windows --no-java must be used.
-processing-java --sketch=$(pwd)/examples/flames/ --platform=linux --output=$(pwd)/animations/flames --no-java --export
+processing-java --sketch=$(pwd)/examples/flames/ --platform=linux --export
+```
 
+It will create all versions in the sketch directory:
+```bash
+$ ls -1 examples/flames/
+application.linux32/
+application.linux64/
+application.linux-arm64/
+application.linux-armv6hf/
+application.windows32/
+application.windows64/
 ```
 
 

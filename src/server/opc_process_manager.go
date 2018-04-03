@@ -23,6 +23,7 @@ type OpcProcessConfig struct {
 	Description string
 	Exec        string
 	// TODO: Enable turning on output
+	// TODO: We must have a kill command also (xvfb-run in docker makes it hard to kill like normal)
 }
 
 // NewOpcProcessManager creates a new process manager and read the config for it.
@@ -101,6 +102,7 @@ func (o *OpcProcessManager) StartAnim(processName string) error {
 	o.StopAnim()
 
 	log.Println("Starting process: ", processName)
+	log.Println("  ", o.Processes[processName].Exec)
 
 	o.currentName = processName
 	o.stopped = false

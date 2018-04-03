@@ -11,5 +11,7 @@ RUN curl -s -L https://github.com/golang/dep/releases/download/v0.3.1/dep-linux-
 # TODO: Add args for building for production/development.
 #COPY . .
 
+ENV DISPLAY=:1
+
 EXPOSE 8080
 EXPOSE 3000
