@@ -16,7 +16,6 @@ func OpcWsHandler(bcast *OpcBroadcaster) http.HandlerFunc {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			log.Printf("Failed to Ugrade websocket connection\n")
-			conn.Close()
 			return
 		}
 
