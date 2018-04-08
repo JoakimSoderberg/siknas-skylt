@@ -84,12 +84,21 @@ func (o *OpcProcessManager) StopAnim() {
 	}
 
 	// TODO: Go routine?
+	// TODO: Timeout command?
 	if process.KillCommand != "" {
-		args := strings.Split(process.Exec, " ")
-		killCmd := exec.Command(args[0], args[1:]...)
+		killCmd := exec.Command("sh", "-c", process.KillCommand)
+
+		log.Printf("Running Kill command for process '%v': '%v'", o.currentName, process.KillCommand)
 
 		if err := killCmd.Run(); err != nil {
-			log.Printf("Failed to run kill command '%v' for process '%v': %v\n", process.KillCommand, o.currentName, err)
+			switch err.(type) {
+			default:
+				log.Printf("Failed to run kill command '%v' for process '%v': %v\n", process.KillCommand, o.currentName, err)
+			case *exec.ExitError:
+				log.Printf("Kill command for '%v' returned error (process might already have been killed): %v\n", o.currentName, err)
+			}
+		} else {
+			log.Printf("Kill command for '%v' ran with no errors\n", o.currentName)
 		}
 	}
 }
@@ -133,6 +142,7 @@ func (o *OpcProcessManager) runAndMonitorCommand(process OpcProcessConfig) {
 	args := strings.Split(process.Exec, " ")
 
 	for {
+		// TODO: Replace with exec.Command("sh", "-c", process.Exec) instead?
 		o.cmd = exec.Command(args[0], args[1:]...)
 		if err := o.cmd.Run(); err != nil {
 			if o.stopped {

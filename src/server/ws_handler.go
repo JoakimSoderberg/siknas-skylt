@@ -70,6 +70,8 @@ func unmarshalClientMsg(data []byte, opcManager *OpcProcessManager) (string, err
 		return "", fmt.Errorf("failed to unmarshal JSON '%v': %v", string(data), err)
 	}
 
+	log.Printf("Got Websocket client message '%v'\n", msg.MessageType)
+
 	switch msg.MessageType {
 	default:
 		return "", fmt.Errorf("unexpected message type from client: %v", msg.MessageType)

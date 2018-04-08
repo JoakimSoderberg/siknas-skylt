@@ -124,6 +124,12 @@ This quickstart uses **Docker**, see below on how to **build** a final build ins
     When running in docker we need to start it manually (before attempting to start any process).
 
     ```bash
+    docker-compose exec server Xvfb :1 -screen 0, 1024x768x16 &
+    ```
+
+    Or in an interactive prompt:
+
+    ```bash
     docker-compose exec server sh
 
     # Inside docker.
