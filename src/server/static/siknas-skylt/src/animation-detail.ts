@@ -14,11 +14,11 @@ export class AnimationDetail {
     activate(params, routeConfig) {
         this.routeConfig = routeConfig;
         this.animation = this.service.getByName(params.name)
-        // TODO: Send event that we selected the given name.
         this.events.publish(new AnimationViewed(this.animation));
     }
 
     play() {
+        // TODO: For some reason at times this.animation will be null here.
         this.service.setSelectedAnimation(this.animation.name);
     }
 

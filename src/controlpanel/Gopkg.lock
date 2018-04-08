@@ -26,6 +26,18 @@
   revision = "30e16169a71e9998d4d6932c4971d85357263c00"
 
 [[projects]]
+  name = "github.com/mattn/go-runewidth"
+  packages = ["."]
+  revision = "9e777a8366cce605130a531d2cd6363d07ad7317"
+  version = "v0.0.2"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/nsf/termbox-go"
+  packages = ["."]
+  revision = "e2050e41c8847748ec5288741c0b19a8cb26d084"
+
+[[projects]]
   name = "gopkg.in/alecthomas/kingpin.v2"
   packages = ["."]
   revision = "947dcec5ba9c011838740e680966fd7087a71d0d"
@@ -34,6 +46,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "cafe439bc4b4016924bb78041189a2035b5260b65031134dba1162a7614eda68"
+  inputs-digest = "e5dc44d5782a4377a4e1cd7fddf32a1b72cfed0ec2c52ff4b40a3a847071108e"
   solver-name = "gps-cdcl"
   solver-version = 1

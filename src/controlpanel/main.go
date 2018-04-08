@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 	"log"
@@ -24,7 +25,8 @@ type ControlPanelMsg struct {
 }
 
 func (msg ControlPanelMsg) String() string {
-	return fmt.Sprintf("Program: %v Color: (%v, %v, %v) Brightness: %v", msg.Program, msg.Color[0], msg.Color[0], msg.Color[0], msg.Brightness)
+	return fmt.Sprintf("Program: %v Color: (%v, %v, %v) Brightness: %v",
+		msg.Program, msg.Color[0], msg.Color[1], msg.Color[2], msg.Brightness)
 }
 
 // NewControlPanelMsg Creates a new ControlPanelMsg struct based on an byte array
@@ -34,7 +36,10 @@ func (msg ControlPanelMsg) String() string {
 // So for example, program 1 with full bright redness:
 // 	1 255 0 0 255
 func NewControlPanelMsg(msgBytes []byte) (*ControlPanelMsg, error) {
-	strs := strings.Split(strings.TrimSpace(string(msgBytes[:])), " ")
+	// Get rid of any spaces or null characters first.
+	msgStr := strings.TrimSpace(string(bytes.Trim(msgBytes[:], "\x00")))
+
+	strs := strings.Split(msgStr, " ")
 	if len(strs) < 5 {
 		return nil, fmt.Errorf("Control message missing values. Expected %v but got %v", 5, len(strs))
 	}
@@ -42,7 +47,7 @@ func NewControlPanelMsg(msgBytes []byte) (*ControlPanelMsg, error) {
 	for i := 0; i < 5; i++ {
 		_, err := strconv.Atoi(strs[i])
 		if err != nil {
-			return nil, fmt.Errorf("Control message contains non-integer value: %v", strs[i])
+			return nil, fmt.Errorf("Control message '%v' contains non-integer value at index %v: %v", strs, i, strs[i])
 		}
 	}
 
@@ -197,13 +202,28 @@ func websocketWriter(ws *websocket.Conn,
 	}
 }
 
+func Min(x, y int16) int16 {
+	if x < y {
+		return x
+	}
+	return y
+}
+
+func Max(x, y int16) int16 {
+	if x > y {
+		return x
+	}
+	return y
+}
+
 // TODO: Replace kingping with cobra!
 var (
 	server = kingpin.Flag("server_url", "Websocket server url to connect to.").
 		Default("ws://localhost/ws/control_panel/").String()
-	serialPort = kingpin.Flag("serial_port", "The serial port to listen to.").String()
-	debug      = kingpin.Flag("debug", "Enable debug output").Bool()
-	dummy      = kingpin.Flag("dummy", "Use a dummy serial port").Bool()
+	serialPort  = kingpin.Flag("serial_port", "The serial port to listen to.").String()
+	debug       = kingpin.Flag("debug", "Enable debug output").Bool()
+	dummy       = kingpin.Flag("dummy", "Use a dummy serial port").Bool()
+	spaceToSend = kingpin.Flag("space_to_send", "Require pressing Space before sending a message in the dummy mode (--dummy --interactive must be used)").Bool()
 )
 
 func main() {
@@ -220,9 +240,8 @@ func main() {
 	if dummy != nil && *dummy {
 		dummyMsgs := make(chan string, 1)
 		port = NewDummySerialPort(dummyMsgs)
-		for i := 0; i < 1; i++ {
-			dummyMsgs <- "1 255 0 0 255\n"
-		}
+
+		go DummyInteractive(dummyMsgs)
 	} else {
 		port = openSerialPort(*serialPort)
 	}
