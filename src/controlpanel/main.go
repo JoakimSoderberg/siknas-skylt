@@ -29,8 +29,12 @@ func (msg ControlPanelMsg) String() string {
 
 // NewControlPanelMsg Creates a new ControlPanelMsg struct based on an byte array
 // containing a row of data read from the serial port.
+// The expected data format is:
+// 	"<Program> <Red> <Green> <Blue> <Brightness>\n"
+// So for example, program 1 with full bright redness:
+// 	1 255 0 0 255
 func NewControlPanelMsg(msgBytes []byte) (*ControlPanelMsg, error) {
-	strs := strings.Split(string(msgBytes[:]), " ")
+	strs := strings.Split(strings.TrimSpace(string(msgBytes[:])), " ")
 	if len(strs) < 5 {
 		return nil, fmt.Errorf("Control message missing values. Expected %v but got %v", 5, len(strs))
 	}
@@ -125,10 +129,19 @@ func websocketReader(ws *websocket.Conn, readDone chan struct{}) {
 	defer ws.Close()
 	defer close(readDone)
 
+	defer func() {
+		log.Println("Websocket reader ended")
+	}()
+
+	if *debug {
+		log.Println("Websocket reader started")
+	}
+
 	// The reader will responed to things like PING even though
 	// we don't care about any messages.
 	for {
 		if _, _, err := ws.NextReader(); err != nil {
+			log.Println("Failed to read from websocket: ", err)
 			break
 		}
 	}
@@ -138,6 +151,13 @@ func websocketReader(ws *websocket.Conn, readDone chan struct{}) {
 func websocketWriter(ws *websocket.Conn,
 	messages chan ControlPanelMsg, interrupt chan os.Signal, readDone chan struct{}) {
 	defer ws.Close()
+	defer func() {
+		log.Println("Websocket writer ended")
+	}()
+
+	if *debug {
+		log.Println("Websocket writer started")
+	}
 
 	pingTicker := time.NewTicker(time.Second)
 	defer pingTicker.Stop()
@@ -147,7 +167,7 @@ func websocketWriter(ws *websocket.Conn,
 		case msg := <-messages:
 			// Receive a control panel message and forward it to the websocket.
 			if *debug {
-				log.Println(msg)
+				log.Printf("Writing: '%v'\n", msg)
 			}
 
 			err := websocket.WriteJSON(ws, msg)
@@ -183,6 +203,7 @@ var (
 		Default("ws://localhost/ws/control_panel/").String()
 	serialPort = kingpin.Flag("serial_port", "The serial port to listen to.").String()
 	debug      = kingpin.Flag("debug", "Enable debug output").Bool()
+	dummy      = kingpin.Flag("dummy", "Use a dummy serial port").Bool()
 )
 
 func main() {
@@ -192,19 +213,28 @@ func main() {
 
 	log.Println("Starting Siknas-skylt Control Panel listener...")
 
-	port := openSerialPort(*serialPort)
+	// Channel receiving control panel messages via serial port.
+	messages := make(chan ControlPanelMsg)
+
+	var port io.ReadWriteCloser
+	if dummy != nil && *dummy {
+		dummyMsgs := make(chan string, 1)
+		port = NewDummySerialPort(dummyMsgs)
+		for i := 0; i < 1; i++ {
+			dummyMsgs <- "1 255 0 0 255\n"
+		}
+	} else {
+		port = openSerialPort(*serialPort)
+	}
 	defer port.Close()
+
+	// Listen for serial port messages.
+	go serialPortListener(messages, port)
 
 	ws := connectWebsocket(*server)
 	defer ws.Close()
 
 	interrupt := registerSignalHandler(ws, port)
-
-	// Channel receiving control panel messages via serial port.
-	messages := make(chan ControlPanelMsg)
-
-	// Listen for serial port messages.
-	go serialPortListener(messages, port)
 
 	// When this is closed we are done reading from the websocket.
 	readDone := make(chan struct{})
@@ -214,4 +244,7 @@ func main() {
 
 	// Websocket writer.
 	go websocketWriter(ws, messages, interrupt, readDone)
+
+	<-readDone
+	log.Println("Exiting")
 }
