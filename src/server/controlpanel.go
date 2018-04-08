@@ -13,3 +13,8 @@ type ControlPanelMsg struct {
 type ControlPanelReceiver struct {
 	controlPanel chan ControlPanelMsg
 }
+
+// NewControlPanelReceiver creates a new ControlPanelReceiver
+func NewControlPanelReceiver() *ControlPanelReceiver {
+	return &ControlPanelReceiver{controlPanel: make(chan ControlPanelMsg)}
+}

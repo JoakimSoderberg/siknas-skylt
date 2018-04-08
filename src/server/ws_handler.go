@@ -108,10 +108,9 @@ func WsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProcessManager) ht
 		serverMessages := make(chan interface{})
 
 		// Add this new client as a control panel broadcast listener.
-		ctrlPanelClient := ControlPanelReceiver{
-			controlPanel: make(chan ControlPanelMsg),
-		}
-		bcast.Push(&ctrlPanelClient)
+		// TODO: Make a New function for this
+		ctrlPanelClient := NewControlPanelReceiver()
+		bcast.Push(ctrlPanelClient)
 
 		// Clients needs to reply to Ping.
 		conn.SetReadDeadline(time.Now().Add(pongWait))
@@ -122,7 +121,7 @@ func WsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProcessManager) ht
 		})
 
 		// Reader.
-		go readOpcWsConn(conn, serverMessages, &ctrlPanelClient, opcManager)
+		go readOpcWsConn(conn, serverMessages, ctrlPanelClient, opcManager)
 
 		// Writer.
 		go func() {
@@ -130,7 +129,7 @@ func WsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProcessManager) ht
 
 			defer func() {
 				conn.Close()
-				bcast.Pop(&ctrlPanelClient)
+				bcast.Pop(ctrlPanelClient)
 				pingTicker.Stop()
 			}()
 
@@ -153,7 +152,7 @@ func WsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProcessManager) ht
 						return
 					}
 				case msg := <-ctrlPanelClient.controlPanel:
-					log.Println("Broadcasting: ", msg)
+					log.Println("Broadcasting control panel message: ", msg)
 					conn.WriteJSON(msg)
 				case <-pingTicker.C:
 					log.Println("Ping! ", conn.RemoteAddr())

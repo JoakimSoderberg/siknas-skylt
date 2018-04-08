@@ -33,13 +33,6 @@ func ControlPanelWsHandler(bcast *ControlPanelBroadcaster) http.HandlerFunc {
 
 		// Reader.
 		go func() {
-
-			defer func() {
-				/*bcast.Broadcast(func(c *ControlPanelReceiver) {
-					close(c.controlPanel)
-				})*/
-			}()
-
 			log.Printf("Websocket Control Panel Client connected: %v\n", conn.RemoteAddr())
 
 			for {
@@ -59,7 +52,7 @@ func ControlPanelWsHandler(bcast *ControlPanelBroadcaster) http.HandlerFunc {
 			}
 		}()
 
-		// Writer
+		// Writer.
 		pingTicker := time.NewTicker(pingPeriod)
 
 		defer func() {

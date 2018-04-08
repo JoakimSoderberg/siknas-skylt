@@ -31,7 +31,7 @@ export class AnimationListService {
     }
 
     getByName(name: string): Animation {
-        if (!this.animations)
+        if (!this.animations || (this.animations.Length == 0))
             return null;
 
         for (let animation of this.animations) {
