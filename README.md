@@ -83,6 +83,7 @@ This quickstart uses **Docker**, see below on how to **build** a final build ins
     #    Flames:
     #        description: Cool flames
     #        Exec: /path/to/sketch/executable
+    #        KillCommand: kill -9 `ps aux | grep path/sketch` | awk '{print $1}'
     ```
 
     Edit this to connect to the correct ip. (On **Windows** this is your docker host IP, see `ipconfig`, on **Linux** most likely `localhost`).
@@ -111,6 +112,8 @@ This quickstart uses **Docker**, see below on how to **build** a final build ins
         Flames:
             description: Cool flames
             Exec: /animations/flames/application.linux64/flames
+            # The kill command is required since a normal kill won't kill the Java process otherwise.
+            KillCommand: kill -9 `ps aux | grep animations/flames | awk '{print $1}'`
     ```
 
     Restart the server so the config is reloaded:
@@ -119,25 +122,16 @@ This quickstart uses **Docker**, see below on how to **build** a final build ins
     docker-compose restart server
     ```
 
-    It won't work yet. The processing sketch must run in **headless mode**. To do that we must use `Xvfb` (a virtual X server), in production we can set this up at system startup.
+    It won't work yet. The processing sketch must run in **headless mode**. To do that we must use `Xvfb` (a virtual X server), in production we can set this up at system startup. You will see errors like this:
+
+    ```bash
+    Animation process died unexpectedly restarting: exit status 1
+    ```
 
     When running in docker we need to start it manually (before attempting to start any process).
 
     ```bash
     docker-compose exec server Xvfb :1 -screen 0, 1024x768x16 &
-    ```
-
-    Or in an interactive prompt:
-
-    ```bash
-    docker-compose exec server sh
-
-    # Inside docker.
-    Xvfb :1 -screen 0, 1024x768x16 &
-    export DISPLAY=:1
-
-    # Not sure why the DISPLAY env-var is not getting set
-    # by docker-compose, but the above works.
     ```
 
 8. Surf to http://localhost:8080 and select the animation and press play. The logo should start animating.
