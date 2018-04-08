@@ -26,20 +26,14 @@
   revision = "30e16169a71e9998d4d6932c4971d85357263c00"
 
 [[projects]]
-  branch = "master"
-  name = "golang.org/x/net"
-  packages = ["websocket"]
-  revision = "a04bdaca5b32abe1c069418fb7088ae607de5bd0"
-
-[[projects]]
   name = "gopkg.in/alecthomas/kingpin.v2"
   packages = ["."]
-  revision = "1087e65c9441605df944fb12c33f0fe7072d18ca"
-  version = "v2.2.5"
+  revision = "947dcec5ba9c011838740e680966fd7087a71d0d"
+  version = "v2.2.6"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "42c918e8ca7968d6ffdcfbab83991cd38843d210028ec4d28b4ec48a5976a0a1"
+  inputs-digest = "cafe439bc4b4016924bb78041189a2035b5260b65031134dba1162a7614eda68"
   solver-name = "gps-cdcl"
   solver-version = 1

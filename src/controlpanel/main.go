@@ -177,6 +177,7 @@ func websocketWriter(ws *websocket.Conn,
 	}
 }
 
+// TODO: Replace kingping with cobra!
 var (
 	server = kingpin.Flag("server_url", "Websocket server url to connect to.").
 		Default("ws://localhost/ws/control_panel/").String()
