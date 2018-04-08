@@ -91,7 +91,7 @@ func serialPortListener(messages chan ControlPanelMsg, port io.ReadWriteCloser) 
 		if err != nil {
 			log.Fatalf("Failed to read line from serial port: %v", err)
 		}
-
+		//log.Printf("Msgbytes: '%v'\n", string(msgBytes))
 		msg, err := NewControlPanelMsg(msgBytes)
 
 		if err != nil {
@@ -169,6 +169,7 @@ func websocketWriter(ws *websocket.Conn,
 
 	for {
 		select {
+		// TODO: For some reason we get double messages here at times
 		case msg := <-messages:
 			// Receive a control panel message and forward it to the websocket.
 			if *debug {
@@ -234,14 +235,21 @@ func main() {
 	log.Println("Starting Siknas-skylt Control Panel listener...")
 
 	// Channel receiving control panel messages via serial port.
-	messages := make(chan ControlPanelMsg)
+	messages := make(chan ControlPanelMsg, 0)
 
 	var port io.ReadWriteCloser
 	if dummy != nil && *dummy {
-		dummyMsgs := make(chan string, 1)
+		// For testing without the real hardware.
+		dummyMsgs := make(chan string, 0)
 		port = NewDummySerialPort(dummyMsgs)
 
 		go DummyInteractive(dummyMsgs)
+		/*go func() {
+			for i := 0; i < 10; i++ {
+				dummyMsgs <- formatDummyMessage([]int16{0, 1, 2, 3, 4})
+				time.Sleep(1 * time.Second)
+			}
+		}()*/
 	} else {
 		port = openSerialPort(*serialPort)
 	}

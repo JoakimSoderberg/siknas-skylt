@@ -67,6 +67,7 @@ func DummyInteractive(dummyMsgs chan string) {
 
 	for {
 		ev := termbox.PollEvent()
+
 		switch ev.Ch {
 		case 'p':
 			curIndex = Program
@@ -96,7 +97,7 @@ func DummyInteractive(dummyMsgs chan string) {
 			case termbox.KeySpace:
 				// Sends a new message over the websocket.
 				if *spaceToSend {
-					//dummyMsgs <- formatDummyMessage(msgVals)
+					dummyMsgs <- formatDummyMessage(msgVals)
 				}
 			case termbox.KeyCtrlC:
 				fallthrough
@@ -121,13 +122,12 @@ func DummyInteractive(dummyMsgs chan string) {
 
 		// We send on each change.
 		if *spaceToSend == false {
-			// TODO:Why are 2 messages sent here? :/
 			dummyMsgs <- formatDummyMessage(msgVals)
-		} else {
-			log.Printf("[%v]: %v %v %v %v %v\n",
-				[]string{"Program", "Red", "Green", "Blue", "Brightness"}[curIndex],
-				msgVals[Program], msgVals[Red], msgVals[Green], msgVals[Blue], msgVals[Brightness])
 		}
+
+		log.Printf("[%v]: %v %v %v %v %v\n",
+			[]string{"Program", "Red", "Green", "Blue", "Brightness"}[curIndex],
+			msgVals[Program], msgVals[Red], msgVals[Green], msgVals[Blue], msgVals[Brightness])
 	}
 }
 
