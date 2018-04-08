@@ -54,9 +54,11 @@ This quickstart uses **Docker**, see below on how to **build** a final build ins
 
     # On Windows you have to specify the OPC host to connect to since it is not localhost.
     processing-java --sketch=$(pwd)/examples/flames/ --run $(docker-machine ip):7890
+
+    # NOTE if you keep getting disconnected repeatedly. Make sure you connect to port 7890.
     ```
 
-6. Now if you don't have a real display built yet, you can test with the [**Simulator**](https://github.com/JoakimSoderberg/OPCSim). Download the latest version here: TODO
+6. Now if you don't have a real display built yet, you can test with the [**Simulator**](https://github.com/JoakimSoderberg/OPCSim). Download the latest version here: https://github.com/JoakimSoderberg/OPCSim/releases/latest
 
     Once you have the simulator running, you must configure the server so that it knows how to connect to it. To do this there's a [config file example](src/server/siknas.yaml.example).
 

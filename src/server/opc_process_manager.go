@@ -22,6 +22,7 @@ type OpcProcessManager struct {
 type OpcProcessConfig struct {
 	Description string
 	Exec        string
+	KillCommand string
 	// TODO: Enable turning on output
 	// TODO: We must have a kill command also (xvfb-run in docker makes it hard to kill like normal)
 }
@@ -68,6 +69,8 @@ func (o *OpcProcessManager) StopAnim() {
 		o.currentName = ""
 	}()
 
+	process := o.Processes[o.currentName]
+
 	o.stopped = true
 	if (o.cmd != nil) && (o.cmd.Process != nil) {
 		err := o.cmd.Process.Kill()
@@ -78,6 +81,16 @@ func (o *OpcProcessManager) StopAnim() {
 		o.cmd = nil
 
 		log.Printf("Killed process: %v\n", o.currentName)
+	}
+
+	// TODO: Go routine?
+	if process.KillCommand != "" {
+		args := strings.Split(process.Exec, " ")
+		killCmd := exec.Command(args[0], args[1:]...)
+
+		if err := killCmd.Run(); err != nil {
+			log.Printf("Failed to run kill command '%v' for process '%v': %v\n", process.KillCommand, o.currentName, err)
+		}
 	}
 }
 
