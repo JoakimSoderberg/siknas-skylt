@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -29,7 +30,6 @@ func main() {
 	rootCmd.Flags().Bool("force", false, "Force overwriting any existing ouput files. They are skipped by defaul")
 	rootCmd.Flags().Bool("list-only", false, "Only list the available sketches on the server. Will not generate any SVGs")
 	// TODO: Add option to fetch SVG from server.
-	// TODO: Add option to only list the sketches from the server.
 
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatalln(err)
@@ -41,17 +41,27 @@ func main() {
 		os.Exit(1)
 	}
 
-	// TODO: Connect to the "control websocket"
-	// TODO: Get list of animations
 	// TODO: Iterate over animations. Check if exists in output directory
 	// TODO: Send a message to the server to switch to the current animation. Sleep for a while
 	// TODO: Record animation for a given amount and save to disk.
 
-	// TODO: Move this to a separate file.
-
 	interrupt := registerSignalHandler()
+	done := make(chan struct{})
 
-	ConnectOPCWebsocket(interrupt, viper.GetString("output"))
+	animationList, err := ConnectControlWebsocket(done, interrupt)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	if viper.GetBool("list-only") {
+		fmt.Println("Animations:")
+		for _, animation := range animationList {
+			fmt.Printf("%v - %v\n", animation.Name, animation.Description)
+		}
+		return
+	}
+
+	ConnectOPCWebsocket(done, interrupt, viper.GetString("output"))
 }
 
 // registerSignalHandler handles interrupt signals.

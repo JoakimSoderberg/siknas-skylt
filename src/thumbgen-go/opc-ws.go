@@ -40,14 +40,12 @@ func (m *OpcMessage) RGB(ledIndex int) (uint8, uint8, uint8) {
 var opcMessages []OpcMessage
 
 // ConnectOPCWebsocket connects to the OPC Websocket.
-func ConnectOPCWebsocket(interrupt chan os.Signal, filename string) {
+func ConnectOPCWebsocket(done chan struct{}, interrupt chan os.Signal, filename string) {
 	url := url.URL{Scheme: "ws", Host: viper.GetString("host"), Path: viper.GetString("ws-opc-path")}
 	captureDuration := viper.GetDuration("capture-duration")
 
 	ws := connectWebsocket(url.String())
 	defer ws.Close()
-
-	done := make(chan struct{})
 
 	// Websocket reader.
 	go websocketReader(ws, interrupt, done)
@@ -64,7 +62,7 @@ func ConnectOPCWebsocket(interrupt chan os.Signal, filename string) {
 }
 
 func connectWebsocket(addr string) *websocket.Conn {
-	log.Printf("Connecting to %s...", addr)
+	log.Printf("Connecting to OPC websocket %s...", addr)
 
 	ws, _, err := websocket.DefaultDialer.Dial(addr, nil)
 	if err != nil {
