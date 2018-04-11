@@ -12,7 +12,11 @@ import (
 )
 
 func main() {
-	var rootCmd = &cobra.Command{Use: "thumbgen", Run: func(c *cobra.Command, args []string) {}}
+	var rootCmd = &cobra.Command{
+		Use:  "thumbgen",
+		Long: "This progam is used to generate animated SVGs that are used as thumbnails for the web page",
+		Run:  func(c *cobra.Command, args []string) {},
+	}
 	rootCmd.Flags().String("host", "localhost:8080", "OPC websocket server host including port")
 
 	rootCmd.Flags().String("logo-svg", "siknas-skylt.svg", "Path to Siknäs logo")
@@ -25,10 +29,10 @@ func main() {
 	rootCmd.Flags().String("output", "output.svg", "Output filename") // TODO: change to directory
 	rootCmd.Flags().String("output_path", "output/", "Output path where to place the animation SVGs")
 
-	rootCmd.Flags().String("ws-opc-path", "/ws/opc", "OPC websocket path to connect to")
+	rootCmd.Flags().String("ws-opc-path", "/ws/opc", "Websocket OPC path to connect to")
 	rootCmd.Flags().String("ws-path", "/ws", "Websocket control path to connect to")
-	rootCmd.Flags().Bool("force", false, "Force overwriting any existing ouput files. They are skipped by defaul")
-	rootCmd.Flags().Bool("list-only", false, "Only list the available sketches on the server. Will not generate any SVGs")
+	rootCmd.Flags().BoolP("force", "f", false, "Force overwriting any existing ouput files. They are skipped by defaul")
+	rootCmd.Flags().BoolP("list-only", "l", false, "Only list the available sketches on the server. Will not generate any SVGs")
 	// TODO: Add option to fetch SVG from server.
 
 	if err := rootCmd.Execute(); err != nil {
@@ -54,7 +58,7 @@ func main() {
 	}
 
 	if viper.GetBool("list-only") {
-		fmt.Println("Animations:")
+		fmt.Println("\nAnimations:")
 		for _, animation := range animationList {
 			fmt.Printf("%v - %v\n", animation.Name, animation.Description)
 		}
