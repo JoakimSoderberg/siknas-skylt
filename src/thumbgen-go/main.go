@@ -47,9 +47,13 @@ func main() {
 	rootCmd.Flags().String("logo-svg", "siknas-skylt.svg", "Path to Siknäs logo")
 	rootCmd.Flags().String("led-layout", "layout.json", "Path to the LED layout.json")
 	rootCmd.Flags().String("host", "localhost:8080", "OPC websocket server host including port")
-	rootCmd.Flags().String("ws-path", "/ws/opc", "OPC websocket path to connect to")
+	rootCmd.Flags().String("ws-opc-path", "/ws/opc", "OPC websocket path to connect to")
+	rootCmd.Flags().String("ws-path", "/ws", "Websocket control path to connect to")
 	rootCmd.Flags().Duration("capture-duration", 10*time.Second, "Duration of data we should capture (in seconds)")
-	rootCmd.Flags().String("output", "output.svg", "Output filename")
+	rootCmd.Flags().String("output", "output.svg", "Output filename") // TODO: change to directory
+	// TODO: Add option to fetch SVG from server.
+	// TODO: Add option to force overwrite existing thumbnails (otherwise skip them).
+	// TODO: Add option to only list the sketches from the server.
 
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatalln(err)
@@ -57,7 +61,18 @@ func main() {
 
 	viper.BindPFlags(rootCmd.Flags())
 
-	url := url.URL{Scheme: "ws", Host: viper.GetString("host"), Path: viper.GetString("ws-path")}
+	if viper.IsSet("help") {
+		os.Exit(0)
+	}
+
+	// TODO: Connect to the "control websocket"
+	// TODO: Get list of animations
+	// TODO: Iterate over animations. Check if exists in output directory
+	// TODO: Send a message to the server to switch to the current animation. Sleep for a while
+	// TODO: Record animation for a given amount and save to disk.
+
+	// TODO: Move this to a separate file.
+	url := url.URL{Scheme: "ws", Host: viper.GetString("host"), Path: viper.GetString("ws-opc-path")}
 	captureDuration := viper.GetDuration("capture-duration")
 
 	ws := connectWebsocket(url.String())
@@ -202,7 +217,7 @@ func websocketWriter(ws *websocket.Conn, interrupt chan os.Signal, done chan str
 func createOutputSVG() {
 	svgLogoPath := viper.GetString("logo-svg")
 	ledLayoutPath := viper.GetString("led-layout")
-	outputPath := viper.GetString("output")
+	outputPath := viper.GetString("output") // TODO: REmove and pass as argument instead.
 
 	doc := xmldom.Must(xmldom.ParseFile(svgLogoPath))
 	svg := doc.Root

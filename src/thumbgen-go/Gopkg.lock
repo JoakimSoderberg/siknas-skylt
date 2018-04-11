@@ -2,12 +2,6 @@
 
 
 [[projects]]
-  name = "github.com/JoakimSoderberg/go-opc"
-  packages = ["."]
-  revision = "2ff613c32b3fd7a5d9171a665da5b7b107bb7322"
-  version = "v0.2.0"
-
-[[projects]]
   branch = "master"
   name = "github.com/antchfx/xpath"
   packages = ["."]
@@ -118,6 +112,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b2b7535863eabe10804aaa228656b894d800470e61b675a29a18ad545f9e2c79"
+  inputs-digest = "d1597457071482098a0d50f022b28049ae71e05317fe7c1afb8f5e57358e02e8"
   solver-name = "gps-cdcl"
   solver-version = 1

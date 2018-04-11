@@ -166,6 +166,7 @@ processing-java --sketch=$(pwd)/examples/flames/ --platform=linux --export
 ```
 
 It will create all versions in the sketch directory:
+
 ```bash
 $ ls -1 examples/flames/
 application.linux32/
@@ -208,4 +209,3 @@ System overview
 ---------------
 
 ![System overview](docs/system-design/siknas-skylt.svg)
-
