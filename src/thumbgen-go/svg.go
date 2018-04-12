@@ -13,7 +13,7 @@ import (
 )
 
 // Creates the output SVG including the animation recorded.
-func createOutputSVG(outputPath string) {
+func createOutputSVG(outputPath string, opcMessages []OpcMessage) {
 	svgLogoPath := viper.GetString("logo-svg")
 	ledLayoutPath := viper.GetString("led-layout")
 
@@ -56,24 +56,31 @@ func createOutputSVG(outputPath string) {
 		circleNode.SetAttributeValue("cy", fmt.Sprintf("%f", (pos.Point[1]*height*0.55)+(height*0.20)))
 		circleNode.SetAttributeValue("r", "10")
 
-		addLedAnimation(i, circleNode)
+		addLedAnimation(opcMessages, i, circleNode)
 	}
 
 	ioutil.WriteFile(outputPath, []byte(doc.XMLPretty()), 0644)
 }
 
-func addLedAnimation(ledIndex int, circleNode *xmldom.Node) {
-	animNode := circleNode.CreateNode("animate")
-	animNode.SetAttributeValue("attributeName", "fill")
-	animNode.SetAttributeValue("dur", fmt.Sprintf("%.2fs", viper.GetDuration("capture-duration").Seconds()))
-	animNode.SetAttributeValue("repeatCount", "indefinite")
+func addLedAnimation(opcMessages []OpcMessage, ledIndex int, circleNode *xmldom.Node) {
 
 	colors := make([]string, len(opcMessages))
 
 	for i := 0; i < len(opcMessages); i++ {
-		r, g, b := opcMessages[i].RGB(ledIndex)
+		msg := opcMessages[i]
+
+		// TODO: Figure out what's wrong here :(
+		if uint16((ledIndex*3)+2) >= msg.Header.Length {
+			return
+		}
+		r, g, b := msg.RGB(ledIndex)
 		colors[i] = fmt.Sprintf("rgb(%d,%d,%d)", r, g, b)
 	}
+
+	animNode := circleNode.CreateNode("animate")
+	animNode.SetAttributeValue("attributeName", "fill")
+	animNode.SetAttributeValue("dur", fmt.Sprintf("%.2fs", viper.GetDuration("capture-duration").Seconds()))
+	animNode.SetAttributeValue("repeatCount", "indefinite")
 	animNode.SetAttributeValue("values", strings.Join(colors, ";"))
 }
 

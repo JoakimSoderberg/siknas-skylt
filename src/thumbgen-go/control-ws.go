@@ -26,8 +26,11 @@ type AnimationListMessage struct {
 func ConnectControlWebsocket(done chan struct{}, interrupt chan os.Signal) (*websocket.Conn, []Animation, chan string, error) {
 	url := url.URL{Scheme: "ws", Host: viper.GetString("host"), Path: viper.GetString("ws-path")}
 
-	log.Printf("Connecting to control websocket %v...", url)
-	ws := connectControlWebsocket(url.String())
+	log.Printf("Connecting to control websocket %v...", url.String())
+	ws, _, err := websocket.DefaultDialer.Dial(url.String(), nil)
+	if err != nil {
+		log.Fatal("Failed to connect to websocket server: ", err)
+	}
 
 	animationListChan := make(chan []Animation)
 	ctrlMessages := make(chan string)
@@ -47,15 +50,6 @@ func ConnectControlWebsocket(done chan struct{}, interrupt chan os.Signal) (*web
 	}
 
 	return ws, animationList, ctrlMessages, nil
-}
-
-func connectControlWebsocket(addr string) *websocket.Conn {
-	ws, _, err := websocket.DefaultDialer.Dial(addr, nil)
-	if err != nil {
-		log.Fatal("Failed to connect to websocket server: ", err)
-	}
-
-	return ws
 }
 
 func websocketControlReader(ws *websocket.Conn, animationListChan chan []Animation, interrupt chan os.Signal, done chan struct{}) {
@@ -104,7 +98,7 @@ func websocketControlWriter(ws *websocket.Conn, ctrlMessages chan string, interr
 			// What to select
 			err := ws.WriteJSON(struct {
 				MessageType string `json:"message_type"`
-				Selected    string `json:"name"`
+				Selected    string `json:"selected"`
 			}{
 				MessageType: "select",
 				Selected:    msg,

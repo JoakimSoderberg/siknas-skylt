@@ -28,40 +28,43 @@ type OpcMessage struct {
 // RGB returns the Red, Green and Blue values between 0-255 for a given pixel.
 func (m *OpcMessage) RGB(ledIndex int) (uint8, uint8, uint8) {
 	i := 3 * ledIndex
+	if i+2 >= len(m.Data) {
+		log.Fatalf("Data for msg at led index %v too short: %v\n", ledIndex, m.Header.Length)
+	}
 	return m.Data[i], m.Data[i+1], m.Data[i+2]
 }
 
-var opcMessages []OpcMessage
-
 // ConnectOPCWebsocket connects to the OPC Websocket.
-func ConnectOPCWebsocket(done chan struct{}, interrupt chan os.Signal) *websocket.Conn {
+func ConnectOPCWebsocket(stopChan chan struct{}, opcDoneChan chan []OpcMessage, interrupt chan os.Signal) *websocket.Conn {
 	url := url.URL{Scheme: "ws", Host: viper.GetString("host"), Path: viper.GetString("ws-opc-path")}
 
-	log.Printf("Connecting to OPC websocket %v...", url)
-	ws := connectWebsocket(url.String())
-
-	// Websocket reader.
-	go websocketReader(ws, interrupt, done)
-
-	// Websocket writer.
-	go websocketWriter(ws, interrupt, done)
-
-	return ws
-}
-
-func connectWebsocket(addr string) *websocket.Conn {
-	ws, _, err := websocket.DefaultDialer.Dial(addr, nil)
+	log.Printf("Connecting to OPC websocket %v...", url.String())
+	ws, _, err := websocket.DefaultDialer.Dial(url.String(), nil)
 	if err != nil {
-		log.Fatalln("Failed to connect to websocket server: ", err)
+		log.Fatalln("Failed to connect to OPC websocket server: ", err)
 	}
 
+	// Websocket reader.
+	go websocketReader(ws, interrupt, stopChan, opcDoneChan)
+
+	// Websocket writer.
+	go websocketWriter(ws, interrupt, stopChan)
+
 	return ws
 }
 
-func websocketReader(ws *websocket.Conn, interrupt chan os.Signal, done chan struct{}) {
+func websocketReader(ws *websocket.Conn, interrupt chan os.Signal, stopChan chan struct{}, opcDoneChan chan []OpcMessage) {
 	var opcMsg OpcMessage
 
 	log.Println("Starting OPC websocket reader")
+
+	opcMessages := []OpcMessage{}
+
+	defer func() {
+		// We pass the messages to the caller this way.
+		opcDoneChan <- opcMessages
+		log.Println("OPC reader done...")
+	}()
 
 	started := false
 
@@ -103,44 +106,47 @@ func websocketReader(ws *websocket.Conn, interrupt chan os.Signal, done chan str
 			opcMessages = append(opcMessages, opcMsg)
 
 		case <-interrupt:
-			// TODO: Fix this
 			log.Println("OPC Websocket Reader got interrupted...")
 			return
-		case <-done:
-			log.Println("OPC Websocket Reader done...")
+		case <-stopChan:
+			log.Println("OPC Websocket Reader stopped...")
 			return
 		}
 	}
 }
 
-func websocketWriter(ws *websocket.Conn, interrupt chan os.Signal, done chan struct{}) {
+func websocketWriter(ws *websocket.Conn, interrupt chan os.Signal, stopChan chan struct{}) {
 	pingTicker := time.NewTicker(time.Second)
 	defer pingTicker.Stop()
 
 	for {
 		select {
-		case <-done:
+		case <-stopChan:
+			webSocketCleanClose(ws, interrupt, stopChan)
+			return
 		case <-interrupt:
-			// User wants to close.
-			log.Println("OPC Websocket Writer got interrupted, attempting clean Websocket close...")
-
-			// To cleanly close a connection, a client should send a close
-			// frame and wait for the server to close the connection.
-			err := ws.WriteMessage(websocket.CloseMessage,
-				websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
-			if err != nil {
-				log.Println("OPC Websocket Failed to write:", err)
-				return
-			}
-
-			// Wait for the reader to be done or a timeout.
-			select {
-			case <-done:
-				log.Println("OPC Websocket done!")
-			case <-time.After(time.Second):
-				log.Println("OPC Websocket timed out")
-			}
+			webSocketCleanClose(ws, interrupt, stopChan)
 			return
 		}
 	}
+}
+
+func webSocketCleanClose(ws *websocket.Conn, interrupt chan os.Signal, stopChan chan struct{}) {
+	// To cleanly close a connection, a client should send a close
+	// frame and wait for the server to close the connection.
+	err := ws.WriteMessage(websocket.CloseMessage,
+		websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+	if err != nil {
+		log.Println("OPC Websocket Failed to write:", err)
+		return
+	}
+
+	// Wait for the reader to be done or a timeout.
+	select {
+	case <-stopChan:
+		log.Println("OPC Websocket done!")
+	case <-time.After(time.Second):
+		log.Println("OPC Websocket timed out")
+	}
+	ws.Close()
 }
