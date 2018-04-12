@@ -34,12 +34,11 @@ func (m *OpcMessage) RGB(ledIndex int) (uint8, uint8, uint8) {
 var opcMessages []OpcMessage
 
 // ConnectOPCWebsocket connects to the OPC Websocket.
-func ConnectOPCWebsocket(done chan struct{}, interrupt chan os.Signal, filename string) {
+func ConnectOPCWebsocket(done chan struct{}, interrupt chan os.Signal) *websocket.Conn {
 	url := url.URL{Scheme: "ws", Host: viper.GetString("host"), Path: viper.GetString("ws-opc-path")}
-	captureDuration := viper.GetDuration("capture-duration")
 
+	log.Printf("Connecting to OPC websocket %v...", url)
 	ws := connectWebsocket(url.String())
-	defer ws.Close()
 
 	// Websocket reader.
 	go websocketReader(ws, interrupt, done)
@@ -47,20 +46,13 @@ func ConnectOPCWebsocket(done chan struct{}, interrupt chan os.Signal, filename 
 	// Websocket writer.
 	go websocketWriter(ws, interrupt, done)
 
-	// TODO: Fix closing down nicely.
-	time.Sleep(captureDuration)
-	log.Printf("Finished capturing after %s\n", captureDuration)
-	close(done)
-
-	createOutputSVG(filename)
+	return ws
 }
 
 func connectWebsocket(addr string) *websocket.Conn {
-	log.Printf("Connecting to OPC websocket %s...", addr)
-
 	ws, _, err := websocket.DefaultDialer.Dial(addr, nil)
 	if err != nil {
-		log.Fatal("Failed to connect to websocket server: ", err)
+		log.Fatalln("Failed to connect to websocket server: ", err)
 	}
 
 	return ws
@@ -69,7 +61,7 @@ func connectWebsocket(addr string) *websocket.Conn {
 func websocketReader(ws *websocket.Conn, interrupt chan os.Signal, done chan struct{}) {
 	var opcMsg OpcMessage
 
-	log.Println("Starting websocket reader")
+	log.Println("Starting OPC websocket reader")
 
 	started := false
 
@@ -78,54 +70,50 @@ func websocketReader(ws *websocket.Conn, interrupt chan os.Signal, done chan str
 		default:
 			messageType, messageData, err := ws.ReadMessage()
 			if err != nil {
-				log.Println("Failed to read: ", err)
+				log.Println("OPC Websocket failed to read: ", err)
 				return
 			}
 
 			if !started {
 				started = true
-				log.Printf("Started capturing %s of animation\n", viper.GetDuration("capture-duration"))
+				log.Printf("OPC Websocket started capturing %s of animation\n", viper.GetDuration("capture-duration"))
 			}
 
 			if messageType != websocket.BinaryMessage {
-				log.Println("ERROR: Got a Text message on the OPC Websocket, expected Binary")
-				break
+				log.Fatalln("ERROR: Got a Text message on the OPC Websocket, expected Binary")
 			}
 
 			buf := bytes.NewBuffer(messageData[0:binary.Size(opcMsg.Header)])
 			err = binary.Read(buf, binary.BigEndian, &opcMsg.Header)
 			if err != nil {
-				log.Println("ERROR: Failed to read OPC message: ", err)
-				break
+				log.Fatalln("OPC Websocket Failed to read OPC message: ", err)
 			}
 
 			realMsgLength := uint16(len(messageData) - binary.Size(opcMsg.Header))
 
 			if opcMsg.Header.Length != realMsgLength {
-				log.Printf("ERROR: Got a %d byte invalid OPC message. Header says %d, got %d bytes\n", opcMsg.Header.Length, opcMsg.Header.Length, realMsgLength)
-				break
+				log.Fatalf("ERROR: Got a %d byte invalid OPC message. Header says %d, got %d bytes\n", opcMsg.Header.Length, opcMsg.Header.Length, realMsgLength)
 			}
 
 			// Note we don't really need the OPC Length here, since this is Websockets
 			// and we already have a known message length.
 			opcMsg.Data = messageData[binary.Size(opcMsg.Header):]
 
+			// TODO: Only start appending once we are signaled to.
 			opcMessages = append(opcMessages, opcMsg)
 
 		case <-interrupt:
 			// TODO: Fix this
-			log.Println("Reader got interrupted...")
+			log.Println("OPC Websocket Reader got interrupted...")
 			return
 		case <-done:
-			log.Println("Reader done...")
+			log.Println("OPC Websocket Reader done...")
 			return
 		}
 	}
 }
 
 func websocketWriter(ws *websocket.Conn, interrupt chan os.Signal, done chan struct{}) {
-	defer ws.Close()
-
 	pingTicker := time.NewTicker(time.Second)
 	defer pingTicker.Stop()
 
@@ -134,21 +122,23 @@ func websocketWriter(ws *websocket.Conn, interrupt chan os.Signal, done chan str
 		case <-done:
 		case <-interrupt:
 			// User wants to close.
-			log.Println("Writer got interrupted, attempting clean Websocket close...")
+			log.Println("OPC Websocket Writer got interrupted, attempting clean Websocket close...")
 
 			// To cleanly close a connection, a client should send a close
 			// frame and wait for the server to close the connection.
 			err := ws.WriteMessage(websocket.CloseMessage,
 				websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 			if err != nil {
-				log.Println("Failed to write:", err)
+				log.Println("OPC Websocket Failed to write:", err)
 				return
 			}
 
 			// Wait for the reader to be done or a timeout.
 			select {
 			case <-done:
+				log.Println("OPC Websocket done!")
 			case <-time.After(time.Second):
+				log.Println("OPC Websocket timed out")
 			}
 			return
 		}

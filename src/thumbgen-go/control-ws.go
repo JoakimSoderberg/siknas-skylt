@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/url"
 	"os"
@@ -24,11 +23,11 @@ type AnimationListMessage struct {
 }
 
 // ConnectControlWebsocket connects to the OPC Websocket.
-func ConnectControlWebsocket(done chan struct{}, interrupt chan os.Signal) ([]Animation, error) {
+func ConnectControlWebsocket(done chan struct{}, interrupt chan os.Signal) (*websocket.Conn, []Animation, chan string, error) {
 	url := url.URL{Scheme: "ws", Host: viper.GetString("host"), Path: viper.GetString("ws-path")}
 
+	log.Printf("Connecting to control websocket %v...", url)
 	ws := connectControlWebsocket(url.String())
-	defer ws.Close()
 
 	animationListChan := make(chan []Animation)
 	ctrlMessages := make(chan string)
@@ -41,19 +40,16 @@ func ConnectControlWebsocket(done chan struct{}, interrupt chan os.Signal) ([]An
 
 	log.Printf("Waiting for Animation list...")
 	var animationList []Animation
-	for {
-		select {
-		case animationList = <-animationListChan:
-			return animationList, nil
-		case <-time.After(10 * time.Second):
-			return nil, fmt.Errorf("timed out after 10s waiting for the animation list")
-		}
+	select {
+	case animationList = <-animationListChan:
+	case <-time.After(10 * time.Second):
+		log.Fatalln("Control websocket timed out after 10s waiting for the animation list")
 	}
+
+	return ws, animationList, ctrlMessages, nil
 }
 
 func connectControlWebsocket(addr string) *websocket.Conn {
-	log.Printf("Connecting to control websocket %s...", addr)
-
 	ws, _, err := websocket.DefaultDialer.Dial(addr, nil)
 	if err != nil {
 		log.Fatal("Failed to connect to websocket server: ", err)
@@ -82,13 +78,15 @@ func websocketControlReader(ws *websocket.Conn, animationListChan chan []Animati
 
 				// Send the Animation list for anyone waiting.
 				animationListChan <- animationsMsg.Anims
+
+				receivedAnimList = true
 			}
 		case <-interrupt:
 			// TODO: Fix this
-			log.Println("Reader got interrupted...")
+			log.Println("Control Websocket Reader got interrupted...")
 			return
 		case <-done:
-			log.Println("Reader done...")
+			log.Println("Control Websocket reader done...")
 			return
 		}
 	}
@@ -113,14 +111,14 @@ func websocketControlWriter(ws *websocket.Conn, ctrlMessages chan string, interr
 			})
 
 			if err != nil {
-				log.Println("Failed to select Animation over control websocket: ", err)
+				log.Println("Control Websocket failed to select Animation over control websocket: ", err)
 				return
 			}
 		case <-done:
 			return
 		case <-interrupt:
 			// User wants to close.
-			log.Println("Writer got interrupted, attempting clean Websocket close...")
+			log.Println("Control Websocket writer got interrupted, attempting clean Websocket close...")
 
 			// To cleanly close a connection, a client should send a close
 			// frame and wait for the server to close the connection.
