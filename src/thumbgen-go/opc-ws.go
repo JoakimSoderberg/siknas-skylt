@@ -35,7 +35,7 @@ func (m *OpcMessage) RGB(ledIndex int) (uint8, uint8, uint8) {
 }
 
 // ConnectOPCWebsocket connects to the OPC Websocket.
-func ConnectOPCWebsocket(stopChan chan struct{}, opcDoneChan chan []OpcMessage, interrupt chan os.Signal) *websocket.Conn {
+func ConnectOPCWebsocket(stopChan chan struct{}, opcDoneChan chan []OpcMessage, expectMsgLen uint16, interrupt chan os.Signal) *websocket.Conn {
 	url := url.URL{Scheme: "ws", Host: viper.GetString("host"), Path: viper.GetString("ws-opc-path")}
 
 	log.Printf("Connecting to OPC websocket %v...", url.String())
@@ -45,7 +45,7 @@ func ConnectOPCWebsocket(stopChan chan struct{}, opcDoneChan chan []OpcMessage, 
 	}
 
 	// Websocket reader.
-	go websocketReader(ws, interrupt, stopChan, opcDoneChan)
+	go websocketReader(ws, interrupt, stopChan, opcDoneChan, expectMsgLen)
 
 	// Websocket writer.
 	go websocketWriter(ws, interrupt, stopChan)
@@ -53,7 +53,7 @@ func ConnectOPCWebsocket(stopChan chan struct{}, opcDoneChan chan []OpcMessage, 
 	return ws
 }
 
-func websocketReader(ws *websocket.Conn, interrupt chan os.Signal, stopChan chan struct{}, opcDoneChan chan []OpcMessage) {
+func websocketReader(ws *websocket.Conn, interrupt chan os.Signal, stopChan chan struct{}, opcDoneChan chan []OpcMessage, expectMsgLen uint16) {
 	var opcMsg OpcMessage
 
 	log.Println("Starting OPC websocket reader")
@@ -67,6 +67,7 @@ func websocketReader(ws *websocket.Conn, interrupt chan os.Signal, stopChan chan
 	}()
 
 	started := false
+	shortMsgCount := 0
 
 	for {
 		select {
@@ -96,6 +97,16 @@ func websocketReader(ws *websocket.Conn, interrupt chan os.Signal, stopChan chan
 
 			if opcMsg.Header.Length != realMsgLength {
 				log.Fatalf("ERROR: Got a %d byte invalid OPC message. Header says %d, got %d bytes\n", opcMsg.Header.Length, opcMsg.Header.Length, realMsgLength)
+			}
+
+			// A few messages not the correct lenght is ok.
+			if opcMsg.Header.Length != expectMsgLen {
+				shortMsgCount++
+				log.Printf("Got a message of length %v when expecting %v. Total %v\n", opcMsg.Header.Length, expectMsgLen, shortMsgCount)
+				if shortMsgCount > 5 {
+					log.Fatalf("Got %v messages not matching expected length %v, aborting\n", shortMsgCount, expectMsgLen)
+				}
+				continue
 			}
 
 			// Note we don't really need the OPC Length here, since this is Websockets

@@ -13,9 +13,8 @@ import (
 )
 
 // Creates the output SVG including the animation recorded.
-func createOutputSVG(outputPath string, opcMessages []OpcMessage) {
+func createOutputSVG(outputPath string, opcMessages []OpcMessage, ledPositions []LedPosition) {
 	svgLogoPath := viper.GetString("logo-svg")
-	ledLayoutPath := viper.GetString("led-layout")
 
 	doc := xmldom.Must(xmldom.ParseFile(svgLogoPath))
 	svg := doc.Root
@@ -43,11 +42,6 @@ func createOutputSVG(outputPath string, opcMessages []OpcMessage) {
 	// we want the LEDs to be stay inside of this. So we clip the group using it.
 	ledGroupNode.SetAttributeValue("clip-path", "url(#SiknasClipPath)")
 
-	ledPositions, err := readLEDLayout(ledLayoutPath)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
 	// Create the circles that represents the LED:s
 	for i, pos := range ledPositions {
 		circleNode := ledGroupNode.CreateNode("circle")
@@ -67,13 +61,7 @@ func addLedAnimation(opcMessages []OpcMessage, ledIndex int, circleNode *xmldom.
 	colors := make([]string, len(opcMessages))
 
 	for i := 0; i < len(opcMessages); i++ {
-		msg := opcMessages[i]
-
-		// TODO: Figure out what's wrong here :(
-		if uint16((ledIndex*3)+2) >= msg.Header.Length {
-			return
-		}
-		r, g, b := msg.RGB(ledIndex)
+		r, g, b := opcMessages[i].RGB(ledIndex)
 		colors[i] = fmt.Sprintf("rgb(%d,%d,%d)", r, g, b)
 	}
 

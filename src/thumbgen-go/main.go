@@ -45,12 +45,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	// TODO: Iterate over animations. Check if exists in output directory
-	// TODO: Send a message to the server to switch to the current animation. Sleep for a while
-	// TODO: Record animation for a given amount and save to disk.
-
 	interrupt := registerSignalHandler()
 	doneCtrl := make(chan struct{})
+
+	// Read the layout file. We expect each OPC message from the server to
+	// be as long as the number of LEDs in this layout.
+	ledPositions, err := readLEDLayout(viper.GetString("led-layout"))
+	if err != nil {
+		log.Fatalln(err)
+	}
+	expectedMsgLen := uint16(len(ledPositions) * 3)
 
 	wsCtrl, animationList, ctrlMessagesChan, err := ConnectControlWebsocket(doneCtrl, interrupt)
 	if err != nil {
@@ -78,7 +82,7 @@ func main() {
 		stopOpcChan := make(chan struct{})
 		opcDoneChan := make(chan []OpcMessage)
 
-		ConnectOPCWebsocket(stopOpcChan, opcDoneChan, interrupt)
+		ConnectOPCWebsocket(stopOpcChan, opcDoneChan, expectedMsgLen, interrupt)
 
 		// Selects the animation via the Control Websocket.
 		log.Printf("Selecting '%s' for capture...\n", animation.Name)
@@ -108,7 +112,7 @@ func main() {
 
 		opcMessages := <-opcDoneChan
 		log.Printf("Saving SVG for '%s' to %v\n", animation.Name, filePath)
-		createOutputSVG(filePath, opcMessages)
+		createOutputSVG(filePath, opcMessages, ledPositions)
 	}
 
 	// Stop any animation still running.
