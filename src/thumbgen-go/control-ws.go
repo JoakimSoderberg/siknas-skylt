@@ -56,27 +56,23 @@ func websocketControlReader(ws *websocket.Conn, animationListChan chan []Animati
 
 	log.Println("Starting control websocket reader")
 
-	var receivedAnimList = false
+	// The first message the server sends is the animation list.
+	var animationsMsg AnimationListMessage
+
+	err := ws.ReadJSON(&animationsMsg)
+	if err != nil {
+		log.Println("Failed to read Animation List message: ", err)
+		return
+	}
+
+	// Send the Animation list for anyone waiting.
+	animationListChan <- animationsMsg.Anims
 
 	for {
 		select {
 		default:
-			if !receivedAnimList {
-				var animationsMsg AnimationListMessage
-
-				err := ws.ReadJSON(&animationsMsg)
-				if err != nil {
-					log.Println("Failed to read Animation List message: ", err)
-					return
-				}
-
-				// Send the Animation list for anyone waiting.
-				animationListChan <- animationsMsg.Anims
-
-				receivedAnimList = true
-			}
+			// TODO: Read messages and pass over channel here.
 		case <-interrupt:
-			// TODO: Fix this
 			log.Println("Control Websocket Reader got interrupted...")
 			return
 		case <-done:

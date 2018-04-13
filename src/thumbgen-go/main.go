@@ -62,11 +62,13 @@ func main() {
 	}
 	defer wsCtrl.Close()
 
+	fmt.Println("\nAnimations:")
+	for _, animation := range animationList {
+		fmt.Printf("%v - %v\n", animation.Name, animation.Description)
+	}
+	fmt.Println()
+
 	if viper.GetBool("list-only") {
-		fmt.Println("\nAnimations:")
-		for _, animation := range animationList {
-			fmt.Printf("%v - %v\n", animation.Name, animation.Description)
-		}
 		return
 	}
 
@@ -82,11 +84,24 @@ func main() {
 		stopOpcChan := make(chan struct{})
 		opcDoneChan := make(chan []OpcMessage)
 
+		log.Println("====================")
+		log.Println(animation.Name)
+		log.Println("====================")
+
+		filePath := path.Join(outputPath, fmt.Sprintf("%s.%s", animation.Name, "svg"))
+		if !viper.GetBool("force") {
+			if _, err := os.Stat(filePath); !os.IsNotExist(err) {
+				log.Printf("Skipping existing file '%v', use --force to overwrite\n", filePath)
+				continue
+			}
+		}
+
+		// stopOpcChan is used to close the connection
+		// opcDoneChan returns the read messages at closing time.
 		ConnectOPCWebsocket(stopOpcChan, opcDoneChan, expectedMsgLen, interrupt)
 
 		// Selects the animation via the Control Websocket.
-		log.Printf("Selecting '%s' for capture...\n", animation.Name)
-		time.Sleep(3 * time.Second)
+		log.Printf("Playing '%s' for capture...\n", animation.Name)
 		ctrlMessagesChan <- animation.Name
 		// TODO: Add channel to wait for reply
 		time.Sleep(3 * time.Second)
@@ -97,18 +112,6 @@ func main() {
 
 		// The OPC Websocket will close when the stopOpcChan chan is closed.
 		close(stopOpcChan)
-
-		filePath := path.Join(outputPath, fmt.Sprintf("%s.%s", animation.Name, "svg"))
-
-		// TODO: Move to before capturing.
-		if !viper.GetBool("force") {
-			if _, err := os.Stat(filePath); err != nil {
-				if !os.IsNotExist(err) {
-					log.Println("Skipping existing file: ", filePath)
-					continue
-				}
-			}
-		}
 
 		opcMessages := <-opcDoneChan
 		log.Printf("Saving SVG for '%s' to %v\n", animation.Name, filePath)
