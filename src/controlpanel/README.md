@@ -10,7 +10,7 @@ The reason the server isn't directly talking via the serial port is to enable si
 Firmware for Teensy
 -------------------
 
-The [`firmware`](firmware/) directory contains the Teensy 2.0 code that reads the analog inputs 
+The [`firmware`](firmware/) directory contains the Teensy 2.0 code that reads the analog inputs
 and sends their state over the serial port.
 
 Quickstart

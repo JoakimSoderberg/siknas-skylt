@@ -244,12 +244,6 @@ func main() {
 		port = NewDummySerialPort(dummyMsgs)
 
 		go DummyInteractive(dummyMsgs)
-		/*go func() {
-			for i := 0; i < 10; i++ {
-				dummyMsgs <- formatDummyMessage([]int16{0, 1, 2, 3, 4})
-				time.Sleep(1 * time.Second)
-			}
-		}()*/
 	} else {
 		port = openSerialPort(*serialPort)
 	}

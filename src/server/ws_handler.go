@@ -27,6 +27,11 @@ type serverMsg struct {
 	MessageType string `json:"message_type"`
 }
 
+type serverControlPanelMsg struct {
+	serverMsg
+	Data ControlPanelMsg `json"data"`
+}
+
 // serverAnim represents a processing animation sketch.
 type serverAnim struct {
 	Name        string `json:"name,omitempty"`
@@ -153,7 +158,13 @@ func WsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProcessManager) ht
 					}
 				case msg := <-ctrlPanelClient.controlPanel:
 					log.Println("Broadcasting control panel message: ", msg)
-					conn.WriteJSON(msg)
+					serverControlPanelMsg := serverControlPanelMsg{
+						serverMsg: serverMsg{
+							MessageType: "control_panel",
+						},
+						Data: msg,
+					}
+					conn.WriteJSON(serverControlPanelMsg)
 				case <-pingTicker.C:
 					log.Println("Ping! ", conn.RemoteAddr())
 					conn.SetWriteDeadline(time.Now().Add(writeWait))

@@ -41,9 +41,12 @@ func ControlPanelWsHandler(bcast *ControlPanelBroadcaster) http.HandlerFunc {
 				err := conn.ReadJSON(&jsonMsg)
 				if err != nil {
 					log.Println("Failed to read control panel message: ", err)
-					return
+					continue
 				}
 
+				// TODO:
+				// server_1   | 2018/04/13 23:11:40 Got control panel message:  {4 [255 0 0] 255}
+				// server_1   | 2018/04/13 23:11:40 Got control panel message:  {0 [255 0 0] 255}
 				log.Println("Got control panel message: ", jsonMsg)
 
 				bcast.Broadcast(func(c *ControlPanelReceiver) {
