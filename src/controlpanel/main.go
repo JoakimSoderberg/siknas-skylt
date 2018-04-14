@@ -51,14 +51,14 @@ func NewControlPanelMsg(msgBytes []byte) (*ControlPanelMsg, error) {
 		}
 	}
 
-	msg := new(ControlPanelMsg)
+	var msg ControlPanelMsg
 	msg.Program, _ = strconv.Atoi(strs[0])
 	msg.Color[0], _ = strconv.Atoi(strs[1])
 	msg.Color[1], _ = strconv.Atoi(strs[2])
 	msg.Color[2], _ = strconv.Atoi(strs[3])
 	msg.Brightness, _ = strconv.Atoi(strs[4])
 
-	return msg, nil
+	return &msg, nil
 }
 
 func openSerialPort(serialPort string) io.ReadWriteCloser {
@@ -91,9 +91,13 @@ func serialPortListener(messages chan ControlPanelMsg, port io.ReadWriteCloser) 
 		if err != nil {
 			log.Fatalf("Failed to read line from serial port: %v", err)
 		}
-		//log.Printf("Msgbytes: '%v'\n", string(msgBytes))
-		msg, err := NewControlPanelMsg(msgBytes)
 
+		if len(msgBytes) < 1 {
+			log.Printf("Skippin empty message: '%v'", string(msgBytes))
+			continue
+		}
+
+		msg, err := NewControlPanelMsg(msgBytes)
 		if err != nil {
 			log.Printf("Failed to create msg: %v", err)
 			continue
@@ -104,7 +108,7 @@ func serialPortListener(messages chan ControlPanelMsg, port io.ReadWriteCloser) 
 }
 
 // registerSignalHandler handles interrupt signals.
-func registerSignalHandler(c *websocket.Conn, port io.ReadWriteCloser) chan os.Signal {
+func registerSignalHandler(c *websocket.Conn) chan os.Signal {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt)
 
@@ -240,22 +244,19 @@ func main() {
 	var port io.ReadWriteCloser
 	if dummy != nil && *dummy {
 		// For testing without the real hardware.
-		dummyMsgs := make(chan string, 0)
-		port = NewDummySerialPort(dummyMsgs)
-
-		go DummyInteractive(dummyMsgs)
+		go DummyInteractive(messages)
 	} else {
 		port = openSerialPort(*serialPort)
-	}
-	defer port.Close()
+		defer port.Close()
 
-	// Listen for serial port messages.
-	go serialPortListener(messages, port)
+		// Listen for serial port messages.
+		go serialPortListener(messages, port)
+	}
 
 	ws := connectWebsocket(*server)
 	defer ws.Close()
 
-	interrupt := registerSignalHandler(ws, port)
+	interrupt := registerSignalHandler(ws)
 
 	// When this is closed we are done reading from the websocket.
 	readDone := make(chan struct{})

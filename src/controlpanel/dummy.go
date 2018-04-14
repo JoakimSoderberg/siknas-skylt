@@ -8,33 +8,6 @@ import (
 	termbox "github.com/nsf/termbox-go"
 )
 
-// DummySerialPort is a fake serial port.
-type DummySerialPort struct {
-	Msgs chan string
-}
-
-// NewDummySerialPort creates a new Dummy Serial Port.
-func NewDummySerialPort(msgs chan string) *DummySerialPort {
-	return &DummySerialPort{Msgs: msgs}
-}
-
-func (dsp DummySerialPort) Read(p []byte) (n int, err error) {
-	msg := <-dsp.Msgs
-	copy(p, []byte(msg))
-	return len(p), nil
-}
-
-func (dsp DummySerialPort) Write(p []byte) (n int, err error) {
-	dsp.Msgs <- string(p)
-	return len(p), nil
-}
-
-// Close closes the dummy serial port.
-func (dsp DummySerialPort) Close() error {
-	close(dsp.Msgs)
-	return nil
-}
-
 const (
 	Program    = 0
 	Red        = 1
@@ -44,7 +17,7 @@ const (
 )
 
 // DummyInteractive allows the user to change the control panel values interactively.
-func DummyInteractive(dummyMsgs chan string) {
+func DummyInteractive(messages chan ControlPanelMsg) {
 	err := termbox.Init()
 	if err != nil {
 		log.Fatalln(err)
@@ -94,11 +67,6 @@ func DummyInteractive(dummyMsgs chan string) {
 				fallthrough
 			case termbox.MouseWheelDown:
 				msgVals[curIndex]--
-			case termbox.KeySpace:
-				// Sends a new message over the websocket.
-				if *spaceToSend {
-					dummyMsgs <- formatDummyMessage(msgVals)
-				}
 			case termbox.KeyCtrlC:
 				fallthrough
 			case termbox.KeyCtrlZ:
@@ -122,7 +90,8 @@ func DummyInteractive(dummyMsgs chan string) {
 
 		// We send on each change.
 		if *spaceToSend == false {
-			dummyMsgs <- formatDummyMessage(msgVals)
+			msg, _ := NewControlPanelMsg([]byte(formatDummyMessage(msgVals)))
+			messages <- *msg
 		}
 
 		log.Printf("[%v]: %v %v %v %v %v\n",
