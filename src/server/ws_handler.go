@@ -88,6 +88,11 @@ func unmarshalClientMsg(data []byte, opcManager *OpcProcessManager) (string, err
 			return "", fmt.Errorf("failed to unmarshal JSON '%v':\n  %v", string(data), err)
 		}
 
+		if opcManager.controlPanelIsOwner {
+			log.Printf("Control panel owns animation selection, ignoring client request")
+			return "", fmt.Errorf("The control panel owns animation selection")
+		}
+
 		// TODO: Selecting a new sketch should broadcast the selection to all ws clients
 
 		if err := opcManager.StartAnim(selectMsg.Selected); err != nil {
@@ -113,7 +118,6 @@ func WsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProcessManager) ht
 		serverMessages := make(chan interface{})
 
 		// Add this new client as a control panel broadcast listener.
-		// TODO: Make a New function for this
 		ctrlPanelClient := NewControlPanelReceiver()
 		bcast.Push(ctrlPanelClient)
 

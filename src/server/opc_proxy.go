@@ -98,6 +98,13 @@ func handleOpcCon(messages chan *opc.Message, conn net.Conn) {
 			return
 		}
 
+		// TODO: Example of global brightness control in C++ https://github.com/scanlime/fadecandy/blob/9d09c62a4ce83f12d1f2aca0429c1cb18b9ec28a/examples/cpp/lib/brightness.h
+
+		// TODO: Color correction code can be used for brightness:
+		// https://github.com/scanlime/fadecandy/blob/3bace3a766e96bea0d23bf7846d26a230eee118b/examples/processing/grid24x8z_waves/OPC.pde#L153-L223
+		// Example how it is used to set brightness:
+		// https://github.com/scanlime/fadecandy/blob/3bace3a766e96bea0d23bf7846d26a230eee118b/examples/processing/grid24x8z_waves/grid24x8z_waves.pde#L38-L40
+
 		// TODO: When a new OPC client connects, fade in the brightness.
 		// TODO: Make it possible to ignore incoming messages (don't forward them)
 

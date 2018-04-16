@@ -13,10 +13,11 @@ import (
 type OpcProcessesMap map[string]OpcProcessConfig
 
 type OpcProcessManager struct {
-	Processes   OpcProcessesMap
-	currentName string
-	stopped     bool
-	cmd         *exec.Cmd
+	Processes           OpcProcessesMap
+	currentName         string
+	stopped             bool
+	controlPanelIsOwner bool
+	cmd                 *exec.Cmd
 }
 
 type OpcProcessConfig struct {

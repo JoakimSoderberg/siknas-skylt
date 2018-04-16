@@ -66,7 +66,7 @@ func main() {
 	// Websocket handlers.
 	router.HandleFunc("/ws", WsHandler(controlPanelBroadcaster, opcProcessManager))
 	router.HandleFunc("/ws/opc", OpcWsHandler(opcBroadcaster))
-	router.HandleFunc("/ws/control_panel", ControlPanelWsHandler(controlPanelBroadcaster))
+	router.HandleFunc("/ws/control_panel", ControlPanelWsHandler(controlPanelBroadcaster, opcProcessManager))
 
 	// Must be last so we don't shadow the other routes.
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("static/siknas-skylt")))

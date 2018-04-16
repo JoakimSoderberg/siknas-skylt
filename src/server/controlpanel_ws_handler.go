@@ -9,7 +9,7 @@ import (
 )
 
 // ControlPanelWsHandler listens on a websocket to messages from the control panel hardware.
-func ControlPanelWsHandler(bcast *ControlPanelBroadcaster) http.HandlerFunc {
+func ControlPanelWsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProcessManager) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var upgrader = websocket.Upgrader{} // use default options
 		conn, err := upgrader.Upgrade(w, r, nil)
@@ -31,6 +31,10 @@ func ControlPanelWsHandler(bcast *ControlPanelBroadcaster) http.HandlerFunc {
 			return nil
 		})
 
+		defer func() {
+			opcManager.controlPanelIsOwner = false
+		}()
+
 		// Reader.
 		go func() {
 			log.Printf("Websocket Control Panel Client connected: %v\n", conn.RemoteAddr())
@@ -44,11 +48,21 @@ func ControlPanelWsHandler(bcast *ControlPanelBroadcaster) http.HandlerFunc {
 					return
 				}
 
-				// TODO:
-				// server_1   | 2018/04/13 23:11:40 Got control panel message:  {4 [255 0 0] 255}
-				// server_1   | 2018/04/13 23:11:40 Got control panel message:  {0 [255 0 0] 255}
 				log.Println("Got control panel message: ", jsonMsg)
 
+				// TODO: Map program choices from control panel map to animation sketches in config
+
+				// If the control panel
+				if jsonMsg.Program != 4 { // TODO: Make constant
+					log.Println("Control panel owns the animation selection")
+					// TODO: Use a channel to set this instead?
+					opcManager.controlPanelIsOwner = true
+				} else {
+					log.Println("Control panel no longer owner of animation selection")
+					opcManager.controlPanelIsOwner = false
+				}
+
+				// Broadcast so we can show state to web clients.
 				bcast.Broadcast(func(c *ControlPanelReceiver) {
 					c.controlPanel <- jsonMsg
 				})
