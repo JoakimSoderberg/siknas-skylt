@@ -10,8 +10,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+// OpcProcessesMap is a collection of OPC Process configurations.
 type OpcProcessesMap map[string]OpcProcessConfig
 
+// OpcProcessManager handles starting and stopping the OPC processes that animate the LED display.
 type OpcProcessManager struct {
 	Processes           OpcProcessesMap
 	currentName         string
@@ -20,9 +22,10 @@ type OpcProcessManager struct {
 	cmd                 *exec.Cmd
 }
 
+// OpcProcessConfig is a single config for one of the OPC processes that animates the LED display.
 type OpcProcessConfig struct {
 	Description string
-	Exec        string
+	Exec        string // The command to execute to run the animation process.
 	KillCommand string
 	// TODO: Enable turning on output
 	// TODO: We must have a kill command also (xvfb-run in docker makes it hard to kill like normal)
