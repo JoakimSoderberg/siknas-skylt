@@ -5,6 +5,7 @@
     "id": "cli",
     "displayName": "Aurelia-CLI"
   },
+  "packageManager": "yarn",
   "build": {
     "targets": [
       {

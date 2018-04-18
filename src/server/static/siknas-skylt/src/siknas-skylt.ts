@@ -53,34 +53,43 @@ export class SiknasSkylt {
             } else if (command == 0xff) {
                 // System exclusive command.
                 // We are only looking for Fadecandy ColorCorrection messages.
-                let highSystemID = d[OPC_HEADER_LEN+1];
-                let systemID = (d[OPC_HEADER_LEN+2] << 8) | highSystemID;
+                let highSystemID = d[OPC_HEADER_LEN];
+                let lowSystemID = d[OPC_HEADER_LEN + 1];
+                let systemID = (highSystemID << 8) | lowSystemID;
 
                 if (systemID != 1) {
                     // Not Fadecandy
                     return;
                 }
 
-                let highCommandID = d[OPC_HEADER_LEN+3];
-                let commandID = (d[OPC_HEADER_LEN+4] << 8) | highCommandID;
+                let highCommandID = d[OPC_HEADER_LEN + 2];
+                let lowCommandID = d[OPC_HEADER_LEN + 3];
+                let commandID = (highCommandID << 8) | lowCommandID;
 
-                if (commandID != 1) { // TODO: Fix, this ends up as 2??
-                    // Not color correction.
+                if (commandID != 1) {
+                    // Not a color correction Fadecandy command.
                     return;
                 }
 
                 let brightness = 0;
 
                 // We subtract 4 from length to exclude the systemID + commandID.
-                let jsonAsBytes = d.slice(OPC_HEADER_LEN+5, length - 4);
-                let json = JSON.parse(jsonAsBytes.toString())
-                brightness = json["whitepoint"][0]*100;       
+                let jsonAsBytes = d.slice(OPC_HEADER_LEN + 4);
+                var jsonTxt = String.fromCharCode.apply(null, jsonAsBytes);
+                let j = JSON.parse(jsonTxt);
 
-                // Change brightness for all pixels.
-                // TODO: Fix this?
-                this.pixels.style("style", function (p: OPCPixel) {
-                    return `brightness(${brightness})`;
-                });
+                // TODO: Remove debug print
+                console.log("Brightness: ", j["whitepoint"][0]);
+
+                let red = j["whitepoint"][0];
+                let green = j["whitepoint"][1];
+                let blue = j["whitepoint"][2];
+
+                document.getElementById("colorCorrectMatrix").setAttribute("values",
+                    `${red} 0        0       0    0
+                     0      ${green} 0       0    0
+                     0      0        ${blue} 0    0
+                     0      0        0       1    0 `)
             }
         })
     }
@@ -100,20 +109,22 @@ export class SiknasSkylt {
         let aspect = w / h;
         console.log("w: " + w + " h: " + h);
 
+        // We use this for the color correction packets.
         var defs = this.svg.append("defs");
-        // These filters costs A LOT (painting 22000ms vs 192.3ms in a 30s span)
-        /*var filter = defs.append("filter")
-            .attr("id", "glow")
-            .append("feGaussianBlur")
-            .attr("stdDeviation", "2.5")
-            .attr("result", "coloredBlur");
+        var filter = defs.append("filter")
+            .attr("id", "fadeFilter")
+            .append("feColorMatrix")
+            .attr("id", "colorCorrectMatrix")
+            .attr("type", "matrix")
+            .attr("values",
+                `1   0   0   0   0
+                 0   1   0   0   0
+                 0   0   1   0   0
+                 0   0   0   1   0`);
 
-        // Merge the original shape with the blur.
-        var feMerge = filter.append("feMerge");
-        feMerge.append("feMergeNode")
-            .attr("in", "coloredBlur");
-        feMerge.append("feMergeNode")
-            .attr("in", "SourceGraphic");*/
+        // Blur to look like the real display.
+        filter.append("feGaussianblur")
+            .attr("stdDeviation", "10"); // TODO: Add support to disable this.
 
         // Change the color of the Siknäs text of the SVG.
         this.svg.select("#Siknas").selectAll("path").style("fill", "black");
@@ -121,7 +132,8 @@ export class SiknasSkylt {
         let grp = this.svg.append("g")
             // A copy of the "Siknäs" text paths exists in the SVG defined as a clip-path
             // we want the pixels to be stay inside of this.
-            .attr("clip-path", "url(#SiknasClipPath)");
+            .attr("clip-path", "url(#SiknasClipPath)")
+            .attr("style", "filter: url(#fadeFilter)");
 
         this.pixels = grp.selectAll("circle").data(this.layout)
             .enter()

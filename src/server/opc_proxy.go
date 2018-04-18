@@ -103,7 +103,6 @@ func createFadecandyColorCorrectionPacket(gamma, red, green, blue float32) (*opc
 		return nil, fmt.Errorf("failed to marshal color correction message: ", err)
 	}
 
-	// TODO: Command ID ends up as 2 in client
 	data := []byte{0x00, 0x01} // Command ID for color correction.
 	data = append(data, contentBytes...)
 
@@ -128,8 +127,10 @@ func handleOpcCon(messages chan *opc.Message, conn net.Conn) {
 	fadeTimeout := 3000
 	fadeDoneTimer := time.NewTimer(time.Duration(fadeTimeout) * time.Millisecond)
 	defer fadeDoneTimer.Stop()
-	fadeTicker := time.NewTicker(time.Duration(fadeTimeout) * time.Millisecond / 1000)
+	fadeTicker := time.NewTicker(time.Duration(fadeTimeout) * time.Millisecond / 100)
 	defer fadeTicker.Stop()
+
+	log.Println("Start fading")
 
 	// TODO: Break out into separate function.
 fadeLoop:
@@ -149,7 +150,7 @@ fadeLoop:
 				return
 			}
 			messages <- colorCorrMsg
-			brightness += float32(1.0 / fadeTimeout)
+			brightness += float32(1.0 / 10.0) // TODO: Fix this to ramp correctly.
 
 		case <-fadeDoneTimer.C:
 			// Fade completed (make sure we are att full brightness).
@@ -159,6 +160,7 @@ fadeLoop:
 				return
 			}
 			messages <- colorCorrMsg
+			log.Println("Done fading")
 			break fadeLoop
 
 		default:
