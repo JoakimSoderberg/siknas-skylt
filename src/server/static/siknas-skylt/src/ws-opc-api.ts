@@ -30,9 +30,8 @@ export class WSOPCAPI {
 
     onmessage(e: MessageEvent) {
         //console.log("OPC Websocket message:", e);
-
-        // TODO: Read binary data.
-        this.events.publish(new WebsocketOPCMessage(e.data));
+        let opcMsg = new WebsocketOPCMessage(e.data);
+        this.events.publish(opcMsg);
     }
 
     onerror(e: ErrorEvent) {

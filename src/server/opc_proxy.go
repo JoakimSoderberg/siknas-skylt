@@ -103,6 +103,7 @@ func createFadecandyColorCorrectionPacket(gamma, red, green, blue float32) (*opc
 		return nil, fmt.Errorf("failed to marshal color correction message: ", err)
 	}
 
+	// TODO: Command ID ends up as 2 in client
 	data := []byte{0x00, 0x01} // Command ID for color correction.
 	data = append(data, contentBytes...)
 
@@ -126,9 +127,11 @@ func handleOpcCon(messages chan *opc.Message, conn net.Conn) {
 	brightness := float32(0.0)
 	fadeTimeout := 3000
 	fadeDoneTimer := time.NewTimer(time.Duration(fadeTimeout) * time.Millisecond)
+	defer fadeDoneTimer.Stop()
 	fadeTicker := time.NewTicker(time.Duration(fadeTimeout) * time.Millisecond / 1000)
+	defer fadeTicker.Stop()
 
-	// TODO: Break out into separet function.
+	// TODO: Break out into separate function.
 fadeLoop:
 	for {
 		msg, err := opc.ReadOpc(conn)

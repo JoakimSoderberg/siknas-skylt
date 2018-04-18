@@ -36,19 +36,52 @@ export class SiknasSkylt {
             let lowLen = d[3];
             let length = (highLen << 8) | lowLen;
 
-            // TODO: Would be good if we could set the style directly instead of first copying here...
-            for (let i = OPC_HEADER_LEN, j = 0; i < length; i += 3, j++) {
-                let r = d[i]
-                let g = d[i + 1]
-                let b = d[i + 2]
+            if (command == 0) {
+                // TODO: Would be good if we could set the style directly instead of first copying here...
+                for (let i = OPC_HEADER_LEN, j = 0; i < length; i += 3, j++) {
+                    let r = d[i]
+                    let g = d[i + 1]
+                    let b = d[i + 2]
 
-                this.layout[j].color = [r, g, b];
+                    this.layout[j].color = [r, g, b];
+                }
+
+                // Change color for all pixels.
+                this.pixels.style("fill", function (p: OPCPixel) {
+                    return `rgb(${p.color[0]},${p.color[1]},${p.color[2]})`
+                });
+            } else if (command == 0xff) {
+                // System exclusive command.
+                // We are only looking for Fadecandy ColorCorrection messages.
+                let highSystemID = d[OPC_HEADER_LEN+1];
+                let systemID = (d[OPC_HEADER_LEN+2] << 8) | highSystemID;
+
+                if (systemID != 1) {
+                    // Not Fadecandy
+                    return;
+                }
+
+                let highCommandID = d[OPC_HEADER_LEN+3];
+                let commandID = (d[OPC_HEADER_LEN+4] << 8) | highCommandID;
+
+                if (commandID != 1) { // TODO: Fix, this ends up as 2??
+                    // Not color correction.
+                    return;
+                }
+
+                let brightness = 0;
+
+                // We subtract 4 from length to exclude the systemID + commandID.
+                let jsonAsBytes = d.slice(OPC_HEADER_LEN+5, length - 4);
+                let json = JSON.parse(jsonAsBytes.toString())
+                brightness = json["whitepoint"][0]*100;       
+
+                // Change brightness for all pixels.
+                // TODO: Fix this?
+                this.pixels.style("style", function (p: OPCPixel) {
+                    return `brightness(${brightness})`;
+                });
             }
-
-            // Change color for all pixels.
-            this.pixels.style("fill", function (p: OPCPixel) {
-                return `rgb(${p.color[0]},${p.color[1]},${p.color[2]})`
-            });
         })
     }
 
