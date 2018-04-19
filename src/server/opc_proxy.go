@@ -3,8 +3,6 @@ package main
 //go:generate go run broadcaster/gen.go Opc broadcaster/broadcast.tmpl
 
 import (
-	"encoding/json"
-	"fmt"
 	"log"
 	"net"
 	"time"
@@ -86,34 +84,6 @@ func RunOPCProxy(protocol string, port string, sink OpcSink) error {
 	return nil
 }
 
-// TODO: Move to separate file
-
-// FadecandyColorCorrectionMsg represents a color correction message for the Fadecandy LED controller board.
-type FadecandyColorCorrectionMsg struct {
-	Gamma      float32   `json:"gamma"`
-	Whitepoint []float32 `json:"whitepoint"`
-}
-
-func createFadecandyColorCorrectionPacket(gamma, red, green, blue float32) (*opc.Message, error) {
-	msg := opc.NewMessage(0)
-
-	contentMsg := FadecandyColorCorrectionMsg{Gamma: gamma, Whitepoint: []float32{red, green, blue}}
-	contentBytes, err := json.Marshal(contentMsg)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal color correction message: ", err)
-	}
-
-	data := []byte{0x00, 0x01} // Command ID for color correction.
-	data = append(data, contentBytes...)
-
-	msg.SystemExclusive(
-		[]byte{0x00, 0x01}, // System ID for Fadecandy board.
-		data)
-	msg.SetLength(uint16(len(data) + 2)) // Include System ID 2 bytes
-
-	return msg, nil
-}
-
 // handleOpcCon handles connections from OPC clients.
 func handleOpcCon(messages chan *opc.Message, conn net.Conn) {
 	defer func() {
@@ -144,7 +114,7 @@ fadeLoop:
 		select {
 		case <-fadeTicker.C:
 			// Fade in the brightness interleaved.
-			colorCorrMsg, err := createFadecandyColorCorrectionPacket(float32(2.5), brightness, brightness, brightness)
+			colorCorrMsg, err := CreateFadecandyColorCorrectionPacket(float32(2.5), brightness, brightness, brightness)
 			if err != nil {
 				log.Println("[OPC incoming client]: ", err)
 				return
@@ -154,7 +124,7 @@ fadeLoop:
 
 		case <-fadeDoneTimer.C:
 			// Fade completed (make sure we are att full brightness).
-			colorCorrMsg, err := createFadecandyColorCorrectionPacket(float32(2.5), 1.0, 1.0, 1.0)
+			colorCorrMsg, err := CreateFadecandyColorCorrectionPacket(float32(2.5), 1.0, 1.0, 1.0)
 			if err != nil {
 				log.Println("[OPC incoming client]: ", err)
 				return
