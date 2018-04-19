@@ -109,10 +109,11 @@ export class SiknasSkylt {
         let aspect = w / h;
         console.log("w: " + w + " h: " + h);
 
+        let defs = this.svg.append("defs");
+        let filter = defs.append("filter");
+
         // We use this for the color correction packets.
-        var defs = this.svg.append("defs");
-        var filter = defs.append("filter")
-            .attr("id", "fadeFilter")
+        filter.attr("id", "siknasFilter")
             .append("feColorMatrix")
             .attr("id", "colorCorrectMatrix")
             .attr("type", "matrix")
@@ -123,7 +124,7 @@ export class SiknasSkylt {
                  0   0   0   1   0`);
 
         // Blur to look like the real display.
-        filter.append("feGaussianblur")
+        filter.append("feGaussianBlur")
             .attr("stdDeviation", "10"); // TODO: Add support to disable this.
 
         // Change the color of the Siknäs text of the SVG.
@@ -133,7 +134,7 @@ export class SiknasSkylt {
             // A copy of the "Siknäs" text paths exists in the SVG defined as a clip-path
             // we want the pixels to be stay inside of this.
             .attr("clip-path", "url(#SiknasClipPath)")
-            .attr("style", "filter: url(#fadeFilter)");
+            .attr("style", "filter: url(#siknasFilter)");
 
         this.pixels = grp.selectAll("circle").data(this.layout)
             .enter()
