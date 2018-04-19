@@ -5,16 +5,28 @@
   <nav class="navbar navbar-default navbar-dark" role="navigation">
     <div class="container-fluid">
       <div class="navbar-header">
-        <span class="badge badge-pill ${api.isConnected ? 'badge-success' : 'badge-danger'}">
-          &nbsp;
-        </span>
-        Siknäs-skylt
+        <a class="navbar-brand" href="#">
+          <span class="badge badge-pill ${api.isConnected ? 'badge-success' : 'badge-danger'}">
+            &nbsp;
+          </span>
+          <span>${api.isConnected ? 'Uppkopplad' : 'Nedkopplad'}</span>
+        </a>
+      </div>
+      <div>
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <div style="white-space:nowrap">
+              <span class="label label-default">Sudd</span>
+              <input type="range" min="1" max="60" value.bind="blurValue" class="slider" id="blurSlider">
+            </div>
+          </li>
+        </ul>
       </div>
     </div>
   </nav>
 
-  <div class="container">
-    <siknas-skylt></siknas-skylt>
+  <div class="container" style="margin: 10px">
+    <siknas-skylt blurlevel.bind="blurValue"></siknas-skylt>
     <div class="row">
       <animation-list class="col-md-4"></animation-list>
       <router-view class="col-md-8"></router-view>

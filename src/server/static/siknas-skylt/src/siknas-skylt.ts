@@ -1,4 +1,4 @@
-import { autoinject } from 'aurelia-framework';
+import { autoinject, bindable } from 'aurelia-framework';
 import * as d3 from "d3";
 import { WSOPCAPI } from "./ws-opc-api";
 import { EventAggregator } from 'aurelia-event-aggregator';
@@ -23,6 +23,8 @@ export class SiknasSkylt {
     layout: OPCPixel[];
     pixelsCreated: boolean = false;
     pixels: any;
+
+    @bindable blurlevel: number;
 
     constructor(private opc: WSOPCAPI, private events: EventAggregator, private client: HttpClient) {
         this.events.subscribe(WebsocketOPCMessage, msg => {
@@ -125,7 +127,8 @@ export class SiknasSkylt {
 
         // Blur to look like the real display.
         filter.append("feGaussianBlur")
-            .attr("stdDeviation", "10"); // TODO: Add support to disable this.
+            .attr("id", "blurFilter")
+            .attr("stdDeviation", this.blurlevel.toString());
 
         // Change the color of the Siknäs text of the SVG.
         this.svg.select("#Siknas").selectAll("path").style("fill", "black");
@@ -184,5 +187,11 @@ export class SiknasSkylt {
                         this.createPixels();
                     });
             });
+    }
+
+    blurlevelChanged(newValue: number, oldValue: number) {
+        if (this.svg) {
+            this.svg.select("#blurFilter").attr("stdDeviation", newValue.toString());
+        }
     }
 }

@@ -8,6 +8,8 @@ export class App {
 
   constructor(private api: WSAPI) { }
 
+  blurValue: number = 10
+
   configureRouter(config: RouterConfiguration, router: Router) {
     config.title = 'Animationer';
     config.map([
