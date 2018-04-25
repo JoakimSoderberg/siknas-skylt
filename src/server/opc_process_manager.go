@@ -5,6 +5,7 @@ import (
 	"log"
 	"os/exec"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/spf13/viper"
@@ -18,7 +19,7 @@ type OpcProcessManager struct {
 	Processes           OpcProcessesMap
 	currentName         string
 	stopped             bool
-	controlPanelIsOwner bool
+	controlPanelIsOwner int32 // Updated atomically.
 	cmd                 *exec.Cmd
 }
 
@@ -38,6 +39,20 @@ func NewOpcProcessManager() (*OpcProcessManager, error) {
 		return nil, err
 	}
 	return &o, nil
+}
+
+// IsControlPanelOwner returns if the control panel owns the animation choice. Use this to read the value atomically.
+func (o *OpcProcessManager) IsControlPanelOwner() bool {
+	return atomic.LoadInt32(&o.controlPanelIsOwner) != 0
+}
+
+// SetControlPanelIsOwner sets if the control panel owns the animation choice. This sets the state atomically.
+func (o *OpcProcessManager) SetControlPanelIsOwner(isControlPanelOwner bool) {
+	if isControlPanelOwner {
+		atomic.StoreInt32(&o.controlPanelIsOwner, 1)
+	} else {
+		atomic.StoreInt32(&o.controlPanelIsOwner, 0)
+	}
 }
 
 // ReadConfig reads the config needed by the process manager.

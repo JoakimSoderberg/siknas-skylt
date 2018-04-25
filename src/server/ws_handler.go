@@ -88,7 +88,7 @@ func unmarshalClientMsg(data []byte, opcManager *OpcProcessManager) (string, err
 			return "", fmt.Errorf("failed to unmarshal JSON '%v':\n  %v", string(data), err)
 		}
 
-		if opcManager.controlPanelIsOwner {
+		if opcManager.IsControlPanelOwner() {
 			log.Printf("Control panel owns animation selection, ignoring client request")
 			return "", fmt.Errorf("The control panel owns animation selection")
 		}

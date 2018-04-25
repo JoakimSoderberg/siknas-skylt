@@ -32,7 +32,7 @@ func ControlPanelWsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProces
 		})
 
 		defer func() {
-			opcManager.controlPanelIsOwner = false
+			opcManager.SetControlPanelIsOwner(false)
 		}()
 
 		// Reader.
@@ -52,14 +52,14 @@ func ControlPanelWsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProces
 
 				// TODO: Map program choices from control panel map to animation sketches in config
 
-				// If the control panel
-				if jsonMsg.Program != 4 { // TODO: Make constant
+				// If the control panel has anything but the "Custom" program selected,
+				// it owns the animation selection, so the web clients don't get a say.
+				if jsonMsg.Program != int(CustomProgram) {
 					log.Println("Control panel owns the animation selection")
-					// TODO: Use a channel to set this instead?
-					opcManager.controlPanelIsOwner = true
+					opcManager.SetControlPanelIsOwner(true)
 				} else {
 					log.Println("Control panel no longer owner of animation selection")
-					opcManager.controlPanelIsOwner = false
+					opcManager.SetControlPanelIsOwner(false)
 				}
 
 				// Broadcast so we can show state to web clients.
