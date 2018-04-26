@@ -38,9 +38,9 @@
      inkscape:window-height="986"
      id="namedview4229"
      showgrid="false"
-     inkscape:zoom="43.161798"
-     inkscape:cx="25.615596"
-     inkscape:cy="37.005201"
+     inkscape:zoom="5.3952247"
+     inkscape:cx="39.254748"
+     inkscape:cy="55.636326"
      inkscape:window-x="-11"
      inkscape:window-y="-11"
      inkscape:window-maximized="1"
@@ -60,293 +60,175 @@
        id="VISIBLE"
        style="color:#000000;display:inline;fill:none;stroke:currentColor;stroke-width:0.03125"
        inkscape:label="VISIBLE">
-      <path
-         id="A2"
-         d="M 168.49921,89.396751 A 7.5,7.5 90 0 1 169.7,89.3"
-         inkscape:connector-curvature="0" />
-      <path
-         id="A3"
-         d="m 219.7,138.3 a 7.5,7.5 90 0 1 -6.29921,7.40325"
-         inkscape:connector-curvature="0" />
-      <path
-         id="A4"
-         d="m 212.2,89.3 a 7.5,7.5 90 0 1 7.5,7.5"
-         inkscape:connector-curvature="0" />
-      <path
-         id="A6"
-         d="m 162.2,138.3 a 7.5,7.5 0 0 0 7.5,7.5"
-         inkscape:connector-curvature="0" />
-      <path
-         id="B2"
-         d="m 188.71393,100.55 a 2.25,2.25 90 0 1 4.47214,0"
-         inkscape:connector-curvature="0" />
-      <path
-         id="B3"
-         d="m 212.2,145.8 a 7.5,7.5 0 0 0 7.5,-7.5"
-         inkscape:connector-curvature="0" />
-      <path
-         id="B4"
-         d="m 186.4606,101.1087 a 4.5,4.5 90 1 1 8.9788,0"
-         inkscape:connector-curvature="0" />
-      <path
-         id="BC"
-         d="m 193.18607,101.05 a 2.25,2.25 90 0 1 -4.47214,0"
-         inkscape:connector-curvature="0" />
-      <path
-         id="BD"
-         d="m 219.7,96.800003 a 7.5,7.5 0 0 0 -7.5,-7.5"
-         inkscape:connector-curvature="0" />
-      <path
-         id="CE"
-         d="m 169.7,89.3 a 7.5,7.5 0 0 0 -7.5,7.5"
-         inkscape:connector-curvature="0" />
-      <path
-         id="DE"
-         d="M 178.43032,89.2613 A 3,3 90 0 1 177.95,89.3"
-         inkscape:connector-curvature="0" />
-      <path
-         id="DF"
-         d="m 204.95,89.300003 a 3,3 0 0 1 -3,-3"
-         inkscape:connector-curvature="0" />
-      <path
-         id="E1"
-         d="m 201.95,86.300003 a 3,3 0 0 0 3,3"
-         inkscape:connector-curvature="0" />
-      <path
-         id="E2"
-         d="m 180.95,86.3 a 3,3 90 0 1 -3,3"
-         inkscape:connector-curvature="0" />
-      <path
-         id="E3"
-         d="m 180.95,76.8 a 10.5,10.5 90 0 1 21,0"
-         inkscape:connector-curvature="0" />
-      <path
-         id="F6"
-         d="M 133.12979,91.325801 A 2,2 90 0 1 133.45,91.3"
-         inkscape:connector-curvature="0" />
-      <path
-         id="F7"
-         d="m 149.95,139.8 a 2,2 90 0 1 -1.67979,1.9742"
-         inkscape:connector-curvature="0" />
-      <path
-         id="F8"
-         d="m 149.95,139.8 a 2,2 90 0 1 -2,2"
-         inkscape:connector-curvature="0" />
-      <path
-         id="F9"
-         d="m 133.45,141.8 a 2,2 90 0 1 -2,-2"
-         inkscape:connector-curvature="0" />
-      <path
-         id="FA"
-         d="m 131.45,93.3 a 2,2 90 0 1 2,-2"
-         inkscape:connector-curvature="0" />
-      <path
-         id="FB"
-         d="m 147.95,91.3 a 2,2 90 0 1 2,2"
-         inkscape:connector-curvature="0" />
-      <path
-         id="FC"
-         d="m 147.95,91.3 a 2,2 90 0 1 2,2"
-         inkscape:connector-curvature="0" />
-      <path
-         id="ID_10D"
-         d="M 250.35116,131.33944 A 2,2 90 0 1 249.7,129.86275"
-         inkscape:connector-curvature="0" />
-      <path
-         id="ID_10E"
-         d="m 249.7,124.23725 a 2,2 90 0 1 0.65116,-1.47669"
-         inkscape:connector-curvature="0" />
-      <path
-         id="ID_10F"
-         d="m 250.35116,131.33944 a 8.75,8.75 90 0 1 -4.50023,15.09768"
-         inkscape:connector-curvature="0" />
-      <path
-         id="ID_110"
-         d="M 250.35116,109.83944 A 2,2 90 0 1 249.7,108.36275"
-         inkscape:connector-curvature="0" />
-      <path
-         id="ID_111"
-         d="m 249.7,102.73725 a 2,2 90 0 1 0.65116,-1.47669"
-         inkscape:connector-curvature="0" />
-      <path
-         id="ID_112"
-         d="m 243.04907,86.162876 a 8.75,8.75 90 0 1 7.30209,15.097684"
-         inkscape:connector-curvature="0" />
-      <path
-         id="ID_113"
-         d="M 238.54884,122.76056 A 2,2 90 0 1 239.2,124.23725"
-         inkscape:connector-curvature="0" />
-      <path
-         id="ID_114"
-         d="m 238.54884,122.76056 a 8.75,8.75 90 0 1 0,-12.92112"
-         inkscape:connector-curvature="0" />
-      <path
-         id="ID_115"
-         d="m 239.2,108.36275 a 2,2 90 0 1 -0.65116,1.47669"
-         inkscape:connector-curvature="0" />
-      <path
-         id="ID_116"
-         d="M 238.54884,101.26056 A 2,2 90 0 1 239.2,102.73725"
-         inkscape:connector-curvature="0" />
-      <path
-         id="ID_117"
-         d="m 238.54884,101.26056 a 8.75,8.75 90 1 1 11.80232,0"
-         inkscape:connector-curvature="0" />
-      <path
-         id="ID_118"
-         d="m 249.7,102.73725 a 2,2 90 0 1 0.65116,-1.47669"
-         inkscape:connector-curvature="0" />
-      <path
-         id="ID_119"
-         d="M 250.35116,109.83944 A 2,2 90 0 1 249.7,108.36275"
-         inkscape:connector-curvature="0" />
-      <path
-         id="ID_11A"
-         d="m 250.35116,109.83944 a 8.75,8.75 90 0 1 0,12.92112"
-         inkscape:connector-curvature="0" />
-      <path
-         id="ID_11B"
-         d="m 249.7,124.23725 a 2,2 90 0 1 0.65116,-1.47669"
-         inkscape:connector-curvature="0" />
-      <path
-         id="ID_11C"
-         d="M 250.35116,131.33944 A 2,2 90 0 1 249.7,129.86275"
-         inkscape:connector-curvature="0" />
-      <path
-         id="ID_11D"
-         d="m 250.35116,131.33944 a 8.75,8.75 90 1 1 -11.80232,0"
-         inkscape:connector-curvature="0" />
-      <path
-         id="ID_11E"
-         d="m 250.35116,109.83944 a 8.75,8.75 90 0 1 0,12.92112"
-         inkscape:connector-curvature="0" />
-      <path
-         id="ID_11F"
-         d="m 239.2,129.86275 a 2,2 90 0 1 -0.65116,1.47669"
-         inkscape:connector-curvature="0" />
-      <line
-         x1="212.2"
-         y1="100.8"
-         x2="212.2"
-         y2="100.8"
-         id="ID_79" />
-      <line
-         x1="212.60027"
-         y1="140.76775"
-         x2="212.60027"
-         y2="140.76775"
-         id="ID_7C" />
-      <line
-         x1="197.08809"
-         y1="100.83225"
-         x2="197.08809"
-         y2="100.83225"
-         id="ID_7D" />
-      <line
-         x1="197.48834"
-         y1="100.8"
-         x2="197.48834"
-         y2="100.8"
-         id="ID_7E" />
-      <line
-         x1="184.41165"
-         y1="100.8"
-         x2="184.41165"
-         y2="100.8"
-         id="ID_7F" />
-      <line
-         x1="169.29973"
-         y1="100.83225"
-         x2="169.29973"
-         y2="100.83225"
-         id="ID_80" />
-      <line
-         x1="169.7"
-         y1="100.8"
-         x2="169.7"
-         y2="100.8"
-         id="ID_81" />
-      <line
-         x1="169.7"
-         y1="89.300003"
-         x2="169.7"
-         y2="89.300003"
-         id="ID_83" />
-      <line
-         x1="168.49921"
-         y1="89.396751"
-         x2="168.49921"
-         y2="89.396751"
-         id="ID_84" />
-      <line
-         x1="212.2"
-         y1="89.300003"
-         x2="212.2"
-         y2="89.300003"
-         id="ID_87" />
-      <line
-         x1="212.2"
-         y1="140.8"
-         x2="212.2"
-         y2="140.8"
-         id="ID_8A" />
-      <line
-         x1="169.7"
-         y1="140.8"
-         x2="169.7"
-         y2="140.8"
-         id="ID_8B" />
-      <line
-         x1="162.2"
-         y1="96.800003"
-         x2="162.2"
-         y2="138.3"
-         id="ID_8C" />
-      <line
-         x1="169.7"
-         y1="145.8"
-         x2="212.2"
-         y2="145.8"
-         id="ID_8F" />
-      <line
-         x1="188.71393"
-         y1="100.55"
-         x2="193.18607"
-         y2="100.55"
-         id="ID_90" />
-      <line
-         x1="219.7"
-         y1="138.3"
-         x2="219.7"
-         y2="96.800003"
-         id="ID_92" />
-      <line
-         x1="213.40079"
-         y1="145.70325"
-         x2="213.40079"
-         y2="145.70325"
-         id="ID_93" />
-      <line
-         x1="188.71393"
-         y1="101.05"
-         x2="193.18607"
-         y2="101.05"
-         id="ID_97" />
-      <line
-         x1="219.7"
-         y1="138.3"
-         x2="219.7"
-         y2="96.800003"
-         id="ID_9E" />
-      <line
-         x1="212.2"
-         y1="89.300003"
-         x2="169.7"
-         y2="89.300003"
-         id="ID_9F" />
+      <g
+         id="g4724"
+         inkscape:label="Display"
+         style="display:inline">
+        <path
+           inkscape:connector-curvature="0"
+           d="M 168.49921,89.396751 A 7.5,7.5 90 0 1 169.7,89.3"
+           id="A2" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 219.7,138.3 a 7.5,7.5 90 0 1 -6.29921,7.40325"
+           id="A3" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 212.2,89.3 a 7.5,7.5 90 0 1 7.5,7.5"
+           id="A4" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 162.2,138.3 a 7.5,7.5 0 0 0 7.5,7.5"
+           id="A6" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 188.71393,100.55 a 2.25,2.25 90 0 1 4.47214,0"
+           id="B2" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 212.2,145.8 a 7.5,7.5 0 0 0 7.5,-7.5"
+           id="B3" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 186.4606,101.1087 a 4.5,4.5 90 1 1 8.9788,0"
+           id="B4" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 193.18607,101.05 a 2.25,2.25 90 0 1 -4.47214,0"
+           id="BC" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 219.7,96.800003 a 7.5,7.5 0 0 0 -7.5,-7.5"
+           id="BD" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 169.7,89.3 a 7.5,7.5 0 0 0 -7.5,7.5"
+           id="CE" />
+        <line
+           id="ID_79"
+           y2="100.8"
+           x2="212.2"
+           y1="100.8"
+           x1="212.2" />
+        <line
+           id="ID_7C"
+           y2="140.76775"
+           x2="212.60027"
+           y1="140.76775"
+           x1="212.60027" />
+        <line
+           id="ID_7D"
+           y2="100.83225"
+           x2="197.08809"
+           y1="100.83225"
+           x1="197.08809" />
+        <line
+           id="ID_7E"
+           y2="100.8"
+           x2="197.48834"
+           y1="100.8"
+           x1="197.48834" />
+        <line
+           id="ID_7F"
+           y2="100.8"
+           x2="184.41165"
+           y1="100.8"
+           x1="184.41165" />
+        <line
+           id="ID_80"
+           y2="100.83225"
+           x2="169.29973"
+           y1="100.83225"
+           x1="169.29973" />
+        <line
+           id="ID_81"
+           y2="100.8"
+           x2="169.7"
+           y1="100.8"
+           x1="169.7" />
+        <line
+           id="ID_83"
+           y2="89.300003"
+           x2="169.7"
+           y1="89.300003"
+           x1="169.7" />
+        <line
+           id="ID_84"
+           y2="89.396751"
+           x2="168.49921"
+           y1="89.396751"
+           x1="168.49921" />
+        <line
+           id="ID_87"
+           y2="89.300003"
+           x2="212.2"
+           y1="89.300003"
+           x1="212.2" />
+        <line
+           id="ID_8A"
+           y2="140.8"
+           x2="212.2"
+           y1="140.8"
+           x1="212.2" />
+        <line
+           id="ID_8B"
+           y2="140.8"
+           x2="169.7"
+           y1="140.8"
+           x1="169.7" />
+        <line
+           id="ID_8C"
+           y2="138.3"
+           x2="162.2"
+           y1="96.800003"
+           x1="162.2" />
+        <line
+           id="ID_8F"
+           y2="145.8"
+           x2="212.2"
+           y1="145.8"
+           x1="169.7" />
+        <line
+           id="ID_90"
+           y2="100.55"
+           x2="193.18607"
+           y1="100.55"
+           x1="188.71393" />
+        <line
+           id="ID_92"
+           y2="96.800003"
+           x2="219.7"
+           y1="138.3"
+           x1="219.7" />
+        <line
+           id="ID_93"
+           y2="145.70325"
+           x2="213.40079"
+           y1="145.70325"
+           x1="213.40079" />
+        <line
+           id="ID_97"
+           y2="101.05"
+           x2="193.18607"
+           y1="101.05"
+           x1="188.71393" />
+        <line
+           id="ID_9E"
+           y2="96.800003"
+           x2="219.7"
+           y1="138.3"
+           x1="219.7" />
+        <line
+           id="ID_9F"
+           y2="89.300003"
+           x2="169.7"
+           y1="89.300003"
+           x1="212.2" />
+      </g>
       <g
          id="g4318"
-         inkscape:label="DisplayGlas">
+         inkscape:label="DisplayGlas"
+         style="display:inline">
         <path
            inkscape:connector-curvature="0"
            d="m 169.7,140.8 a 2.5,2.5 90 0 1 -2.5,-2.5"
@@ -406,210 +288,306 @@
            y1="100.8"
            x1="197.48834" />
       </g>
-      <line
-         x1="268.45001"
-         y1="61.299999"
-         x2="118.45"
-         y2="61.299999"
-         id="CF" />
-      <line
-         x1="268.45001"
-         y1="161.3"
-         x2="118.45"
-         y2="161.3"
-         id="D0" />
-      <line
-         x1="118.45"
-         y1="61.299999"
-         x2="118.45"
-         y2="161.3"
-         id="D1" />
-      <line
-         x1="268.45001"
-         y1="61.299999"
-         x2="268.45001"
-         y2="61.299999"
-         id="D2" />
-      <line
-         x1="268.45001"
-         y1="61.299999"
-         x2="268.45001"
-         y2="161.3"
-         id="D3" />
-      <line
-         x1="268.45001"
-         y1="61.299999"
-         x2="268.45001"
-         y2="161.3"
-         id="D4" />
-      <line
-         x1="268.45001"
-         y1="161.3"
-         x2="268.45001"
-         y2="161.3"
-         id="D5" />
-      <line
-         x1="177.95"
-         y1="89.300003"
-         x2="177.95"
-         y2="89.300003"
-         id="D6" />
-      <line
-         x1="204.95"
-         y1="89.300003"
-         x2="204.95"
-         y2="89.300003"
-         id="D8" />
-      <line
-         x1="180.95"
-         y1="76.800003"
-         x2="180.95"
-         y2="86.300003"
-         id="DC" />
-      <line
-         x1="201.95"
-         y1="76.800003"
-         x2="201.95"
-         y2="86.300003"
-         id="DD" />
-      <line
-         x1="133.45"
-         y1="91.300003"
-         x2="133.45"
-         y2="91.300003"
-         id="E4" />
-      <line
-         x1="133.12979"
-         y1="91.325798"
-         x2="133.12979"
-         y2="91.325798"
-         id="E5" />
-      <line
-         x1="139.95"
-         y1="100.8"
-         x2="139.95"
-         y2="100.8"
-         id="E6" />
-      <line
-         x1="139.95"
-         y1="132.8"
-         x2="139.95"
-         y2="100.8"
-         id="E7" />
-      <line
-         x1="139.95"
-         y1="132.8"
-         x2="139.95"
-         y2="132.8"
-         id="E8" />
-      <line
-         x1="148.27022"
-         y1="141.7742"
-         x2="148.27022"
-         y2="141.7742"
-         id="E9" />
-      <line
-         x1="139.95"
-         y1="132.8"
-         x2="139.95"
-         y2="100.8"
-         id="EB" />
-      <line
-         x1="139.95"
-         y1="132.8"
-         x2="141.2"
-         y2="132.8"
-         id="EC" />
-      <line
-         x1="141.2"
-         y1="132.8"
-         x2="141.2"
-         y2="100.8"
-         id="ED" />
-      <line
-         x1="139.95"
-         y1="100.8"
-         x2="141.2"
-         y2="100.8"
-         id="EE" />
-      <line
-         x1="133.45"
-         y1="91.300003"
-         x2="147.95"
-         y2="91.300003"
-         id="EF" />
-      <line
-         x1="149.95"
-         y1="139.8"
-         x2="149.95"
-         y2="93.300003"
-         id="F0" />
-      <line
-         x1="133.45"
-         y1="141.8"
-         x2="147.95"
-         y2="141.8"
-         id="F1" />
-      <line
-         x1="131.45"
-         y1="139.8"
-         x2="131.45"
-         y2="93.300003"
-         id="F2" />
-      <line
-         x1="149.95"
-         y1="139.8"
-         x2="149.95"
-         y2="93.300003"
-         id="F3" />
-      <line
-         x1="147.95"
-         y1="91.300003"
-         x2="147.95"
-         y2="91.300003"
-         id="F5" />
-      <line
-         x1="249.7"
-         y1="129.86275"
-         x2="249.7"
-         y2="124.23725"
-         id="FD" />
-      <line
-         x1="249.7"
-         y1="108.36275"
-         x2="249.7"
-         y2="102.73725"
-         id="ID_100" />
-      <line
-         x1="243.04907"
-         y1="86.16288"
-         x2="243.04907"
-         y2="86.16288"
-         id="ID_107" />
-      <line
-         x1="239.2"
-         y1="108.36275"
-         x2="239.2"
-         y2="102.73725"
-         id="ID_108" />
-      <line
-         x1="249.7"
-         y1="108.36275"
-         x2="249.7"
-         y2="102.73725"
-         id="ID_10A" />
-      <line
-         x1="249.7"
-         y1="129.86275"
-         x2="249.7"
-         y2="124.23725"
-         id="ID_10B" />
-      <line
-         x1="239.2"
-         y1="129.86275"
-         x2="239.2"
-         y2="124.23725"
-         id="ID_10C" />
+      <g
+         id="g4779"
+         inkscape:label="Marble">
+        <line
+           id="CF"
+           y2="61.299999"
+           x2="118.45"
+           y1="61.299999"
+           x1="268.45001" />
+        <line
+           id="D0"
+           y2="161.3"
+           x2="118.45"
+           y1="161.3"
+           x1="268.45001" />
+        <line
+           id="D1"
+           y2="161.3"
+           x2="118.45"
+           y1="61.299999"
+           x1="118.45" />
+        <line
+           id="D2"
+           y2="61.299999"
+           x2="268.45001"
+           y1="61.299999"
+           x1="268.45001" />
+        <line
+           id="D3"
+           y2="161.3"
+           x2="268.45001"
+           y1="61.299999"
+           x1="268.45001" />
+        <line
+           id="D4"
+           y2="161.3"
+           x2="268.45001"
+           y1="61.299999"
+           x1="268.45001" />
+        <line
+           id="D5"
+           y2="161.3"
+           x2="268.45001"
+           y1="161.3"
+           x1="268.45001" />
+      </g>
+      <g
+         id="g4632"
+         inkscape:label="BrightTrack">
+        <line
+           id="E6"
+           y2="100.8"
+           x2="139.95"
+           y1="100.8"
+           x1="139.95" />
+        <line
+           id="E7"
+           y2="100.8"
+           x2="139.95"
+           y1="132.8"
+           x1="139.95" />
+        <line
+           id="E8"
+           y2="132.8"
+           x2="139.95"
+           y1="132.8"
+           x1="139.95" />
+        <line
+           id="EB"
+           y2="100.8"
+           x2="139.95"
+           y1="132.8"
+           x1="139.95" />
+        <line
+           id="EC"
+           y2="132.8"
+           x2="141.2"
+           y1="132.8"
+           x1="139.95" />
+        <line
+           id="ED"
+           y2="100.8"
+           x2="141.2"
+           y1="132.8"
+           x1="141.2" />
+        <line
+           id="EE"
+           y2="100.8"
+           x2="141.2"
+           y1="100.8"
+           x1="139.95" />
+      </g>
+      <g
+         id="g4650"
+         inkscape:label="BrightPlate">
+        <path
+           inkscape:connector-curvature="0"
+           d="M 133.12979,91.325801 A 2,2 90 0 1 133.45,91.3"
+           id="F6" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 149.95,139.8 a 2,2 90 0 1 -1.67979,1.9742"
+           id="F7" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 149.95,139.8 a 2,2 90 0 1 -2,2"
+           id="F8" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 133.45,141.8 a 2,2 90 0 1 -2,-2"
+           id="F9" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 131.45,93.3 a 2,2 90 0 1 2,-2"
+           id="FA" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 147.95,91.3 a 2,2 90 0 1 2,2"
+           id="FB" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 147.95,91.3 a 2,2 90 0 1 2,2"
+           id="FC" />
+        <line
+           id="E4"
+           y2="91.300003"
+           x2="133.45"
+           y1="91.300003"
+           x1="133.45" />
+        <line
+           id="E5"
+           y2="91.325798"
+           x2="133.12979"
+           y1="91.325798"
+           x1="133.12979" />
+        <line
+           id="E9"
+           y2="141.7742"
+           x2="148.27022"
+           y1="141.7742"
+           x1="148.27022" />
+        <line
+           id="EF"
+           y2="91.300003"
+           x2="147.95"
+           y1="91.300003"
+           x1="133.45" />
+        <line
+           id="F0"
+           y2="93.300003"
+           x2="149.95"
+           y1="139.8"
+           x1="149.95" />
+        <line
+           id="F1"
+           y2="141.8"
+           x2="147.95"
+           y1="141.8"
+           x1="133.45" />
+        <line
+           id="F2"
+           y2="93.300003"
+           x2="131.45"
+           y1="139.8"
+           x1="131.45" />
+        <line
+           id="F3"
+           y2="93.300003"
+           x2="149.95"
+           y1="139.8"
+           x1="149.95" />
+        <line
+           id="F5"
+           y2="91.300003"
+           x2="147.95"
+           y1="91.300003"
+           x1="147.95" />
+      </g>
+      <g
+         id="g4678"
+         inkscape:label="ColorPlate">
+        <path
+           inkscape:connector-curvature="0"
+           d="M 250.35116,131.33944 A 2,2 90 0 1 249.7,129.86275"
+           id="ID_10D" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 249.7,124.23725 a 2,2 90 0 1 0.65116,-1.47669"
+           id="ID_10E" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 250.35116,131.33944 a 8.75,8.75 90 0 1 -4.50023,15.09768"
+           id="ID_10F" />
+        <path
+           inkscape:connector-curvature="0"
+           d="M 250.35116,109.83944 A 2,2 90 0 1 249.7,108.36275"
+           id="ID_110" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 249.7,102.73725 a 2,2 90 0 1 0.65116,-1.47669"
+           id="ID_111" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 243.04907,86.162876 a 8.75,8.75 90 0 1 7.30209,15.097684"
+           id="ID_112" />
+        <path
+           inkscape:connector-curvature="0"
+           d="M 238.54884,122.76056 A 2,2 90 0 1 239.2,124.23725"
+           id="ID_113" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 238.54884,122.76056 a 8.75,8.75 90 0 1 0,-12.92112"
+           id="ID_114" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 239.2,108.36275 a 2,2 90 0 1 -0.65116,1.47669"
+           id="ID_115" />
+        <path
+           inkscape:connector-curvature="0"
+           d="M 238.54884,101.26056 A 2,2 90 0 1 239.2,102.73725"
+           id="ID_116" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 238.54884,101.26056 a 8.75,8.75 90 1 1 11.80232,0"
+           id="ID_117" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 249.7,102.73725 a 2,2 90 0 1 0.65116,-1.47669"
+           id="ID_118" />
+        <path
+           inkscape:connector-curvature="0"
+           d="M 250.35116,109.83944 A 2,2 90 0 1 249.7,108.36275"
+           id="ID_119" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 250.35116,109.83944 a 8.75,8.75 90 0 1 0,12.92112"
+           id="ID_11A" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 249.7,124.23725 a 2,2 90 0 1 0.65116,-1.47669"
+           id="ID_11B" />
+        <path
+           inkscape:connector-curvature="0"
+           d="M 250.35116,131.33944 A 2,2 90 0 1 249.7,129.86275"
+           id="ID_11C" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 250.35116,131.33944 a 8.75,8.75 90 1 1 -11.80232,0"
+           id="ID_11D" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 250.35116,109.83944 a 8.75,8.75 90 0 1 0,12.92112"
+           id="ID_11E" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 239.2,129.86275 a 2,2 90 0 1 -0.65116,1.47669"
+           id="ID_11F" />
+        <line
+           id="FD"
+           y2="124.23725"
+           x2="249.7"
+           y1="129.86275"
+           x1="249.7" />
+        <line
+           id="ID_100"
+           y2="102.73725"
+           x2="249.7"
+           y1="108.36275"
+           x1="249.7" />
+        <line
+           id="ID_107"
+           y2="86.16288"
+           x2="243.04907"
+           y1="86.16288"
+           x1="243.04907" />
+        <line
+           id="ID_108"
+           y2="102.73725"
+           x2="239.2"
+           y1="108.36275"
+           x1="239.2" />
+        <line
+           id="ID_10A"
+           y2="102.73725"
+           x2="249.7"
+           y1="108.36275"
+           x1="249.7" />
+        <line
+           id="ID_10B"
+           y2="124.23725"
+           x2="249.7"
+           y1="129.86275"
+           x1="249.7" />
+        <line
+           id="ID_10C"
+           y2="124.23725"
+           x2="239.2"
+           y1="129.86275"
+           x1="239.2" />
+      </g>
       <g
          id="g4593"
          inkscape:label="TopRightScrew">
@@ -2446,25 +2424,73 @@
            y1="73.087639"
            x1="190.52347" />
       </g>
-      <path
-         style="color:#000000;display:inline;fill:none;stroke:currentColor;stroke-width:0.03125"
-         inkscape:connector-curvature="0"
-         d="M 189.76889,66.435452 A 10.5,10.5 90 0 1 201.95,76.8"
-         id="E0" />
-      <line
-         style="color:#000000;display:inline;fill:none;stroke:currentColor;stroke-width:0.03125"
-         id="D7"
-         y2="86.300003"
-         x2="201.95"
-         y1="76.800003"
-         x1="201.95" />
-      <line
-         style="color:#000000;display:inline;fill:none;stroke:currentColor;stroke-width:0.03125"
-         id="DB"
-         y2="66.435455"
-         x2="189.76889"
-         y1="66.435455"
-         x1="189.76889" />
+      <g
+         id="g4692"
+         inkscape:label="ProgramPlate">
+        <path
+           inkscape:connector-curvature="0"
+           d="M 178.43032,89.2613 A 3,3 90 0 1 177.95,89.3"
+           id="DE" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 204.95,89.300003 a 3,3 0 0 1 -3,-3"
+           id="DF" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 201.95,86.300003 a 3,3 0 0 0 3,3"
+           id="E1" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 180.95,86.3 a 3,3 90 0 1 -3,3"
+           id="E2" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m 180.95,76.8 a 10.5,10.5 90 0 1 21,0"
+           id="E3" />
+        <line
+           id="D6"
+           y2="89.300003"
+           x2="177.95"
+           y1="89.300003"
+           x1="177.95" />
+        <line
+           id="D8"
+           y2="89.300003"
+           x2="204.95"
+           y1="89.300003"
+           x1="204.95" />
+        <line
+           id="DC"
+           y2="86.300003"
+           x2="180.95"
+           y1="76.800003"
+           x1="180.95" />
+        <line
+           id="DD"
+           y2="86.300003"
+           x2="201.95"
+           y1="76.800003"
+           x1="201.95" />
+        <path
+           id="E0"
+           d="M 189.76889,66.435452 A 10.5,10.5 90 0 1 201.95,76.8"
+           inkscape:connector-curvature="0"
+           style="color:#000000;display:inline;fill:none;stroke:currentColor;stroke-width:0.03125" />
+        <line
+           x1="201.95"
+           y1="76.800003"
+           x2="201.95"
+           y2="86.300003"
+           id="D7"
+           style="color:#000000;display:inline;fill:none;stroke:currentColor;stroke-width:0.03125" />
+        <line
+           x1="189.76889"
+           y1="66.435455"
+           x2="189.76889"
+           y2="66.435455"
+           id="DB"
+           style="color:#000000;display:inline;fill:none;stroke:currentColor;stroke-width:0.03125" />
+      </g>
       <rect
          style="fill:#ffffff"
          id="rect4537"
@@ -2499,56 +2525,6 @@
        id="TANGENT_LINES"
        style="color:#000000;display:inline;fill:none;stroke:currentColor;stroke-width:0.03125">
       <path
-         id="A9"
-         d="m 169.7,100.3 a 3,3 0 0 0 -3,3"
-         inkscape:connector-curvature="0"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <path
-         id="AA"
-         d="m 164.2,96.8 a 5.5,5.5 90 0 1 5.5,-5.5"
-         inkscape:connector-curvature="0"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <path
-         id="AB"
-         d="M 186.4606,101.1087 A 3,3 0 0 0 184.41165,100.3"
-         inkscape:connector-curvature="0"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <path
-         id="AC"
-         d="m 212.2,141.3 a 3,3 0 0 0 3,-3"
-         inkscape:connector-curvature="0"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <path
-         id="AF"
-         d="m 215.2,103.3 a 3,3 0 0 0 -3,-3"
-         inkscape:connector-curvature="0"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <path
-         id="B0"
-         d="m 197.48835,100.3 a 3,3 0 0 0 -2.04895,0.8087"
-         inkscape:connector-curvature="0"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <path
-         id="BA"
-         d="m 169.7,143.8 a 5.5,5.5 90 0 1 -5.5,-5.5"
-         inkscape:connector-curvature="0"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <path
-         id="BB"
-         d="m 212.2,91.3 a 5.5,5.5 90 0 1 5.5,5.5"
-         inkscape:connector-curvature="0"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <path
-         id="BF"
-         d="m 166.7,138.3 a 3,3 0 0 0 3,3"
-         inkscape:connector-curvature="0"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <path
-         id="C1"
-         d="m 217.7,138.3 a 5.5,5.5 90 0 1 -5.5,5.5"
-         inkscape:connector-curvature="0"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <path
          id="ID_26B"
          d="m 140.3,137.63666 a 0.85,0.85 90 0 1 0,-1.67332"
          inkscape:connector-curvature="0"
@@ -2568,243 +2544,297 @@
          d="m 140.6,95.96334 a 0.85,0.85 90 0 1 0,1.67332"
          inkscape:connector-curvature="0"
          style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <circle
-         cx="190.95"
-         cy="100.8"
-         r="3.3819661"
-         id="ID_82"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="214.7"
-         y1="103.3"
-         x2="214.7"
-         y2="103.3"
-         id="ID_7A"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="214.7"
-         y1="138.3"
-         x2="214.7"
-         y2="138.3"
-         id="ID_7B"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="219.7"
-         y1="138.3"
-         x2="219.7"
-         y2="138.3"
-         id="ID_85"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="219.7"
-         y1="96.800003"
-         x2="219.7"
-         y2="96.800003"
-         id="ID_86"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="167.2"
-         y1="138.3"
-         x2="167.2"
-         y2="138.3"
-         id="ID_88"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="167.2"
-         y1="103.3"
-         x2="167.2"
-         y2="103.3"
-         id="ID_89"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="184.41165"
-         y1="100.3"
-         x2="169.7"
-         y2="100.3"
-         id="ID_91"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="217.7"
-         y1="96.800003"
-         x2="217.7"
-         y2="138.3"
-         id="ID_94"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="212.2"
-         y1="100.3"
-         x2="197.48834"
-         y2="100.3"
-         id="ID_95"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="169.7"
-         y1="141.3"
-         x2="212.2"
-         y2="141.3"
-         id="ID_98"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="166.7"
-         y1="103.3"
-         x2="166.7"
-         y2="138.3"
-         id="ID_99"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="164.2"
-         y1="138.3"
-         x2="164.2"
-         y2="96.800003"
-         id="ID_9A"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="215.2"
-         y1="138.3"
-         x2="215.2"
-         y2="103.3"
-         id="ID_9B"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="212.2"
-         y1="143.8"
-         x2="169.7"
-         y2="143.8"
-         id="ID_9C"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="169.7"
-         y1="91.300003"
-         x2="212.2"
-         y2="91.300003"
-         id="A0"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="164.2"
-         y1="138.3"
-         x2="162.2"
-         y2="138.3"
-         id="A7"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="169.7"
-         y1="143.8"
-         x2="169.7"
-         y2="145.8"
-         id="A8"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="164.2"
-         y1="96.800003"
-         x2="162.2"
-         y2="96.800003"
-         id="AD"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="184.41165"
-         y1="100.8"
-         x2="184.41165"
-         y2="100.3"
-         id="B1"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="167.2"
-         y1="103.3"
-         x2="166.7"
-         y2="103.3"
-         id="B5"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="219.7"
-         y1="138.3"
-         x2="217.7"
-         y2="138.3"
-         id="B6"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="212.2"
-         y1="100.3"
-         x2="212.2"
-         y2="100.8"
-         id="B7"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="197.48834"
-         y1="100.8"
-         x2="197.48834"
-         y2="100.3"
-         id="B9"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="215.2"
-         y1="103.3"
-         x2="214.7"
-         y2="103.3"
-         id="BE"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="212.2"
-         y1="89.300003"
-         x2="212.2"
-         y2="91.300003"
-         id="C0"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="215.2"
-         y1="138.3"
-         x2="214.7"
-         y2="138.3"
-         id="C2"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="219.7"
-         y1="96.800003"
-         x2="217.7"
-         y2="96.800003"
-         id="C4"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="212.2"
-         y1="141.3"
-         x2="212.2"
-         y2="140.8"
-         id="C5"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="212.2"
-         y1="145.8"
-         x2="212.2"
-         y2="143.8"
-         id="C7"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="169.7"
-         y1="141.3"
-         x2="169.7"
-         y2="140.8"
-         id="C8"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="169.7"
-         y1="91.300003"
-         x2="169.7"
-         y2="89.300003"
-         id="C9"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="169.7"
-         y1="100.8"
-         x2="169.7"
-         y2="100.3"
-         id="CC"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
-      <line
-         x1="166.7"
-         y1="138.3"
-         x2="167.2"
-         y2="138.3"
-         id="CD"
-         style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635" />
+      <g
+         id="g4770"
+         inkscape:label="Display">
+        <path
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           inkscape:connector-curvature="0"
+           d="m 169.7,100.3 a 3,3 0 0 0 -3,3"
+           id="A9" />
+        <path
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           inkscape:connector-curvature="0"
+           d="m 164.2,96.8 a 5.5,5.5 90 0 1 5.5,-5.5"
+           id="AA" />
+        <path
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           inkscape:connector-curvature="0"
+           d="M 186.4606,101.1087 A 3,3 0 0 0 184.41165,100.3"
+           id="AB" />
+        <path
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           inkscape:connector-curvature="0"
+           d="m 212.2,141.3 a 3,3 0 0 0 3,-3"
+           id="AC" />
+        <path
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           inkscape:connector-curvature="0"
+           d="m 215.2,103.3 a 3,3 0 0 0 -3,-3"
+           id="AF" />
+        <path
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           inkscape:connector-curvature="0"
+           d="m 197.48835,100.3 a 3,3 0 0 0 -2.04895,0.8087"
+           id="B0" />
+        <path
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           inkscape:connector-curvature="0"
+           d="m 169.7,143.8 a 5.5,5.5 90 0 1 -5.5,-5.5"
+           id="BA" />
+        <path
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           inkscape:connector-curvature="0"
+           d="m 212.2,91.3 a 5.5,5.5 90 0 1 5.5,5.5"
+           id="BB" />
+        <path
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           inkscape:connector-curvature="0"
+           d="m 166.7,138.3 a 3,3 0 0 0 3,3"
+           id="BF" />
+        <path
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           inkscape:connector-curvature="0"
+           d="m 217.7,138.3 a 5.5,5.5 90 0 1 -5.5,5.5"
+           id="C1" />
+        <circle
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="ID_82"
+           r="3.3819661"
+           cy="100.8"
+           cx="190.95" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="ID_7A"
+           y2="103.3"
+           x2="214.7"
+           y1="103.3"
+           x1="214.7" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="ID_7B"
+           y2="138.3"
+           x2="214.7"
+           y1="138.3"
+           x1="214.7" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="ID_85"
+           y2="138.3"
+           x2="219.7"
+           y1="138.3"
+           x1="219.7" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="ID_86"
+           y2="96.800003"
+           x2="219.7"
+           y1="96.800003"
+           x1="219.7" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="ID_88"
+           y2="138.3"
+           x2="167.2"
+           y1="138.3"
+           x1="167.2" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="ID_89"
+           y2="103.3"
+           x2="167.2"
+           y1="103.3"
+           x1="167.2" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="ID_91"
+           y2="100.3"
+           x2="169.7"
+           y1="100.3"
+           x1="184.41165" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="ID_94"
+           y2="138.3"
+           x2="217.7"
+           y1="96.800003"
+           x1="217.7" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="ID_95"
+           y2="100.3"
+           x2="197.48834"
+           y1="100.3"
+           x1="212.2" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="ID_98"
+           y2="141.3"
+           x2="212.2"
+           y1="141.3"
+           x1="169.7" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="ID_99"
+           y2="138.3"
+           x2="166.7"
+           y1="103.3"
+           x1="166.7" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="ID_9A"
+           y2="96.800003"
+           x2="164.2"
+           y1="138.3"
+           x1="164.2" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="ID_9B"
+           y2="103.3"
+           x2="215.2"
+           y1="138.3"
+           x1="215.2" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="ID_9C"
+           y2="143.8"
+           x2="169.7"
+           y1="143.8"
+           x1="212.2" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="A0"
+           y2="91.300003"
+           x2="212.2"
+           y1="91.300003"
+           x1="169.7" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="A7"
+           y2="138.3"
+           x2="162.2"
+           y1="138.3"
+           x1="164.2" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="A8"
+           y2="145.8"
+           x2="169.7"
+           y1="143.8"
+           x1="169.7" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="AD"
+           y2="96.800003"
+           x2="162.2"
+           y1="96.800003"
+           x1="164.2" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="B1"
+           y2="100.3"
+           x2="184.41165"
+           y1="100.8"
+           x1="184.41165" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="B5"
+           y2="103.3"
+           x2="166.7"
+           y1="103.3"
+           x1="167.2" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="B6"
+           y2="138.3"
+           x2="217.7"
+           y1="138.3"
+           x1="219.7" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="B7"
+           y2="100.8"
+           x2="212.2"
+           y1="100.3"
+           x1="212.2" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="B9"
+           y2="100.3"
+           x2="197.48834"
+           y1="100.8"
+           x1="197.48834" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="BE"
+           y2="103.3"
+           x2="214.7"
+           y1="103.3"
+           x1="215.2" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="C0"
+           y2="91.300003"
+           x2="212.2"
+           y1="89.300003"
+           x1="212.2" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="C2"
+           y2="138.3"
+           x2="214.7"
+           y1="138.3"
+           x1="215.2" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="C4"
+           y2="96.800003"
+           x2="217.7"
+           y1="96.800003"
+           x1="219.7" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="C5"
+           y2="140.8"
+           x2="212.2"
+           y1="141.3"
+           x1="212.2" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="C7"
+           y2="143.8"
+           x2="212.2"
+           y1="145.8"
+           x1="212.2" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="C8"
+           y2="140.8"
+           x2="169.7"
+           y1="141.3"
+           x1="169.7" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="C9"
+           y2="89.300003"
+           x2="169.7"
+           y1="91.300003"
+           x1="169.7" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="CC"
+           y2="100.3"
+           x2="169.7"
+           y1="100.8"
+           x1="169.7" />
+        <line
+           style="stroke-dasharray:3.175, 0.635, 0.635, 0.635, 0.635, 0.635"
+           id="CD"
+           y2="138.3"
+           x2="167.2"
+           y1="138.3"
+           x1="166.7" />
+      </g>
       <line
          x1="201.95"
          y1="86.300003"
