@@ -41,7 +41,7 @@
      id="namedview4229"
      showgrid="false"
      inkscape:zoom="3.815"
-     inkscape:cx="13.98822"
+     inkscape:cx="10.318495"
      inkscape:cy="18.146432"
      inkscape:window-x="-11"
      inkscape:window-y="-11"
@@ -176,13 +176,13 @@
       <stop
          id="stop5265"
          offset="0"
-         style="stop-color:#008080;stop-opacity:0;" />
+         style="stop-color:#008080;stop-opacity:1" />
       <stop
-         style="stop-color:#008680;stop-opacity:0.91625613"
+         style="stop-color:#00928c;stop-opacity:1"
          offset="0.36145324"
          id="stop5277" />
       <stop
-         style="stop-color:#008180;stop-opacity:0.75862068"
+         style="stop-color:#006867;stop-opacity:1"
          offset="0.73960924"
          id="stop5275" />
       <stop
