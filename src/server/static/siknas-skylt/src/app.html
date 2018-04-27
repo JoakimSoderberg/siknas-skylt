@@ -1,6 +1,7 @@
 <template>
   <require from="./animation-list"></require>
   <require from="./siknas-skylt"></require>
+  <require from="./kontrollpanel"></require>
 
   <nav class="navbar navbar-default navbar-dark" role="navigation">
     <div class="container-fluid">
@@ -27,6 +28,7 @@
 
   <div class="container" style="margin: 10px">
     <siknas-skylt blurlevel.bind="blurValue"></siknas-skylt>
+    <kontrollpanel></kontrollpanel>
     <div class="row">
       <animation-list class="col-md-4"></animation-list>
       <router-view class="col-md-8"></router-view>

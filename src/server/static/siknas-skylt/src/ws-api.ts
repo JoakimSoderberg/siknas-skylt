@@ -2,9 +2,9 @@ import { autoinject } from 'aurelia-framework';
 import { EventAggregator } from 'aurelia-event-aggregator';
 import {
     WebsocketDisconnected, WebsocketConnected, WebsocketError,
-    WebsocketMessageReceived, WebsocketAnimationList
+    WebsocketMessageReceived, WebsocketAnimationList, WebsocketControlPanelMessage
 } from "./messages";
-import { Animation, AnimationListMessage } from "./types";
+import { Animation, AnimationListMessage, ControlPanelMessage } from "./types";
 
 const MAX_BACKOFF = 5000;
 const BACKOFF_INCR = 500;
@@ -44,8 +44,13 @@ export class WSAPI {
                 this.events.publish(new WebsocketAnimationList(animations));
                 break;
             case "status":
-                console.log("Status: " + data["text"]);
+                console.log("Status: ", data["text"]);
                 break
+            case "control_panel":
+                let msg: ControlPanelMessage = data;
+                console.log("Control Panel message: ", data);
+                this.events.publish(new WebsocketControlPanelMessage(data));
+                break;
             default:
                 console.log("Unknown message:", e.data);
                 break;

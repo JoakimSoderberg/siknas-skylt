@@ -29,3 +29,8 @@ export class AnimationViewed {
 export class WebsocketOPCMessage {
     constructor(public data) { }
 }
+
+// TODO: Make data have an inteface
+export class WebsocketControlPanelMessage {
+    constructor(public data) {}
+}

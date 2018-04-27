@@ -29,7 +29,7 @@ type serverMsg struct {
 
 type serverControlPanelMsg struct {
 	serverMsg
-	Data ControlPanelMsg `json"data"`
+	ControlPanelMsg
 }
 
 // serverAnim represents a processing animation sketch.
@@ -166,7 +166,7 @@ func WsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProcessManager) ht
 						serverMsg: serverMsg{
 							MessageType: "control_panel",
 						},
-						Data: msg,
+						ControlPanelMsg: msg,
 					}
 					conn.WriteJSON(serverControlPanelMsg)
 				case <-pingTicker.C:

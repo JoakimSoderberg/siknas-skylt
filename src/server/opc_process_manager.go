@@ -102,6 +102,7 @@ func (o *OpcProcessManager) StopAnim() {
 		log.Printf("Killed process: %v\n", o.currentName)
 	}
 
+	// TODO: Change this to use https://stackoverflow.com/questions/22470193/why-wont-go-kill-a-child-process-correctly
 	// TODO: Go routine?
 	// TODO: Timeout command?
 	if process.KillCommand != "" {

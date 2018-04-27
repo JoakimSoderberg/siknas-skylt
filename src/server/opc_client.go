@@ -15,7 +15,6 @@ func RunOpcClient(protocol string, host string, maxBackoff time.Duration, bcast 
 	opcConnect := func() error {
 		conn, err := net.Dial("tcp", host)
 		if err != nil {
-			//log.Println("[OPC outgoing client] Failed to connect:", err)
 			return err
 		}
 
@@ -53,7 +52,7 @@ func RunOpcClient(protocol string, host string, maxBackoff time.Duration, bcast 
 		b.MaxElapsedTime = maxBackoff
 		b.MaxInterval = 30 * time.Second
 		err := backoff.RetryNotify(opcConnect, b, func(err error, duration time.Duration) {
-			log.Printf("[OPC outgoing client] Reconnect in %s: %s\n", duration, err)
+			log.Printf("[OPC outgoing client] Reconnect in %.2fs: %v\n", duration.Seconds(), err) // TODO: Round this duration
 		})
 		if err != nil {
 			log.Printf("[OPC outgoing client] Failed retry while reconnecting: %v\n", err)

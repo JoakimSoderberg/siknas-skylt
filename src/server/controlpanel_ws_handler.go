@@ -21,7 +21,8 @@ func ControlPanelWsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProces
 
 		// TODO: Only allow one client.
 		// TODO: When this client is connected ignore selection via webpage if not "custom program" is selected.
-		// TODO: Enable connectin
+
+		// TODO: Keep latest control panel state and send it to all connection web clients.
 
 		// Clients needs to reply to Ping.
 		conn.SetReadDeadline(time.Now().Add(pongWait))

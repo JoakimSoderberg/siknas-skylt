@@ -6,3 +6,9 @@ export interface Animation {
 export interface AnimationListMessage {
     anims: Array<Animation>
 }
+
+export interface ControlPanelMessage {
+    program: number
+    color: number[]
+    brightness: number
+}

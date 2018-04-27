@@ -12,9 +12,9 @@ const (
 
 // ControlPanelMsg represents the state of the control panel hardware.
 type ControlPanelMsg struct {
-	Program    int    `json:"program,omitempty"`
-	Color      [3]int `json:"color,omitempty"`
-	Brightness int    `json:"brightness,omitempty"`
+	Program    int    `json:"program"`
+	Color      [3]int `json:"color"`
+	Brightness int    `json:"brightness"`
 }
 
 // ControlPanelReceiver is a client that wants to listen to control panel messages.
