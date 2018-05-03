@@ -15,6 +15,7 @@ export class Kontrollpanel {
         this.events.subscribe(WebsocketControlPanelMessage, msg => {
             this.state = msg.data;
             console.log("kontrollpanel has msg: ", this.state, msg);
+            // TODO: Animate SVG.
         });
     }
 
