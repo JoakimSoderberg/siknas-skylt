@@ -81,7 +81,7 @@ export class SiknasSkylt {
                 let j = JSON.parse(jsonTxt);
 
                 // TODO: Remove debug print
-                console.log("Brightness: ", j["whitepoint"][0]);
+                // console.log("Brightness: ", j["whitepoint"][0]);
 
                 let red = j["whitepoint"][0];
                 let green = j["whitepoint"][1];

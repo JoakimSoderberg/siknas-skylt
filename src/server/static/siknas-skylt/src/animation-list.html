@@ -1,12 +1,14 @@
 <template>
+    <button class="btn btn-danger" click.delegate="stop()">Stop</button>
     <div class="animation-list">
         <ul class="list-group">
             <h1>${animations.Length}</h1>
-            <li repeat.for="animation of animations" class="list-group-item ${animation.name === $parent.selectedName ? 'active' : ''}">
-                <a route-href="route: animations; params.bind: {name:animation.name}" click.delegate="$parent.select(animation)">
-                    <h4 class="list-group-item-heading">${animation.name}</h4>
-                    <p class="list-group-item-text">${animation.description}</p>
-                </a>
+            <li repeat.for="animation of animations"
+                class="list-group-item d-flex justify-content-between ${animation === playingAnimation ? 'active' : ''}">
+                <h6 class="list-group-item-heading">${animation.name}</h6>
+                <small class="text-muted">${animation.description}</small>
+                <button class="btn btn-primary" style="height: 50%" click.delegate="play(animation)">Play</button>
+                <img src="images/animations/${animation.name}.svg" width="100" height="100"/>
             </li>
         </ul>
     </div>

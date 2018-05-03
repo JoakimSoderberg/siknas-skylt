@@ -5,25 +5,32 @@ import {
 } from './messages';
 import { autoinject } from 'aurelia-framework';
 import { Animation, AnimationListMessage } from "./types";
-import { AnimationListService } from "./animation-list-service";
+import { WSAPI } from "./ws-api";
 
 @autoinject()
 export class AnimationList {
-    selectedName: string;
+    animations: Array<Animation>;
+    playingAnimation: Animation | null;
 
-    constructor(private events: EventAggregator, private service: AnimationListService) {
-        this.events.subscribe(AnimationViewed, msg => {
-            console.log("Viewed:", msg.animation);
-            this.select(msg.animation);
-        })
+    constructor(private events: EventAggregator, private api: WSAPI) {
+        // Once the websocket is connected we'll receive a list of animations.
+        events.subscribe(WebsocketAnimationList, msg => {
+            this.animations = msg.data.anims;
+            console.log("Animations received:", this.animations);
+        });
     }
 
-    get animations() {
-        return this.service.animations;
-    }
+    play(animation: Animation | null) {
+        if (animation != null) {
+            this.api.sendSelectMessage(animation.name);
+            this.playingAnimation = animation;
+        }
 
-    select(animation: Animation | null) {
-        this.selectedName = (animation != null) ? animation.name : null;
         return true;
+    }
+
+    stop() {
+        this.api.sendSelectMessage("");
+        this.playingAnimation = null;
     }
 }
