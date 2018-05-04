@@ -28,6 +28,7 @@ func main() {
 
 	rootCmd.Flags().Duration("capture-duration", 10*time.Second, "Duration of data we should capture (in seconds)")
 	rootCmd.Flags().String("output", "output/", "Output path where to place the animation SVGs")
+	rootCmd.Flags().Bool("output-frames", false, "Output each frame, instead of adding the animation to the SVG itself")
 
 	rootCmd.Flags().String("ws-opc-path", "/ws/opc", "Websocket OPC path to connect to")
 	rootCmd.Flags().String("ws-path", "/ws", "Websocket control path to connect to")
@@ -88,10 +89,18 @@ func main() {
 		log.Println(animation.Name)
 		log.Println("====================")
 
-		filePath := path.Join(outputPath, fmt.Sprintf("%s.%s", animation.Name, "svg"))
+		var targetPath string
+
+		if viper.GetBool("output-frames") {
+			// Each frame will be a separate file, so create a directory.
+			targetPath = path.Join(outputPath, animation.Name)
+		} else {
+			targetPath = path.Join(outputPath, fmt.Sprintf("%s.%s", animation.Name, "svg"))
+		}
+
 		if !viper.GetBool("force") {
-			if _, err := os.Stat(filePath); !os.IsNotExist(err) {
-				log.Printf("Skipping existing file '%v', use --force to overwrite\n", filePath)
+			if _, err := os.Stat(targetPath); !os.IsNotExist(err) {
+				log.Printf("Skipping existing animation '%v', use --force to overwrite\n", targetPath)
 				continue
 			}
 		}
@@ -114,8 +123,14 @@ func main() {
 		close(stopOpcChan)
 
 		opcMessages := <-opcDoneChan
-		log.Printf("Saving SVG for '%s' to %v\n", animation.Name, filePath)
-		createOutputSVG(filePath, opcMessages, ledPositions)
+
+		if viper.GetBool("output-frames") {
+			log.Printf("Saving SVG frames for '%s' to %v", animation.Name, targetPath)
+
+		} else {
+			log.Printf("Saving SVG for '%s' to %v\n", animation.Name, targetPath)
+			createAnimatedSVG(targetPath, opcMessages, ledPositions)
+		}
 	}
 
 	// Stop any animation still running.

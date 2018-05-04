@@ -56,7 +56,7 @@ func websocketControlReader(ws *websocket.Conn, animationListChan chan []Animati
 
 	log.Println("Starting control websocket reader")
 
-	// The first message the server sends is the animation list.
+	// The server starts by sending the list of Animations.
 	var animationsMsg AnimationListMessage
 
 	err := ws.ReadJSON(&animationsMsg)

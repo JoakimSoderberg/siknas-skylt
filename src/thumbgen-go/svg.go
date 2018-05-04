@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"path"
 	"strconv"
 	"strings"
 
@@ -12,10 +13,8 @@ import (
 	xmldom "github.com/subchen/go-xmldom"
 )
 
-// Creates the output SVG including the animation recorded.
-func createOutputSVG(outputPath string, opcMessages []OpcMessage, ledPositions []LedPosition) {
+func createBaseSVG() (*xmldom.Document, *xmldom.Node, float64, float64) {
 	svgLogoPath := viper.GetString("logo-svg")
-
 	doc := xmldom.Must(xmldom.ParseFile(svgLogoPath))
 	svg := doc.Root
 
@@ -41,6 +40,34 @@ func createOutputSVG(outputPath string, opcMessages []OpcMessage, ledPositions [
 	// A copy of the "Siknäs" text paths exists in the SVG defined as a clip-path
 	// we want the LEDs to be stay inside of this. So we clip the group using it.
 	ledGroupNode.SetAttributeValue("clip-path", "url(#SiknasClipPath)")
+
+	return doc, ledGroupNode, width, height
+}
+
+func createSVGFrames(outputPath string, name string, opcMessages []OpcMessage, ledPositions []LedPosition) {
+
+	for i := 0; i < len(opcMessages); i++ {
+		outputFilePath := path.Join(outputPath, fmt.Sprintf("%s%0*d.svg", name, 6, i))
+
+		doc, ledGroupNode, width, height := createBaseSVG()
+
+		for ledIndex, pos := range ledPositions {
+			circleNode := ledGroupNode.CreateNode("circle")
+			circleNode.SetAttributeValue("id", fmt.Sprintf("led%d", ledIndex))
+			circleNode.SetAttributeValue("cx", fmt.Sprintf("%f", (pos.Point[0]*width*0.81)+(width*0.05)))
+			circleNode.SetAttributeValue("cy", fmt.Sprintf("%f", (pos.Point[1]*height*0.55)+(height*0.20)))
+			circleNode.SetAttributeValue("r", "10")
+			r, g, b := opcMessages[i].RGB(ledIndex)
+			circleNode.SetAttributeValue("style", fmt.Sprintf("rgb(%d,%d,%d)", r, g, b))
+		}
+
+		ioutil.WriteFile(outputFilePath, []byte(doc.XMLPretty()), 0644)
+	}
+}
+
+// Creates the output SVG including the animation recorded.
+func createAnimatedSVG(outputPath string, opcMessages []OpcMessage, ledPositions []LedPosition) {
+	doc, ledGroupNode, width, height := createBaseSVG()
 
 	// Create the circles that represents the LED:s
 	for i, pos := range ledPositions {
