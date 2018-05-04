@@ -3,12 +3,14 @@
     <div class="animation-list">
         <ul class="list-group">
             <h1>${animations.Length}</h1>
-            <li repeat.for="animation of animations"
-                class="list-group-item d-flex justify-content-between ${animation === playingAnimation ? 'active' : ''}">
-                <h6 class="list-group-item-heading">${animation.name}</h6>
-                <small class="text-muted">${animation.description}</small>
-                <button class="btn btn-primary" style="height: 50%" click.delegate="play(animation)">Play</button>
-                <img src="images/animations/${animation.name}.svg" width="100" height="100"/>
+            <li repeat.for="animation of animations" class="list-group-item d-flex justify-content-between ${animation === playingAnimation ? 'active' : ''}">
+                <div>
+                    <h6 class="list-group-item-heading">${animation.name}</h6>
+                    <button class="btn btn-primary" style="height: 30%" click.delegate="play(animation)">
+                        <i class="fa fas fa-play"></i>
+                    </button>
+                </div>
+                <img src="images/animations/${animation.name}.svg" width="150" height="150" />
             </li>
         </ul>
     </div>

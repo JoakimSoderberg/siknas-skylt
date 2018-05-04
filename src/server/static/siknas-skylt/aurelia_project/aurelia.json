@@ -192,7 +192,10 @@
     "elements": "resources/elements",
     "attributes": "resources/attributes",
     "valueConverters": "resources/value-converters",
-    "bindingBehaviors": "resources/binding-behaviors"
+    "bindingBehaviors": "resources/binding-behaviors",
+    "fa": "node_modules/font-awesome",
+    "faCssOutput": "styles",
+    "faFontsOutput": "fonts"
   },
   "testFramework": {
     "id": "jasmine",

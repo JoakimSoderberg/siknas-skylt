@@ -4,6 +4,8 @@ import transpile from './transpile';
 import processMarkup from './process-markup';
 import processCSS from './process-css';
 import copyFiles from './copy-files';
+import faCss from './fa-css';
+import faFonts from './fa-fonts';
 import watch from './watch';
 import * as project from '../aurelia.json';
 
@@ -13,7 +15,10 @@ let build = gulp.series(
     transpile,
     processMarkup,
     processCSS,
-    copyFiles
+    copyFiles,
+    // custom tasks
+    faCss,
+    faFonts
   ),
   writeBundles
 );

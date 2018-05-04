@@ -26,5 +26,9 @@ node_modules
 # Compiled files
 scripts
 
+styles/font-awesome.min.css
+
+fonts/fontawesome*
+
 materialize-css.js
 rbuild.js
