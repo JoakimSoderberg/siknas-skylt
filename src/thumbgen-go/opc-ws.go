@@ -99,7 +99,12 @@ func websocketReader(ws *websocket.Conn, interrupt chan os.Signal, stopChan chan
 				log.Fatalf("ERROR: Got a %d byte invalid OPC message. Header says %d, got %d bytes\n", opcMsg.Header.Length, opcMsg.Header.Length, realMsgLength)
 			}
 
-			// A few messages not the correct lenght is ok.
+			// We only care about the normal OPC commands.
+			if opcMsg.Header.Command != 0 {
+				continue
+			}
+
+			// A few messages not the correct length is ok.
 			if opcMsg.Header.Length != expectMsgLen {
 				shortMsgCount++
 				log.Printf("Got a message of length %v when expecting %v. Total %v\n", opcMsg.Header.Length, expectMsgLen, shortMsgCount)

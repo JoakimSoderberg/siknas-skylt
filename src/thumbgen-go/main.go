@@ -94,6 +94,10 @@ func main() {
 		if viper.GetBool("output-frames") {
 			// Each frame will be a separate file, so create a directory.
 			targetPath = path.Join(outputPath, animation.Name)
+			err = os.MkdirAll(targetPath, 0644)
+			if err != nil {
+				log.Fatalf("Failed to create directory '%v': %v", targetPath, err)
+			}
 		} else {
 			targetPath = path.Join(outputPath, fmt.Sprintf("%s.%s", animation.Name, "svg"))
 		}
@@ -125,8 +129,8 @@ func main() {
 		opcMessages := <-opcDoneChan
 
 		if viper.GetBool("output-frames") {
-			log.Printf("Saving SVG frames for '%s' to %v", animation.Name, targetPath)
-
+			log.Printf("Saving SVG %d frames for '%s' to %v", len(opcMessages), animation.Name, targetPath)
+			createSVGFrames(targetPath, animation.Name, opcMessages, ledPositions)
 		} else {
 			log.Printf("Saving SVG for '%s' to %v\n", animation.Name, targetPath)
 			createAnimatedSVG(targetPath, opcMessages, ledPositions)

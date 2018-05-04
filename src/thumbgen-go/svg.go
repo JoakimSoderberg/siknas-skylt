@@ -64,7 +64,7 @@ func createSVGFrames(outputPath string, name string, opcMessages []OpcMessage, l
 		for ledIndex, pos := range ledPositions {
 			circleNode := createCircleNode(ledGroupNode, &pos, width, height, ledIndex)
 			r, g, b := opcMessages[i].RGB(ledIndex)
-			circleNode.SetAttributeValue("style", fmt.Sprintf("rgb(%d,%d,%d)", r, g, b))
+			circleNode.SetAttributeValue("style", fmt.Sprintf("fill: rgb(%d,%d,%d)", r, g, b))
 		}
 
 		ioutil.WriteFile(outputFilePath, []byte(doc.XMLPretty()), 0644)
