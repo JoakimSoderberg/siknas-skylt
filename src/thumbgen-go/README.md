@@ -8,6 +8,11 @@ It can then either output a single SVG file containing the recorded animation, o
 
 Displaying an animated SVG as a single file is very CPU intensive in the browser, so using GIFs is better.
 
+Requirements
+------------
+
+To be able to run this you will need the SVG [`siknas-skylt.svg`](siknas-skylt.svg) and [`layout.json`](layout.json) (which contains the positions of the LEDs).
+
 Running
 -------
 
@@ -27,19 +32,17 @@ docker run -it --rm -v $(pwd):/go/src/app siknas-skylt-thumbgen-go go run *.go -
 docker run -it --rm -v $(pwd):/go/src/app siknas-skylt-thumbgen-go go run *.go --host $(docker-machine ip):8080 --output-frames 
 ```
 
-Docker (rsvg / Imagemagick)
----------------------------
+ImageMagick and gifs
+--------------------
 
-To rasterize a single SVG `rsvg-convert` can be used:
+To create an animated gif out of the generated SVGs, [ImageMagick](https://www.imagemagick.org) can be used:
 
 ```bash
+# Docker image for ImageMagick (or install it natively is preferred).
 docker build -t svg2gif -f Dockerfile.svg2gif .
 
-# Convert a single SVG to png (animations not supported) using librsvg.
-docker run -it --rm -v $(pwd):/shared -w /shared svg2gif rsvg-convert some.svg -o some.png
-
-# Convert a set of SVG frames to an animated gif using Imagemagick.
-docker run -it --rm -v $(pwd):/shared -w /shared svg2gif ./gifmaker.sh
+# Convert a set of SVG frames to an animated gif using Imagemagick (Takes a long time).
+docker run -it --rm -v $(pwd):/shared -w /shared svg2gif ./makegifs.sh
 ```
 
-
+**NOTE** On Windows running this in docker takes 2x more time!

@@ -48,7 +48,6 @@ export class WSAPI {
                 break
             case "control_panel":
                 let msg: ControlPanelMessage = data;
-                console.log("Control Panel message: ", data);
                 this.events.publish(new WebsocketControlPanelMessage(data));
                 break;
             default:
