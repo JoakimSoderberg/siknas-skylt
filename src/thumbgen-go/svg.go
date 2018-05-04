@@ -44,6 +44,16 @@ func createBaseSVG() (*xmldom.Document, *xmldom.Node, float64, float64) {
 	return doc, ledGroupNode, width, height
 }
 
+func createCircleNode(ledGroupNode *xmldom.Node, pos *LedPosition, width, height float64, ledIndex int) *xmldom.Node {
+	circleNode := ledGroupNode.CreateNode("circle")
+	circleNode.SetAttributeValue("id", fmt.Sprintf("led%d", ledIndex))
+	circleNode.SetAttributeValue("cx", fmt.Sprintf("%f", (pos.Point[0]*width*0.81)+(width*0.05)))
+	circleNode.SetAttributeValue("cy", fmt.Sprintf("%f", (pos.Point[1]*height*0.55)+(height*0.20)))
+	circleNode.SetAttributeValue("r", "10")
+
+	return circleNode
+}
+
 func createSVGFrames(outputPath string, name string, opcMessages []OpcMessage, ledPositions []LedPosition) {
 
 	for i := 0; i < len(opcMessages); i++ {
@@ -52,11 +62,7 @@ func createSVGFrames(outputPath string, name string, opcMessages []OpcMessage, l
 		doc, ledGroupNode, width, height := createBaseSVG()
 
 		for ledIndex, pos := range ledPositions {
-			circleNode := ledGroupNode.CreateNode("circle")
-			circleNode.SetAttributeValue("id", fmt.Sprintf("led%d", ledIndex))
-			circleNode.SetAttributeValue("cx", fmt.Sprintf("%f", (pos.Point[0]*width*0.81)+(width*0.05)))
-			circleNode.SetAttributeValue("cy", fmt.Sprintf("%f", (pos.Point[1]*height*0.55)+(height*0.20)))
-			circleNode.SetAttributeValue("r", "10")
+			circleNode := createCircleNode(ledGroupNode, &pos, width, height, ledIndex)
 			r, g, b := opcMessages[i].RGB(ledIndex)
 			circleNode.SetAttributeValue("style", fmt.Sprintf("rgb(%d,%d,%d)", r, g, b))
 		}
@@ -71,12 +77,7 @@ func createAnimatedSVG(outputPath string, opcMessages []OpcMessage, ledPositions
 
 	// Create the circles that represents the LED:s
 	for i, pos := range ledPositions {
-		circleNode := ledGroupNode.CreateNode("circle")
-		circleNode.SetAttributeValue("id", fmt.Sprintf("led%d", i))
-		circleNode.SetAttributeValue("cx", fmt.Sprintf("%f", (pos.Point[0]*width*0.81)+(width*0.05)))
-		circleNode.SetAttributeValue("cy", fmt.Sprintf("%f", (pos.Point[1]*height*0.55)+(height*0.20)))
-		circleNode.SetAttributeValue("r", "10")
-
+		circleNode := createCircleNode(ledGroupNode, &pos, width, height, i)
 		addLedAnimation(opcMessages, i, circleNode)
 	}
 
