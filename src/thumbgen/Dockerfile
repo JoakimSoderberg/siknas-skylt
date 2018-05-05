@@ -7,7 +7,7 @@ RUN curl -s -L https://github.com/golang/dep/releases/download/v0.3.1/dep-linux-
 
 EXPOSE 8080
 
-ADD *.go Gopkg.lock Gopkg.toml ./
+ADD *.go Gopkg.lock Gopkg.toml layout.json siknas-skylt.svg ./
 
 RUN dep ensure -v
 RUN go-wrapper install

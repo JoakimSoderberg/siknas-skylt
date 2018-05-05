@@ -13,15 +13,20 @@ Requirements
 
 To be able to run this you will need the SVG [`siknas-skylt.svg`](siknas-skylt.svg) and [`layout.json`](layout.json) (which contains the positions of the LEDs).
 
-Running
--------
+Build
+-----
 
 ```bash
 docker build -t siknas-skylt-thumbgen .
 
 # Get dependencies
 docker run -it --rm -v $(pwd):/go/src/app siknas-skylt-thumbgen dep ensure -v
+```
 
+Running
+-------
+
+```bash
 # Help
 docker run -it --rm -v $(pwd):/go/src/app siknas-skylt-thumbgen go run *.go --help
 

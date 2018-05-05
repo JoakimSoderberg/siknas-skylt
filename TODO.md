@@ -6,12 +6,12 @@ GUI
 - [ ] Add a live icon to indicate current animation
 - [ ] Add thumbnails to the list items
 - [ ] Adjust to mobile screen vs big screen
-- [ ] Add control panel graphic
+- [x] Add control panel graphic
     - [ ] When control panel "owns" the server it becomes big and list fades out
     - [ ] Updates to show the status of the real control panel
     - [ ] Minimizes once "Custom" is selected and the webapp can be used
-- [ ] Host the thumbnails for the sketches
-    - [ ] Uses the same names as the animations in the config
+- [x] Host the thumbnails for the sketches
+    - [x] Uses the same names as the animations in the config
 
 Server
 ======
@@ -26,6 +26,6 @@ Server
 Thumbnail generator
 ===================
 
-- [ ] Start the thumbnail generating client
-- [ ] Make the thumbnail generating client switch sketches and record to SVG thumbnails and then quit
-    - [ ] Save thumbnails using same name as animations
+- [x] Start the thumbnail generating client
+- [x] Make the thumbnail generating client switch sketches and record to SVG thumbnails and then quit
+    - [x] Save thumbnails using same name as animations
