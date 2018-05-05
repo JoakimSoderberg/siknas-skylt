@@ -12,6 +12,26 @@ To use this software, a **Fadecandy** server needs to run and be connected to th
 Quickstart
 ----------
 
+See Tutorial below for details.
+
+```bash
+# Create and edit src/server/sikas.yaml
+cp src/server/siknas.yaml.example src/server/siknas.yaml
+
+# Start server.
+docker-compose up -d
+
+# (Separate window) Run Xvfb inside of server.
+docker-compose exec server Xvfb :1 -screen 0, 1024x768x16 &
+
+# Surf to http://localhost:8080 (Linux)
+open http://$(docker-machine ip):8080   # OSX
+start http://$(docker-machine ip):8080  # Windows.
+```
+
+Tutorial
+--------
+
 This quickstart uses **Docker**, see below on how to **build** a final build instead.
 
 1. Install Docker. (On Windows use [**Docker toolbox**](https://docs.docker.com/toolbox/toolbox_install_windows/)).
@@ -140,7 +160,7 @@ This quickstart uses **Docker**, see below on how to **build** a final build ins
 Building
 --------
 
-### Export Processing to be standalone
+### Export Processing sketches to be standalone
 
 Examples assuming you are standing in the root of this repository (and using **git bash** or **docker console** on Windows).
 
@@ -159,7 +179,7 @@ processing-java --sketch=$(pwd)/examples/flames/ --platform=windows --export
 
 #### Linux
 
-This produces all versions under the sketch folder (yes the CLI is buggy).
+This produces all versions under the sketch folder (in theory). Best is to use the GUI.
 
 ```bash
 processing-java --sketch=$(pwd)/examples/flames/ --platform=linux --export
@@ -204,6 +224,20 @@ Repository structure
 * [`src/controlpanel/`](src/controlpanel/) - A websocket client that talks to the control panel via a serial port over USB. The Websocket client connects to the server. Written in Golang.
 * [`src/server/`](src/server/) - A server that hosts an OPC proxy, as well as a webserver and websockets server. This forwards the OPC traffic to the display coming from the processing sketches (that it starts and stops). It also broadcasts the traffic to connected webclients via websockets. The webserver hosts a web page that will let the user chose which processing sketch to run.
 * [`src/server/static/`](src/server/static/) - Hosts a webpage written in [Aurelia](https://aurelia.io/) that displays the list of Processing sketches used to animate the display. This webpage also listens to the binary OPC traffic, and uses [D3](https://d3js.org/) to animate an SVG copy of the real display.
+* [`src/thumbgen/`](src/thumbgen/) - Used to generate gif thumbnails by looping through and recording all the animations. These are used in the webapp to show a preview of the animation.
+
+Generating thumbnails
+---------------------
+
+The webapp displays animated gifs as thumbnails for the animations.
+
+To regenerate these, run the script below:
+
+```bash
+./make_thumbnails.sh
+```
+
+Or for details look at the [`README.md`](src/thumbgen) for **Thumbgen**.
 
 System overview
 ---------------
