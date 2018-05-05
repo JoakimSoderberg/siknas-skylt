@@ -17,19 +17,19 @@ Running
 -------
 
 ```bash
-docker build -t siknas-skylt-thumbgen-go .
+docker build -t siknas-skylt-thumbgen .
 
 # Get dependencies
-docker run -it --rm -v $(pwd):/go/src/app siknas-skylt-thumbgen-go dep ensure -v
+docker run -it --rm -v $(pwd):/go/src/app siknas-skylt-thumbgen dep ensure -v
 
 # Help
-docker run -it --rm -v $(pwd):/go/src/app siknas-skylt-thumbgen-go go run *.go --help
+docker run -it --rm -v $(pwd):/go/src/app siknas-skylt-thumbgen go run *.go --help
 
 # Generate a single SVG animation.
-docker run -it --rm -v $(pwd):/go/src/app siknas-skylt-thumbgen-go go run *.go --host $(docker-machine ip):8080
+docker run -it --rm -v $(pwd):/go/src/app siknas-skylt-thumbgen go run *.go --host $(docker-machine ip):8080
 
 # Generate one frame per OPC message.
-docker run -it --rm -v $(pwd):/go/src/app siknas-skylt-thumbgen-go go run *.go --host $(docker-machine ip):8080 --output-frames 
+docker run -it --rm -v $(pwd):/go/src/app siknas-skylt-thumbgen go run *.go --host $(docker-machine ip):8080 --output-frames
 ```
 
 ImageMagick and gifs
