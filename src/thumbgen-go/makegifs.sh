@@ -10,7 +10,9 @@ animations=$(ls -d output/*/ | xargs basename)
 
 for anim in "${animations[@]}"
 do
-    files=( output/flames/*.svg )
+    files=( output/${anim}/*.svg )
+    out_path="output/${anim}.gif"
+
     echo "Animation: ${anim} (${#files[@]} frames)"
 
     if [ ${#files[@]} = 0 ]; then
@@ -21,15 +23,21 @@ do
     mkdir -p tmp/
     rm -rf tmp/${anim}.*.miff
 
-    # Generate intermediate batches of animations in the internal ImageMagick miff format.
-    for (( i=0; $i<${#files[@]}; i+=$batch ))
-    do
-        intname="tmp/${anim}.$(printf "%06d" $i).miff"
-        echo "  Generating ($i of ${#files[@]}) ${intname}"
-        magick -delay 2 -loop 0 "${files[@]:$i:$batch}" -scale 150x150 ${intname}
-    done
+    if [ ${batch} -ge ${#files[@]} ]; then
+        echo "  Generating ${anim} gif ${out_path}"
+        magick -delay 2 -loop 0 -background none "${files[@]}" -scale 150x150 ${out_path}
+    else
+        # Generate intermediate batches of animations in the internal ImageMagick miff format.
+        for (( i=0; $i<${#files[@]}; i+=$batch ))
+        do
+            intermediate_path="tmp/${anim}.$(printf "%06d" $i).miff"
 
-    echo -n
-    echo "  Combining result for ${anim} into output/${anim}.gif"
-    magick tmp/${anim}.*.miff output/${anim}.gif
+            echo "  Generating ($i of ${#files[@]}) ${intermediate_path}"
+            magick -delay 2 -loop 0 -background none "${files[@]:$i:$batch}" -scale 150x150 ${intermediate_path}
+        done
+
+        echo -n
+        echo "  Combining result for ${anim} into ${out_path}"
+        magick -background none tmp/${anim}.*.miff ${out_path}
+    fi
 done
