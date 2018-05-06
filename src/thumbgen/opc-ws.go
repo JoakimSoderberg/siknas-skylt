@@ -79,8 +79,7 @@ func websocketReader(ws *websocket.Conn, interrupt chan os.Signal, stopChan chan
 			ws.SetReadDeadline(time.Now().Add(frameTimeout))
 			messageType, messageData, err := ws.ReadMessage()
 			if err != nil {
-				log.Println("OPC Websocket failed to read: ", err)
-				return
+				log.Fatalln("OPC Websocket failed to read: ", err)
 			}
 
 			if !started {

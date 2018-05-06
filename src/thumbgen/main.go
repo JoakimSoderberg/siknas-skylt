@@ -133,8 +133,6 @@ func main() {
 		}
 		log.Printf("Finished capturing after %v\n", captureDuration)
 
-		time.Sleep(captureDuration)
-
 		opcMessages := <-opcDoneChan
 
 		if viper.GetBool("output-frames") {
