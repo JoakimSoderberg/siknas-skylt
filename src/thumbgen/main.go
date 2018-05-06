@@ -34,7 +34,8 @@ func main() {
 	rootCmd.Flags().String("ws-path", "/ws", "Websocket control path to connect to")
 	rootCmd.Flags().BoolP("force", "f", false, "Force overwriting any existing ouput files. They are skipped by defaul")
 	rootCmd.Flags().BoolP("list-only", "l", false, "Only list the available sketches on the server. Will not generate any SVGs")
-	// TODO: Add option to capture by frame count instead of duration.
+	rootCmd.Flags().Int("max-frames", 0, "Capture up to this amount of frames. capture-duration sets max time. Set 0 to allow any frame count")
+	rootCmd.Flags().Duration("frame-timeout", 3*time.Second, "The time between frames (Example: 3s, 3000ms)")
 
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatalln(err)
@@ -82,9 +83,6 @@ func main() {
 	}
 
 	for _, animation := range animationList {
-		stopOpcChan := make(chan struct{})
-		opcDoneChan := make(chan []OpcMessage)
-
 		log.Println("====================")
 		log.Println(animation.Name)
 		log.Println("====================")
@@ -111,20 +109,31 @@ func main() {
 
 		// stopOpcChan is used to close the connection
 		// opcDoneChan returns the read messages at closing time.
+		stopOpcChan := make(chan struct{})
+		opcDoneChan := make(chan []OpcMessage)
 		ConnectOPCWebsocket(stopOpcChan, opcDoneChan, expectedMsgLen, interrupt)
 
 		// Selects the animation via the Control Websocket.
 		log.Printf("Playing '%s' for capture...\n", animation.Name)
 		ctrlMessagesChan <- animation.Name
-		// TODO: Add channel to wait for reply
-		time.Sleep(3 * time.Second)
+
 		log.Printf("Capturing...")
 
-		time.Sleep(captureDuration)
+	captureLoop:
+		for {
+			select {
+			case <-stopOpcChan:
+				// The websocket closed because it has captured max frames.
+				break captureLoop
+			case <-time.After(captureDuration):
+				// The OPC Websocket will close when the stopOpcChan chan is closed.
+				close(stopOpcChan)
+				break captureLoop
+			}
+		}
 		log.Printf("Finished capturing after %v\n", captureDuration)
 
-		// The OPC Websocket will close when the stopOpcChan chan is closed.
-		close(stopOpcChan)
+		time.Sleep(captureDuration)
 
 		opcMessages := <-opcDoneChan
 

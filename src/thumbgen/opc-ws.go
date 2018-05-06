@@ -56,22 +56,27 @@ func ConnectOPCWebsocket(stopChan chan struct{}, opcDoneChan chan []OpcMessage, 
 func websocketReader(ws *websocket.Conn, interrupt chan os.Signal, stopChan chan struct{}, opcDoneChan chan []OpcMessage, expectMsgLen uint16) {
 	var opcMsg OpcMessage
 
-	log.Println("Starting OPC websocket reader")
+	//log.Println("Starting OPC websocket reader")
 
 	opcMessages := []OpcMessage{}
 
 	defer func() {
 		// We pass the messages to the caller this way.
 		opcDoneChan <- opcMessages
-		log.Println("OPC reader done...")
+		//log.Println("OPC reader done...")
 	}()
 
 	started := false
 	shortMsgCount := 0
 
+	frameCount := 0
+	maxFrameCount := viper.GetInt("max-frames")
+	frameTimeout := viper.GetDuration("frame-timeout")
+
 	for {
 		select {
 		default:
+			ws.SetReadDeadline(time.Now().Add(frameTimeout))
 			messageType, messageData, err := ws.ReadMessage()
 			if err != nil {
 				log.Println("OPC Websocket failed to read: ", err)
@@ -121,6 +126,14 @@ func websocketReader(ws *websocket.Conn, interrupt chan os.Signal, stopChan chan
 			// TODO: Only start appending once we are signaled to.
 			opcMessages = append(opcMessages, opcMsg)
 
+			// If we should only capture max number of frames.
+			if maxFrameCount > 0 {
+				frameCount++
+				if frameCount >= maxFrameCount {
+					log.Println("Max frame count reached: ", frameCount)
+					close(stopChan)
+				}
+			}
 		case <-interrupt:
 			log.Println("OPC Websocket Reader got interrupted...")
 			return
@@ -160,7 +173,7 @@ func webSocketCleanClose(ws *websocket.Conn, interrupt chan os.Signal, stopChan 
 	// Wait for the reader to be done or a timeout.
 	select {
 	case <-stopChan:
-		log.Println("OPC Websocket done!")
+		//log.Println("OPC Websocket done!")
 	case <-time.After(time.Second):
 		log.Println("OPC Websocket timed out")
 	}
