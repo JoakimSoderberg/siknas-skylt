@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"path"
 	"strconv"
 	"strings"
@@ -55,7 +56,7 @@ func createCircleNode(ledGroupNode *xmldom.Node, pos *LedPosition, width, height
 }
 
 func createSVGFrames(outputPath string, name string, opcMessages []OpcMessage, ledPositions []LedPosition) {
-	//os.RemoveAll(outputPath)
+	os.RemoveAll(viper.GetString("output"))
 
 	for i := 0; i < len(opcMessages); i++ {
 		outputFilePath := path.Join(outputPath, fmt.Sprintf("%s%0*d.svg", name, 6, i))

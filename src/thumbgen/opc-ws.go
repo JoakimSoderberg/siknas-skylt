@@ -85,7 +85,7 @@ func websocketReader(ws *websocket.Conn, interrupt chan os.Signal, stopChan chan
 
 			if !started {
 				started = true
-				log.Printf("OPC Websocket started capturing %s of animation\n", viper.GetDuration("capture-duration"))
+				log.Printf("OPC Websocket started capturing %s of animation (max frames: %v)\n", viper.GetDuration("capture-duration"), maxFrameCount)
 			}
 
 			if messageType != websocket.BinaryMessage {
