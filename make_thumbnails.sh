@@ -23,6 +23,7 @@ if [ "${answer}" = "y" ]; then
     imagemagick_in_docker=1
 fi
 
+# Build docker images.
 pushd src/thumbgen/
 docker build -t siknas-skylt-thumbgen .
 
@@ -44,6 +45,7 @@ if [ imagemagick_in_docker = 1 ]; then
         siknas-skylt-gif2svg \
         ./makegifs.sh
 else
-    cd src/thumbgen && ./makegifs.sh -o ../server/static/siknas-skylt/images/animations
+    animation_path="../server/static/siknas-skylt/images/animations"
+    cd src/thumbgen && ./makegifs.sh -i ${animation_path} -o ${animation_path}
 fi
 

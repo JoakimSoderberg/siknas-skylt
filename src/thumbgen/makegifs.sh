@@ -21,13 +21,15 @@ show_help() {
 }
 
 OPTIND=1 # Reset in case getopts has been used previously in the shell.
-while getopts "h?o:b:" opt; do
+while getopts "h?o:i:b:" opt; do
     case "$opt" in
     h|\?)
         show_help
         exit 0
         ;;
     o)  output_path=$OPTARG
+        ;;
+    i)  input_path=$OPTARG
         ;;
     b)  batch=$OPTARG
         ;;
@@ -38,6 +40,8 @@ shift $((OPTIND-1))
 
 echo "Batch size: ${batch} frames"
 echo ""
+
+mkdir -p ${output_path}
 
 # We assume all directories are animations.
 animations=$(ls -d ${input_path}/*/ | xargs basename)
