@@ -125,7 +125,7 @@ func (o *OpcProcessManager) StopAnim() {
 
 // StartAnim starts a given animation process by name.
 func (o *OpcProcessManager) StartAnim(processName string) error {
-
+	// TODO: Rename to PlayAnim.
 	// Empty name means to stop.
 	if processName == "" {
 		o.StopAnim()

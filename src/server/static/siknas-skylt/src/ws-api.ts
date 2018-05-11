@@ -90,10 +90,10 @@ export class WSAPI {
         this.socket.send(JSON.stringify(msg));
     }
 
-    sendSelectMessage(name: string) {
+    sendPlayMessage(name: string) {
         this.sendJSONMessage({
-            "message_type": "select",
-            "selected": name
+            "message_type": "play",
+            "animation_name": name
         });
     }
 

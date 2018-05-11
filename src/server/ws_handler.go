@@ -15,11 +15,11 @@ type clientMsg struct {
 	MessageType string `json:"message_type"`
 }
 
-// clientSelectMsg is sent by clients when selecting an animation
+// clientPlayMsg is sent by clients when selecting an animation
 // from the list of available animations returned in servListMsg.
-type clientSelectMsg struct {
+type clientPlayMsg struct {
 	clientMsg
-	Selected string `json:"selected"`
+	AnimationName string `json:"animation_name"`
 }
 
 // serverMsg is a message returned over the websocket.
@@ -34,21 +34,23 @@ type serverControlPanelMsg struct {
 
 // serverAnim represents a processing animation sketch.
 type serverAnim struct {
-	Name        string `json:"name,omitempty"`
-	Description string `json:"description,omitempty"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
 // servListMsg is a message containing a list of processing Animations available to choose from.
 type serverListMsg struct {
 	serverMsg
-	Anims []serverAnim `json:"anims,omitempty"`
+	Playing     int          `json:"playing"`
+	PlayingName string       `json:"playing_name"`
+	Anims       []serverAnim `json:"anims"`
 }
 
 // serverStatusMsg is a status message for any action a client performed.
 type serverStatusMsg struct {
 	serverMsg
-	Success bool   `json:"success,omitempty"`
-	Text    string `json:"text,omitempty"`
+	Success bool   `json:"success"`
+	Text    string `json:"text"`
 }
 
 // getAnimsListMsg returns a list of available animation processes.
@@ -57,50 +59,67 @@ func getAnimsListMsg(opcManager *OpcProcessManager) (serverListMsg, error) {
 		serverMsg: serverMsg{MessageType: "list"},
 	}
 
+	msg.Playing = -1
+	msg.PlayingName = opcManager.currentName
 	msg.Anims = make([]serverAnim, len(opcManager.Processes))
 	i := 0
 	for name, val := range opcManager.Processes {
 		msg.Anims[i].Name = name
 		msg.Anims[i].Description = val.Description
+
+		if msg.Anims[i].Name == msg.PlayingName {
+			msg.Playing = i
+		}
 	}
 
 	return msg, nil
 }
 
-// Unmarshals a client message and returns a server status.
-func unmarshalClientMsg(data []byte, opcManager *OpcProcessManager) (string, error) {
+// sendClientReply unmarshals a client message and returns a server status.
+func sendClientReply(data []byte, opcManager *OpcProcessManager, replyChan chan interface{}) {
 	var msg clientMsg
 	err := json.Unmarshal(data, &msg)
 	if err != nil {
-		return "", fmt.Errorf("failed to unmarshal JSON '%v': %v", string(data), err)
+		log.Printf("Failed to unmarshal JSON '%v': %v\n", string(data), err)
 	}
 
 	log.Printf("Got Websocket client message:\n%v\n", msg)
 
 	switch msg.MessageType {
 	default:
-		return "", fmt.Errorf("unexpected message type from client: %v", msg.MessageType)
-	case "select":
-		// TODO: Make into function.
-		var selectMsg clientSelectMsg
-		err := json.Unmarshal(data, &selectMsg) // TODO: Does not fail if "selected" is missing
+		log.Printf("Unexpected message type from client: %v")
+	case "play":
+		msg, err := playMsgHandler(data, opcManager)
 		if err != nil {
-			return "", fmt.Errorf("failed to unmarshal JSON '%v':\n  %v", string(data), err)
+			replyChan <- serverStatusMsg{
+				serverMsg: serverMsg{MessageType: "error"},
+				Success:   false,
+				Text:      err.Error(),
+			}
+		} else {
+			replyChan <- *msg
 		}
-
-		if opcManager.IsControlPanelOwner() {
-			log.Printf("Control panel owns animation selection, ignoring client request")
-			return "", fmt.Errorf("The control panel owns animation selection")
-		}
-
-		// TODO: Selecting a new sketch should broadcast the selection to all ws clients
-
-		if err := opcManager.StartAnim(selectMsg.Selected); err != nil {
-			return "", err
-		}
-
-		return fmt.Sprintf("Started animation %v", selectMsg.Selected), nil
 	}
+}
+
+func playMsgHandler(data []byte, opcManager *OpcProcessManager) (*serverListMsg, error) {
+	var playMsg clientPlayMsg
+	err := json.Unmarshal(data, &playMsg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal JSON '%v':\n  %v", string(data), err)
+	}
+
+	if opcManager.IsControlPanelOwner() {
+		log.Printf("Control panel owns animation selection, ignoring client request")
+		return nil, fmt.Errorf("The control panel owns animation selection")
+	}
+
+	if err := opcManager.StartAnim(playMsg.AnimationName); err != nil {
+		return nil, err
+	}
+
+	msg, err := getAnimsListMsg(opcManager)
+	return &msg, err
 }
 
 // WsHandler is the websocket handler for "normal" websocket clients that are not the control panel.
@@ -204,15 +223,6 @@ func readOpcWsConn(conn *websocket.Conn, serverMessages chan interface{},
 			break
 		}
 
-		statusText, err := unmarshalClientMsg(data, opcManager)
-		if err != nil {
-			statusText = err.Error()
-		}
-
-		serverMessages <- serverStatusMsg{
-			serverMsg: serverMsg{MessageType: "status"},
-			Success:   (err != nil),
-			Text:      statusText,
-		}
+		sendClientReply(data, opcManager, serverMessages)
 	}
 }

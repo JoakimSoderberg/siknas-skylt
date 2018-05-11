@@ -4,6 +4,8 @@ export interface Animation {
 }
 
 export interface AnimationListMessage {
+    playing: number
+    playing_name: string
     anims: Array<Animation>
 }
 

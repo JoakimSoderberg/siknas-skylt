@@ -14,23 +14,29 @@ export class AnimationList {
 
     constructor(private events: EventAggregator, private api: WSAPI) {
         // Once the websocket is connected we'll receive a list of animations.
-        events.subscribe(WebsocketAnimationList, msg => {
-            this.animations = msg.data.anims;
-            console.log("Animations received:", this.animations);
+        events.subscribe(WebsocketAnimationList, msg_raw => {
+            let msg: AnimationListMessage = msg_raw.data;
+            console.log("Animations received:", msg);
+
+            this.animations = msg.anims;
+
+            if (msg.playing > 0) {
+                this.playingAnimation = msg.anims[msg.playing];
+            } else {
+                this.playingAnimation = null;
+            }
         });
     }
 
     play(animation: Animation | null) {
         if (animation != null) {
-            this.api.sendSelectMessage(animation.name);
-            this.playingAnimation = animation;
+            this.api.sendPlayMessage(animation.name);
         }
 
         return true;
     }
 
     stop() {
-        this.api.sendSelectMessage("");
-        this.playingAnimation = null;
+        this.api.sendPlayMessage("");
     }
 }
