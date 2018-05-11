@@ -41,9 +41,7 @@ type serverAnim struct {
 // servListMsg is a message containing a list of processing Animations available to choose from.
 type serverListMsg struct {
 	serverMsg
-	Playing     int          `json:"playing"`
-	PlayingName string       `json:"playing_name"`
-	Anims       []serverAnim `json:"anims"`
+	AnimationState
 }
 
 // serverStatusMsg is a status message for any action a client performed.
@@ -55,24 +53,10 @@ type serverStatusMsg struct {
 
 // getAnimsListMsg returns a list of available animation processes.
 func getAnimsListMsg(opcManager *OpcProcessManager) (serverListMsg, error) {
-	msg := serverListMsg{
-		serverMsg: serverMsg{MessageType: "list"},
-	}
-
-	msg.Playing = -1
-	msg.PlayingName = opcManager.currentName
-	msg.Anims = make([]serverAnim, len(opcManager.Processes))
-	i := 0
-	for name, val := range opcManager.Processes {
-		msg.Anims[i].Name = name
-		msg.Anims[i].Description = val.Description
-
-		if msg.Anims[i].Name == msg.PlayingName {
-			msg.Playing = i
-		}
-	}
-
-	return msg, nil
+	return serverListMsg{
+		serverMsg:      serverMsg{MessageType: "list"},
+		AnimationState: opcManager.GetAnimationsState(),
+	}, nil
 }
 
 // sendClientReply unmarshals a client message and returns a server status.
@@ -114,7 +98,7 @@ func playMsgHandler(data []byte, opcManager *OpcProcessManager) (*serverListMsg,
 		return nil, fmt.Errorf("The control panel owns animation selection")
 	}
 
-	if err := opcManager.StartAnim(playMsg.AnimationName); err != nil {
+	if err := opcManager.PlayAnim(playMsg.AnimationName); err != nil {
 		return nil, err
 	}
 

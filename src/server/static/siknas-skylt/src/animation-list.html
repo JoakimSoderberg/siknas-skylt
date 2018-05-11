@@ -6,8 +6,8 @@
             <li repeat.for="animation of animations" class="list-group-item d-flex justify-content-between ${animation === playingAnimation ? 'active' : ''}">
                 <div>
                     <h6 class="list-group-item-heading">${animation.name}</h6>
-                    <button class="btn btn-primary" style="height: 30%" click.delegate="play(animation)">
-                        <i class="fa fas fa-play"></i>
+                    <button class="btn btn-primary" click.delegate="play(animation)">
+                        <i class="fa fas fa-play" style="font-weight: 4em"></i>
                     </button>
                 </div>
                 <img src="images/animations/${animation.name}.gif" width="150" height="150" />

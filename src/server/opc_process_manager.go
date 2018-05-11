@@ -123,9 +123,8 @@ func (o *OpcProcessManager) StopAnim() {
 	}
 }
 
-// StartAnim starts a given animation process by name.
-func (o *OpcProcessManager) StartAnim(processName string) error {
-	// TODO: Rename to PlayAnim.
+// PlayAnim starts a given animation process by name.
+func (o *OpcProcessManager) PlayAnim(processName string) error {
 	// Empty name means to stop.
 	if processName == "" {
 		o.StopAnim()
@@ -174,4 +173,30 @@ func (o *OpcProcessManager) runAndMonitorCommand(process OpcProcessConfig) {
 			continue
 		}
 	}
+}
+
+// AnimationState contains the animations state and what is playing.
+type AnimationState struct {
+	Playing     int          `json:"playing"`
+	PlayingName string       `json:"playing_name"`
+	Anims       []serverAnim `json:"anims"`
+}
+
+// GetAnimationsState returns the current animations state.
+func (o *OpcProcessManager) GetAnimationsState() AnimationState {
+	msg := AnimationState{}
+	msg.Playing = -1
+	msg.PlayingName = o.currentName
+	msg.Anims = make([]serverAnim, len(o.Processes))
+	i := 0
+	for name, val := range o.Processes {
+		msg.Anims[i].Name = name
+		msg.Anims[i].Description = val.Description
+
+		if msg.Anims[i].Name == msg.PlayingName {
+			msg.Playing = i
+		}
+	}
+
+	return msg
 }

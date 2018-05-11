@@ -13,7 +13,7 @@ export class AnimationList {
     playingAnimation: Animation | null;
 
     constructor(private events: EventAggregator, private api: WSAPI) {
-        // Once the websocket is connected we'll receive a list of animations.
+        // We receive animation both on connect and when it is reselected.
         events.subscribe(WebsocketAnimationList, msg_raw => {
             let msg: AnimationListMessage = msg_raw.data;
             console.log("Animations received:", msg);
