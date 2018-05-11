@@ -121,6 +121,12 @@ func WsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProcessManager) ht
 		ctrlPanelClient := NewControlPanelReceiver()
 		bcast.Push(ctrlPanelClient)
 
+		// This is set by the Control panel WS handler.
+		// We want the websocket clients to have the correct state as soon as they login.
+		if LastKnownControlPanelState != nil {
+			ctrlPanelClient.controlPanel <- *LastKnownControlPanelState
+		}
+
 		// Clients needs to reply to Ping.
 		conn.SetReadDeadline(time.Now().Add(pongWait))
 		conn.SetPongHandler(func(string) error {

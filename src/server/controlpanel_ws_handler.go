@@ -8,6 +8,9 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// LastKnownControlPanelState is the last state of the Control Panel so it can be broadcasted to websocket clients.
+var LastKnownControlPanelState *ControlPanelMsg
+
 // ControlPanelWsHandler listens on a websocket to messages from the control panel hardware.
 func ControlPanelWsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProcessManager) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -20,9 +23,6 @@ func ControlPanelWsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProces
 		defer conn.Close()
 
 		// TODO: Only allow one client.
-		// TODO: When this client is connected ignore selection via webpage if not "custom program" is selected.
-
-		// TODO: Keep latest control panel state and send it to all connection web clients.
 
 		// Clients needs to reply to Ping.
 		conn.SetReadDeadline(time.Now().Add(pongWait))
@@ -49,6 +49,9 @@ func ControlPanelWsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProces
 					return
 				}
 
+				// Save so we can broadcast to new clients.
+				LastKnownControlPanelState = &jsonMsg
+
 				log.Println("Got control panel message: ", jsonMsg)
 
 				// TODO: Map program choices from control panel map to animation sketches in config
@@ -72,10 +75,7 @@ func ControlPanelWsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProces
 
 		// Writer.
 		pingTicker := time.NewTicker(pingPeriod)
-
-		defer func() {
-			pingTicker.Stop()
-		}()
+		defer pingTicker.Stop()
 
 		for {
 			select {
