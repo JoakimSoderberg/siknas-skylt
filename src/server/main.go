@@ -65,7 +65,7 @@ func main() {
 	router.HandleFunc("/debug/control_panel", WsDebugControlPanelHandler)
 
 	// Websocket handlers.
-	router.HandleFunc("/ws", WsHandler(controlPanelBroadcaster, opcProcessManager))
+	router.HandleFunc("/ws", WsHandler(controlPanelBroadcaster, opcProcessManager, opcBroadcaster))
 	router.HandleFunc("/ws/opc", OpcWsHandler(opcBroadcaster))
 	router.HandleFunc("/ws/control_panel", ControlPanelWsHandler(controlPanelBroadcaster, opcProcessManager))
 

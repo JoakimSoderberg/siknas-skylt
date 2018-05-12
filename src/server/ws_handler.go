@@ -15,11 +15,16 @@ type clientMsg struct {
 	MessageType string `json:"message_type"`
 }
 
-// clientPlayMsg is sent by clients when selecting an animation
-// from the list of available animations returned in servListMsg.
+// clientPlayMsg is sent by clients when playing an animation
+// from the list of available animations returned in serverAnimationMsg.
 type clientPlayMsg struct {
 	clientMsg
 	AnimationName string `json:"animation_name"`
+}
+
+type clientBrightnessMsg struct {
+	clientMsg
+	Brightness int `json:"brightness"`
 }
 
 // serverMsg is a message returned over the websocket.
@@ -69,7 +74,9 @@ func newServerAnimationsMsg(animationState AnimationState) *serverAnimationMsg {
 }
 
 // sendClientReply unmarshals a client message and returns a server status.
-func sendClientReply(data []byte, opcManager *OpcProcessManager, replyChan chan interface{}) {
+func sendClientReply(data []byte, opcManager *OpcProcessManager,
+	replyChan chan interface{}, opcBroadcaster *OpcBroadcaster) {
+
 	var msg clientMsg
 	err := json.Unmarshal(data, &msg)
 	if err != nil {
@@ -80,13 +87,41 @@ func sendClientReply(data []byte, opcManager *OpcProcessManager, replyChan chan 
 
 	switch msg.MessageType {
 	default:
-		log.Printf("Unexpected message type from client: %v")
+		log.Printf("Unexpected message type from client: %v", msg.MessageType)
 	case "play":
 		err := playMsgHandler(data, opcManager)
 		if err != nil {
 			replyChan <- *newServerErrorMsg(err, fmt.Sprintf("Failed to play"))
 		}
+	case "brightness":
+		brightnessMsgHandler(data, opcManager, opcBroadcaster)
 	}
+}
+
+func brightnessMsgHandler(data []byte, opcManager *OpcProcessManager, opcBroadcaster *OpcBroadcaster) {
+	var brightnessMsg clientBrightnessMsg
+	err := json.Unmarshal(data, &brightnessMsg)
+	if err != nil {
+		log.Printf("Error unmarshalling brigthnessMsg: ", err)
+		return
+	}
+
+	if opcManager.IsControlPanelOwner() {
+		return
+	}
+
+	// TODO: Brightness should be sent to any newly connected clients, so we must save the state.
+	brightness := float32(brightnessMsg.Brightness) / 255.0
+
+	log.Println("Brightness: ", brightness)
+
+	// Generate an OPC message and broadcast that to all clients.
+	colorCorrOpcMsg, err := CreateFadecandyColorCorrectionPacket(float32(2.5), brightness, brightness, brightness)
+	opcBroadcaster.Broadcast(func(c *OpcReceiver) {
+		c.opcMessages <- colorCorrOpcMsg
+	})
+
+	return
 }
 
 func playMsgHandler(data []byte, opcManager *OpcProcessManager) error {
@@ -109,7 +144,7 @@ func playMsgHandler(data []byte, opcManager *OpcProcessManager) error {
 }
 
 // WsHandler is the websocket handler for "normal" websocket clients that are not the control panel.
-func WsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProcessManager) http.HandlerFunc {
+func WsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProcessManager, opcBroadcaster *OpcBroadcaster) http.HandlerFunc {
 	// TODO: Break out go functions
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var upgrader = websocket.Upgrader{} // use default options
@@ -146,7 +181,7 @@ func WsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProcessManager) ht
 		})
 
 		// Reader.
-		go readOpcWsConn(conn, serverMessages, ctrlPanelClient, opcManager)
+		go readOpcWsConn(conn, serverMessages, ctrlPanelClient, opcManager, opcBroadcaster)
 
 		// Writer.
 		go func() {
@@ -175,6 +210,7 @@ func WsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProcessManager) ht
 					}
 				case msg := <-ctrlPanelClient.controlPanel:
 					log.Println("Broadcasting control panel message: ", msg)
+					// TODO: Make NewServerControlPanelMsg function.
 					serverControlPanelMsg := serverControlPanelMsg{
 						serverMsg: serverMsg{
 							MessageType: "control_panel",
@@ -200,7 +236,8 @@ func WsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProcessManager) ht
 
 // readOpcWsConn reads incoming Websocket client messages.
 func readOpcWsConn(conn *websocket.Conn, serverMessages chan interface{},
-	ctrlPanelClient *ControlPanelReceiver, opcManager *OpcProcessManager) {
+	ctrlPanelClient *ControlPanelReceiver, opcManager *OpcProcessManager,
+	opcBroadcaster *OpcBroadcaster) {
 
 	defer func() {
 		conn.Close()
@@ -215,6 +252,6 @@ func readOpcWsConn(conn *websocket.Conn, serverMessages chan interface{},
 			break
 		}
 
-		sendClientReply(data, opcManager, serverMessages)
+		sendClientReply(data, opcManager, serverMessages, opcBroadcaster)
 	}
 }

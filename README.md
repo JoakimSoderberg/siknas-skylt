@@ -22,7 +22,7 @@ cp src/server/siknas.yaml.example src/server/siknas.yaml
 docker-compose up -d
 
 # (Separate window) Run Xvfb inside of server.
-docker-compose exec server Xvfb :1 -screen 0, 1024x768x16 &
+./run_xvfb.sh
 
 # Surf to http://localhost:8080 (Linux)
 open http://$(docker-machine ip):8080   # OSX

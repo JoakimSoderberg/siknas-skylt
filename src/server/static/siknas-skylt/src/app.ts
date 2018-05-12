@@ -1,5 +1,5 @@
 import { Router, RouterConfiguration } from 'aurelia-router';
-import { autoinject } from 'aurelia-framework';
+import { autoinject, observable } from 'aurelia-framework';
 import { WSAPI } from './ws-api';
 
 @autoinject()
@@ -9,8 +9,9 @@ export class App {
   constructor(private api: WSAPI) { }
 
   blurValue: number = 10;
-  brightness: number = 128;
+  @observable brightness: number = 128;
 
+  /*
   configureRouter(config: RouterConfiguration, router: Router) {
     config.title = 'Animationer';
     config.map([
@@ -19,6 +20,10 @@ export class App {
     ]);
 
     this.router = router;
+  }*/
+
+  brightnessChanged(newValue, oldValue) {
+    this.api.sendBrightnessMessage(parseInt(newValue));
   }
 
   created() {

@@ -97,6 +97,15 @@ export class WSAPI {
         });
     }
 
+    sendBrightnessMessage(brightness: number) {
+        let msg = {
+            "message_type": "brightness",
+            "brightness": brightness
+        };
+        console.log("Sending brightness: ", brightness, msg);
+        this.sendJSONMessage(msg);
+    }
+
     get isConnected(): boolean {
         if (this.socket) {
             return (this.socket.readyState == WebSocket.OPEN);

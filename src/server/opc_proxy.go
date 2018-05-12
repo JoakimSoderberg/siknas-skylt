@@ -5,7 +5,7 @@ package main
 import (
 	"log"
 	"net"
-	"time"
+	//"time"
 
 	// TODO: Replace with own version since lib is abandoned...
 	"github.com/kellydunn/go-opc"
@@ -91,53 +91,56 @@ func handleOpcCon(messages chan *opc.Message, conn net.Conn) {
 		conn.Close()
 	}()
 
-	// TODO: Take into account what the current max brightness is set to.
-	// We will ramp it up by interjecting color correction packets that raises the brightness gradually.
-	brightness := float32(0.0)
-	fadeTimeout := 3000
-	fadeDoneTimer := time.NewTimer(time.Duration(fadeTimeout) * time.Millisecond)
-	defer fadeDoneTimer.Stop()
-	fadeTicker := time.NewTicker(time.Duration(fadeTimeout) * time.Millisecond / 100)
-	defer fadeTicker.Stop()
+	/*
+			// TODO: Take into account what the current max brightness is set to.
+			// We will ramp it up by interjecting color correction packets that raises the brightness gradually.
+			brightness := float32(0.0)
+			fadeTimeout := 3000
+			fadeDoneTimer := time.NewTimer(time.Duration(fadeTimeout) * time.Millisecond)
+			defer fadeDoneTimer.Stop()
+			fadeTicker := time.NewTicker(time.Duration(fadeTimeout) * time.Millisecond / 100)
+			defer fadeTicker.Stop()
 
-	log.Println("Start fading")
 
-	// TODO: Break out into separate function.
-fadeLoop:
-	for {
-		msg, err := opc.ReadOpc(conn)
-		if err != nil {
-			log.Println("[OPC incoming client] Failed to read OPC:", conn.RemoteAddr())
-			return
-		}
+			log.Println("Start fading")
 
-		select {
-		case <-fadeTicker.C:
-			// Fade in the brightness interleaved.
-			colorCorrMsg, err := CreateFadecandyColorCorrectionPacket(float32(2.5), brightness, brightness, brightness)
-			if err != nil {
-				log.Println("[OPC incoming client]: ", err)
-				return
+			// TODO: Break out into separate function.
+		fadeLoop:
+			for {
+				msg, err := opc.ReadOpc(conn)
+				if err != nil {
+					log.Println("[OPC incoming client] Failed to read OPC:", conn.RemoteAddr())
+					return
+				}
+
+				select {
+				case <-fadeTicker.C:
+					// Fade in the brightness interleaved.
+					colorCorrMsg, err := CreateFadecandyColorCorrectionPacket(float32(2.5), brightness, brightness, brightness)
+					if err != nil {
+						log.Println("[OPC incoming client]: ", err)
+						return
+					}
+					messages <- colorCorrMsg
+					brightness += float32(1.0 / 10.0) // TODO: Fix this to ramp correctly.
+
+				case <-fadeDoneTimer.C:
+					// Fade completed (make sure we are att full brightness).
+					colorCorrMsg, err := CreateFadecandyColorCorrectionPacket(float32(2.5), 1.0, 1.0, 1.0)
+					if err != nil {
+						log.Println("[OPC incoming client]: ", err)
+						return
+					}
+					messages <- colorCorrMsg
+					log.Println("Done fading")
+					break fadeLoop
+
+				default:
+					// Send the regular OPC message.
+					messages <- msg
+				}
 			}
-			messages <- colorCorrMsg
-			brightness += float32(1.0 / 10.0) // TODO: Fix this to ramp correctly.
-
-		case <-fadeDoneTimer.C:
-			// Fade completed (make sure we are att full brightness).
-			colorCorrMsg, err := CreateFadecandyColorCorrectionPacket(float32(2.5), 1.0, 1.0, 1.0)
-			if err != nil {
-				log.Println("[OPC incoming client]: ", err)
-				return
-			}
-			messages <- colorCorrMsg
-			log.Println("Done fading")
-			break fadeLoop
-
-		default:
-			// Send the regular OPC message.
-			messages <- msg
-		}
-	}
+	*/
 
 	// Normal parsing of packets.
 	for {
