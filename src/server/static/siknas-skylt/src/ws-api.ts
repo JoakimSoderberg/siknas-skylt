@@ -39,12 +39,12 @@ export class WSAPI {
         let data = JSON.parse(e.data);
 
         switch (data["message_type"]) {
-            case "list":
+            case "animations":
                 let animations: AnimationListMessage = data;
                 this.events.publish(new WebsocketAnimationList(animations));
                 break;
-            case "status":
-                console.log("Status: ", data["text"]);
+            case "error":
+                console.log("Error: ", data["friendly_error"], data["error"]);
                 break
             case "control_panel":
                 let msg: ControlPanelMessage = data;

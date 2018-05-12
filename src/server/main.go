@@ -51,8 +51,9 @@ func main() {
 	// Broadcast channel for control panel.
 	controlPanelBroadcaster := NewControlPanelBroadcaster()
 	opcBroadcaster := NewOpcBroadcaster()
+	opcProcessManagerBroadcaster := NewOpcProcessManagerBroadcaster()
 
-	opcProcessManager, err := NewOpcProcessManager()
+	opcProcessManager, err := NewOpcProcessManager(opcProcessManagerBroadcaster)
 	if err != nil {
 		log.Fatalln("Failed to create OPC process manager:", err)
 	}

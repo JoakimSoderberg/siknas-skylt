@@ -38,25 +38,34 @@ type serverAnim struct {
 	Description string `json:"description"`
 }
 
-// servListMsg is a message containing a list of processing Animations available to choose from.
-type serverListMsg struct {
+// serverAnimationMsg is a message containing a list of processing Animations available to choose from.
+type serverAnimationMsg struct {
 	serverMsg
 	AnimationState
 }
 
-// serverStatusMsg is a status message for any action a client performed.
-type serverStatusMsg struct {
+// serverErrorMsg is a status message for any action a client performed.
+type serverErrorMsg struct {
 	serverMsg
-	Success bool   `json:"success"`
-	Text    string `json:"text"`
+	Error         string `json:"error"`
+	FriendlyError string `json:"friendly_error"`
 }
 
-// getAnimsListMsg returns a list of available animation processes.
-func getAnimsListMsg(opcManager *OpcProcessManager) (serverListMsg, error) {
-	return serverListMsg{
-		serverMsg:      serverMsg{MessageType: "list"},
-		AnimationState: opcManager.GetAnimationsState(),
-	}, nil
+// newServerErrorMsg creates a new error server reply.
+func newServerErrorMsg(err error, friendly string) *serverErrorMsg {
+	return &serverErrorMsg{
+		serverMsg:     serverMsg{MessageType: "error"},
+		Error:         err.Error(),
+		FriendlyError: friendly,
+	}
+}
+
+// newServerAnimationsMsg creates a new server list message.
+func newServerAnimationsMsg(animationState AnimationState) *serverAnimationMsg {
+	return &serverAnimationMsg{
+		serverMsg:      serverMsg{MessageType: "animations"},
+		AnimationState: animationState,
+	}
 }
 
 // sendClientReply unmarshals a client message and returns a server status.
@@ -73,37 +82,30 @@ func sendClientReply(data []byte, opcManager *OpcProcessManager, replyChan chan 
 	default:
 		log.Printf("Unexpected message type from client: %v")
 	case "play":
-		msg, err := playMsgHandler(data, opcManager)
+		err := playMsgHandler(data, opcManager)
 		if err != nil {
-			replyChan <- serverStatusMsg{
-				serverMsg: serverMsg{MessageType: "error"},
-				Success:   false,
-				Text:      err.Error(),
-			}
-		} else {
-			replyChan <- *msg
+			replyChan <- *newServerErrorMsg(err, fmt.Sprintf("Failed to play"))
 		}
 	}
 }
 
-func playMsgHandler(data []byte, opcManager *OpcProcessManager) (*serverListMsg, error) {
+func playMsgHandler(data []byte, opcManager *OpcProcessManager) error {
 	var playMsg clientPlayMsg
 	err := json.Unmarshal(data, &playMsg)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal JSON '%v':\n  %v", string(data), err)
+		return fmt.Errorf("failed to unmarshal JSON '%v':\n  %v", string(data), err)
 	}
 
 	if opcManager.IsControlPanelOwner() {
 		log.Printf("Control panel owns animation selection, ignoring client request")
-		return nil, fmt.Errorf("The control panel owns animation selection")
+		return fmt.Errorf("The control panel owns animation selection")
 	}
 
 	if err := opcManager.PlayAnim(playMsg.AnimationName); err != nil {
-		return nil, err
+		return err
 	}
 
-	msg, err := getAnimsListMsg(opcManager)
-	return &msg, err
+	return nil
 }
 
 // WsHandler is the websocket handler for "normal" websocket clients that are not the control panel.
@@ -118,11 +120,16 @@ func WsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProcessManager) ht
 			return
 		}
 
+		// Used for passing replies to clients to the writer from the reader.
 		serverMessages := make(chan interface{})
 
 		// Add this new client as a control panel broadcast listener.
 		ctrlPanelClient := NewControlPanelReceiver()
 		bcast.Push(ctrlPanelClient)
+
+		// Opc Manager broadcasts changes of animation state.
+		opcProcessManagerReceiver := NewOpcProcessManagerReceiver()
+		opcManager.broadcaster.Push(opcProcessManagerReceiver)
 
 		// This is set by the Control panel WS handler.
 		// We want the websocket clients to have the correct state as soon as they login.
@@ -148,18 +155,15 @@ func WsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProcessManager) ht
 			defer func() {
 				conn.Close()
 				bcast.Pop(ctrlPanelClient)
+				opcManager.broadcaster.Pop(opcProcessManagerReceiver)
 				pingTicker.Stop()
 			}()
 
 			log.Printf("Websocket Client connected: %v\n", conn.RemoteAddr())
 
 			// Start by sending a list of animations.
-			anims, err := getAnimsListMsg(opcManager)
-			if err != nil {
-				log.Println("Failed to get list of animations")
-				return
-			}
-			conn.WriteJSON(anims)
+			animsMsg := newServerAnimationsMsg(opcManager.GetAnimationsState())
+			conn.WriteJSON(animsMsg)
 
 			for {
 				select {
@@ -178,6 +182,10 @@ func WsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProcessManager) ht
 						ControlPanelMsg: msg,
 					}
 					conn.WriteJSON(serverControlPanelMsg)
+				case animationState := <-opcProcessManagerReceiver.animationStateChan:
+					log.Println("Broadcasting animation state: ", animationState)
+					listMsg := newServerAnimationsMsg(animationState)
+					conn.WriteJSON(*listMsg)
 				case <-pingTicker.C:
 					log.Println("Ping! ", conn.RemoteAddr())
 					conn.SetWriteDeadline(time.Now().Add(writeWait))

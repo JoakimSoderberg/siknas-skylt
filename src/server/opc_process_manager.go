@@ -1,5 +1,7 @@
 package main
 
+// go run broadcaster/gen.go OpcProcessManager broadcaster/broadcast.tmpl
+
 import (
 	"fmt"
 	"log"
@@ -21,6 +23,7 @@ type OpcProcessManager struct {
 	stopped             bool
 	controlPanelIsOwner int32 // Updated atomically.
 	cmd                 *exec.Cmd
+	broadcaster         *OpcProcessManagerBroadcaster
 }
 
 // OpcProcessConfig is a single config for one of the OPC processes that animates the LED display.
@@ -32,9 +35,26 @@ type OpcProcessConfig struct {
 	// TODO: We must have a kill command also (xvfb-run in docker makes it hard to kill like normal)
 }
 
+// AnimationState contains the animations state and what is playing.
+type AnimationState struct {
+	Playing     int          `json:"playing"`
+	PlayingName string       `json:"playing_name"`
+	Anims       []serverAnim `json:"anims"`
+}
+
+// OpcProcessManagerReceiver is a client that wants to listen to state changes to the OPC Process manager.
+type OpcProcessManagerReceiver struct {
+	animationStateChan chan AnimationState
+}
+
+// NewOpcProcessManagerReceiver creates a new OpcProcessManagerReceiver instance.
+func NewOpcProcessManagerReceiver() *OpcProcessManagerReceiver {
+	return &OpcProcessManagerReceiver{animationStateChan: make(chan AnimationState)}
+}
+
 // NewOpcProcessManager creates a new process manager and read the config for it.
-func NewOpcProcessManager() (*OpcProcessManager, error) {
-	o := OpcProcessManager{}
+func NewOpcProcessManager(broadcaster *OpcProcessManagerBroadcaster) (*OpcProcessManager, error) {
+	o := OpcProcessManager{broadcaster: broadcaster}
 	if err := o.ReadConfig(); err != nil {
 		return nil, err
 	}
@@ -82,8 +102,8 @@ func (o *OpcProcessManager) ReadConfig() error {
 	return nil
 }
 
-// StopAnim stops the currently running animation process (if any).
-func (o *OpcProcessManager) StopAnim() {
+// stopAnim stops the currently running animation process (if any).
+func (o *OpcProcessManager) stopAnim() {
 	defer func() {
 		o.currentName = ""
 	}()
@@ -123,11 +143,21 @@ func (o *OpcProcessManager) StopAnim() {
 	}
 }
 
-// PlayAnim starts a given animation process by name.
+// PlayAnim starts a given animation process by name. An empty string means stop.
 func (o *OpcProcessManager) PlayAnim(processName string) error {
+	// Broadcast whatever state change we ended up with.
+	defer func() {
+		log.Printf("Broadcasting Play of '%v'\n", processName)
+		o.broadcaster.Broadcast(func(r *OpcProcessManagerReceiver) {
+			r.animationStateChan <- o.GetAnimationsState()
+		})
+	}()
+
+	log.Println("PlayAnim called")
+
 	// Empty name means to stop.
 	if processName == "" {
-		o.StopAnim()
+		o.stopAnim()
 		return nil
 	}
 
@@ -140,7 +170,7 @@ func (o *OpcProcessManager) PlayAnim(processName string) error {
 		return fmt.Errorf("no animation named '%v' exists", processName)
 	}
 
-	o.StopAnim()
+	o.stopAnim()
 
 	log.Println("Starting process: ", processName)
 	log.Println("  ", o.Processes[processName].Exec)
@@ -175,13 +205,6 @@ func (o *OpcProcessManager) runAndMonitorCommand(process OpcProcessConfig) {
 	}
 }
 
-// AnimationState contains the animations state and what is playing.
-type AnimationState struct {
-	Playing     int          `json:"playing"`
-	PlayingName string       `json:"playing_name"`
-	Anims       []serverAnim `json:"anims"`
-}
-
 // GetAnimationsState returns the current animations state.
 func (o *OpcProcessManager) GetAnimationsState() AnimationState {
 	msg := AnimationState{}
@@ -196,6 +219,8 @@ func (o *OpcProcessManager) GetAnimationsState() AnimationState {
 		if msg.Anims[i].Name == msg.PlayingName {
 			msg.Playing = i
 		}
+
+		i++
 	}
 
 	return msg

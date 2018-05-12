@@ -20,7 +20,7 @@ export class AnimationList {
 
             this.animations = msg.anims;
 
-            if (msg.playing > 0) {
+            if (msg.playing >= 0) {
                 this.playingAnimation = msg.anims[msg.playing];
             } else {
                 this.playingAnimation = null;
@@ -30,6 +30,7 @@ export class AnimationList {
 
     play(animation: Animation | null) {
         if (animation != null) {
+            console.log("Playing ", animation);
             this.api.sendPlayMessage(animation.name);
         }
 
@@ -37,6 +38,7 @@ export class AnimationList {
     }
 
     stop() {
+        console.log("Stopping");
         this.api.sendPlayMessage("");
     }
 }
