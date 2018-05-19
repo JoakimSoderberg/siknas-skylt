@@ -19,6 +19,7 @@ export class SiknasSkylt {
     svg: any;
     skylt: any;
     // TODO: make it possible to disable the animation via a bindable property.
+    @bindable disableAnimation: boolean = false;
 
     layout: OPCPixel[];
     pixelsCreated: boolean = false;
@@ -28,7 +29,7 @@ export class SiknasSkylt {
 
     constructor(private opc: WSOPCAPI, private events: EventAggregator, private client: HttpClient) {
         this.events.subscribe(WebsocketOPCMessage, msg => {
-            if (!this.pixelsCreated)
+            if (!this.pixelsCreated || this.disableAnimation)
                 return;
 
             let d = new Uint8Array(msg.data);
@@ -114,7 +115,8 @@ export class SiknasSkylt {
         let defs = this.svg.append("defs");
         let filter = defs.append("filter");
 
-        // We use this for the color correction packets.
+        // We use this for the color correction packets
+        // (Which is used to set brightness).
         filter.attr("id", "siknasFilter")
             .append("feColorMatrix")
             .attr("id", "colorCorrectMatrix")
@@ -150,7 +152,6 @@ export class SiknasSkylt {
                 return (p.point[1] * h * 0.55) + (h * 0.20);
             })
             .attr("r", 10)
-            //.attr("filter", "url(#glow)")
             .style("fill", function (p: OPCPixel) {
                 return `rgb(${p.color[0]},${p.color[1]},${p.color[2]})`
             });

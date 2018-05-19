@@ -27,25 +27,27 @@
       -->
     </div>
   </nav>
-
-  <div class="container" style="margin: 10px">
-    <siknas-skylt blurlevel.bind="blurValue"></siknas-skylt>
-    <kontrollpanel></kontrollpanel>
-    <div class="row">
-      <animation-list class="col-md-4"></animation-list>
+  <div class="container" style="margin: 10px; padding-bottom: 500px">
+    <div class="d-flex justify-content-center">
+      <siknas-skylt blurlevel.bind="blurValue"></siknas-skylt>
     </div>
+    <h4>Välj en animation:</h4>
+    <animation-list></animation-list>
   </div>
-  <nav class="navbar fixed-bottom navbar-dark bg-dark">
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item">
-        <div style="white-space:nowrap">
-          <label for="brightnessSlider" class="label label-default">Ljusstyrka</label>
-          <input type="range" min="0" max="255" value.bind="brightness" class="slider" id="brightnessSlider">
-        </div>
-      </li>
-      <li class="nav-item">
-        <button class="btn btn-danger" click.delegate="stop()">Stop</button>
-      </li>
-    </ul>
+  <nav class="navbar fixed-bottom navbar-dark bg-dark" style="position: sticky">
+    <div class="d-flex justify-content-between">
+      <kontrollpanel class="navbar-brand"></kontrollpanel>
+      <div style="white-space:nowrap" class="p-2">
+        <label for="brightnessSlider" class="label label-default">
+          <i class="fa fas fa-adjust" style="font-weight: 4em"></i>
+        </label>
+        <input type="range" min="0" max="255" value.bind="brightness" class="slider" id="brightnessSlider">
+      </div>
+      <div class="p-1">
+        <button class="btn btn-danger" click.delegate="stop()">
+          <i class="fa fas fa-square" style="font-weight: 4em"></i>
+        </button>
+      </div>
+    </div>
   </nav>
 </template>

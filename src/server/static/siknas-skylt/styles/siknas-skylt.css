@@ -37,6 +37,16 @@ input[type="range"][orient=vertical] {
 }*/
 
 #brightnessSlider {
-    width: 270px;
-    left: -120px;
+    width: 100px;
+}
+
+/* If we set width for the SVG like this, they will
+ * scale after their parent element instead of having fixed size */
+svg#kontrollpanel {
+    width: 100%;
+    min-width: 50px;
+}
+
+svg#siknas-skylt {
+    width: 100%;
 }
