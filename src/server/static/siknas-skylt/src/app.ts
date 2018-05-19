@@ -15,6 +15,11 @@ export class App {
   created() {
     this.api.connect();
     // TODO: Add button to turn off animation.
+
+    // TODO: Listen to server state here:
+    /* events.subscribe(WebsocketAnimationList, msg_raw => {
+            let msg: AnimationListMessage = msg_raw.data;
+            console.log("Animations received:", msg); */
   }
 
   stop() {
