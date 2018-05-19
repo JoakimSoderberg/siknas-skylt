@@ -29,11 +29,12 @@
     cursor: pointer;
 }
 
+/*
 input[type="range"][orient=vertical] {
     position: absolute;
     top: 40%;
     transform: rotate(270deg);
-}
+}*/
 
 #brightnessSlider {
     width: 270px;

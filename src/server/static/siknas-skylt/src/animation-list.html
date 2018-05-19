@@ -1,16 +1,16 @@
 <template>
-    <button class="btn btn-danger" click.delegate="stop()">Stop</button>
     <div class="animation-list">
-        <p>Playing: ${playingAnimation.name}</p>
         <ul class="list-group">
-            <li repeat.for="animation of animations" class="list-group-item d-flex justify-content-between ${animation === playingAnimation ? 'active' : ''}">
-                <div>
+            <li repeat.for="animation of animations" class="list-group-item d-flex ${animation === playingAnimation ? 'active' : ''}">
+                <div class="p-2">
+                    <img src="images/animations/${animation.name}.gif" width="150" height="150" />
+                </div>
+                <div class="p-2 mr-auto">
                     <h6 class="list-group-item-heading">${animation.name}</h6>
                     <button class="btn btn-primary" click.delegate="play(animation)">
                         <i class="fa fas fa-play" style="font-weight: 4em"></i>
                     </button>
                 </div>
-                <img src="images/animations/${animation.name}.gif" width="150" height="150" />
             </li>
         </ul>
     </div>
