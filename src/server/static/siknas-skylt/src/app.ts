@@ -3,6 +3,7 @@ import { WSAPI } from './ws-api';
 import { EventAggregator } from 'aurelia-event-aggregator';
 import { WebsocketAnimationList, WebsocketBrightnessMessage } from './messages';
 import { AnimationListMessage, BrightnessMessage } from './types';
+import { AnimationList } from './animation-list';
 
 @autoinject()
 export class App {
@@ -22,17 +23,22 @@ export class App {
   created() {
     this.api.connect();
     // TODO: Add button to turn off animation.
+    this.events.subscribeOnce(WebsocketAnimationList, msg_raw => {
+      let msg: AnimationListMessage = msg_raw.data;
+      this.brightness = msg.brightness;
+    });
 
     this.events.subscribe(WebsocketBrightnessMessage, msg_raw => {
       let msg: BrightnessMessage = msg_raw.data;
       console.log("Brightness received: ", this.brightness);
 
       // Make sure we don't resend any incoming brightness changes
-      // because of the view binding of brightness.
+      // because of the view binding of brightness by waiting a while
+      // after each incoming message.
       this.enableSending = false;
       setTimeout(() => {
         this.enableSending = true;
-      }, 1000);
+      }, 500);
 
       if (msg.brightness != this.brightness) {
         this.brightness = msg.brightness;

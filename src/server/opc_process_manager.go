@@ -165,6 +165,7 @@ func (o *OpcProcessManager) SetBrightness(brightness int, sender *OpcProcessMana
 		return
 	}
 
+	// Save for new clients.
 	o.brightness = brightness
 
 	o.broadcaster.Broadcast(func(r *OpcProcessManagerReceiver) {

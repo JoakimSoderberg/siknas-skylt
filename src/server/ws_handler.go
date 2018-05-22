@@ -74,32 +74,6 @@ func newServerAnimationsMsg(animationState AnimationState) *serverAnimationMsg {
 	}
 }
 
-/*
-// sendClientReply unmarshals a client message and returns a server status.
-func sendClientReply(data []byte, opcManager *OpcProcessManager,
-	replyChan chan interface{}, opcBroadcaster *OpcBroadcaster) {
-
-	var msg clientMsg
-	err := json.Unmarshal(data, &msg)
-	if err != nil {
-		log.Printf("Failed to unmarshal JSON '%v': %v\n", string(data), err)
-	}
-
-	log.Printf("Got Websocket client message:\n%v\n", msg)
-
-	switch msg.MessageType {
-	default:
-		log.Printf("Unexpected message type from client: %v", msg.MessageType)
-	case "play":
-		err := playMsgHandler(data, opcManager)
-		if err != nil {
-			replyChan <- *newServerErrorMsg(err, fmt.Sprintf("Failed to play"))
-		}
-	case "brightness":
-		brightnessMsgHandler(data, opcManager, opcBroadcaster)
-	}
-}*/
-
 // brightnessMsgHandler handles incoming client requests for brightness changes.
 func brightnessMsgHandler(data []byte, opcManager *OpcProcessManager,
 	opcBroadcaster *OpcBroadcaster, opcProcessManagerReceiver *OpcProcessManagerReceiver) {
@@ -155,7 +129,6 @@ func playMsgHandler(data []byte, opcManager *OpcProcessManager) error {
 
 // WsHandler is the websocket handler for "normal" websocket clients that are not the control panel.
 func WsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProcessManager, opcBroadcaster *OpcBroadcaster) http.HandlerFunc {
-	// TODO: Break out go functions
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var upgrader = websocket.Upgrader{} // use default options
 		conn, err := upgrader.Upgrade(w, r, nil)
@@ -272,7 +245,6 @@ func readOpcWsConn(conn *websocket.Conn, replyChan chan interface{},
 			break
 		}
 
-		//sendClientReply(data, opcManager, replyChan, opcBroadcaster)
 		var msg clientMsg
 		err = json.Unmarshal(data, &msg)
 		if err != nil {
