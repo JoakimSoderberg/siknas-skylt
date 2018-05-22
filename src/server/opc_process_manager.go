@@ -20,6 +20,7 @@ type OpcProcessesMap map[string]OpcProcessConfig
 type OpcProcessManager struct {
 	Processes           OpcProcessesMap
 	currentName         string
+	brightness          int
 	stopped             bool
 	controlPanelIsOwner int32 // Updated atomically.
 	cmd                 *exec.Cmd
@@ -39,6 +40,7 @@ type OpcProcessConfig struct {
 type AnimationState struct {
 	Playing     int          `json:"playing"`
 	PlayingName string       `json:"playing_name"`
+	Brightness  int          `json:"brightness"`
 	Anims       []serverAnim `json:"anims"`
 }
 
@@ -54,7 +56,10 @@ func NewOpcProcessManagerReceiver() *OpcProcessManagerReceiver {
 
 // NewOpcProcessManager creates a new process manager and read the config for it.
 func NewOpcProcessManager(broadcaster *OpcProcessManagerBroadcaster) (*OpcProcessManager, error) {
-	o := OpcProcessManager{broadcaster: broadcaster}
+	o := OpcProcessManager{
+		broadcaster: broadcaster,
+		brightness:  128,
+	}
 	if err := o.ReadConfig(); err != nil {
 		return nil, err
 	}
@@ -143,14 +148,27 @@ func (o *OpcProcessManager) stopAnim() {
 	}
 }
 
+// broadCastState broadcasts the current state of the animation being played.
+func (o *OpcProcessManager) broadCastState() {
+	o.broadcaster.Broadcast(func(r *OpcProcessManagerReceiver) {
+		r.animationStateChan <- o.GetAnimationsState()
+	})
+}
+
+// SetBrightness sets the brightness and broadcasts the current state to all websocket clients.
+func (o *OpcProcessManager) SetBrightness(brightness int) {
+	if o.brightness != brightness {
+		o.brightness = brightness
+		o.broadCastState()
+	}
+}
+
 // PlayAnim starts a given animation process by name. An empty string means stop.
 func (o *OpcProcessManager) PlayAnim(processName string) error {
 	// Broadcast whatever state change we ended up with.
 	defer func() {
 		log.Printf("Broadcasting Play of '%v'\n", processName)
-		o.broadcaster.Broadcast(func(r *OpcProcessManagerReceiver) {
-			r.animationStateChan <- o.GetAnimationsState()
-		})
+		o.broadCastState()
 	}()
 
 	log.Println("PlayAnim called")
@@ -210,6 +228,7 @@ func (o *OpcProcessManager) GetAnimationsState() AnimationState {
 	msg := AnimationState{}
 	msg.Playing = -1
 	msg.PlayingName = o.currentName
+	msg.Brightness = o.brightness
 	msg.Anims = make([]serverAnim, len(o.Processes))
 	i := 0
 	for name, val := range o.Processes {

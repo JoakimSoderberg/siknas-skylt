@@ -98,6 +98,7 @@ func sendClientReply(data []byte, opcManager *OpcProcessManager,
 	}
 }
 
+// brightnessMsgHandler handles incoming client requests for brightness changes.
 func brightnessMsgHandler(data []byte, opcManager *OpcProcessManager, opcBroadcaster *OpcBroadcaster) {
 	var brightnessMsg clientBrightnessMsg
 	err := json.Unmarshal(data, &brightnessMsg)
@@ -110,12 +111,16 @@ func brightnessMsgHandler(data []byte, opcManager *OpcProcessManager, opcBroadca
 		return
 	}
 
-	// TODO: Brightness should be sent to any newly connected clients, so we must save the state.
+	// Brightness should be sent to any newly connected clients, so we must save the state.
+	// TODO: This ends up in an infinite loop!
+	//opcManager.SetBrightness(brightnessMsg.Brightness)
+
+	// Needs to be a value between 0.0-1.0 for the OPC message.
 	brightness := float32(brightnessMsg.Brightness) / 255.0
 
-	log.Println("Brightness: ", brightness)
+	log.Printf("Brightness: %v (%v)\n", brightness, brightnessMsg.Brightness)
 
-	// Generate an OPC message and broadcast that to all clients.
+	// Generate an OPC message and broadcast that to all OPC clients (both WS and real display).
 	colorCorrOpcMsg, err := CreateFadecandyColorCorrectionPacket(float32(2.5), brightness, brightness, brightness)
 	opcBroadcaster.Broadcast(func(c *OpcReceiver) {
 		c.opcMessages <- colorCorrOpcMsg
@@ -124,6 +129,7 @@ func brightnessMsgHandler(data []byte, opcManager *OpcProcessManager, opcBroadca
 	return
 }
 
+// playMsgHandler handles incoming client messages.
 func playMsgHandler(data []byte, opcManager *OpcProcessManager) error {
 	var playMsg clientPlayMsg
 	err := json.Unmarshal(data, &playMsg)

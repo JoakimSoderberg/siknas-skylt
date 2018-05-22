@@ -6,7 +6,7 @@ export interface Animation {
 export interface AnimationListMessage {
     playing: number
     playing_name: string
-    // TODO: Add brightness
+    brightness: number
     anims: Array<Animation>
 }
 

@@ -48,11 +48,18 @@ func main() {
 
 	// TODO: Move the config parsing here and pass as arguments.
 
-	// Broadcast channel for control panel.
+	// Broadcasts control panel messages to all connected websocket clients.
 	controlPanelBroadcaster := NewControlPanelBroadcaster()
+
+	// Broadcasts all OPC messages coming from the animation process
+	// to both Websocket clients and the display(s) we are connecting to.
 	opcBroadcaster := NewOpcBroadcaster()
+
+	// Used to process the current state of what animation is playing
+	// to all connected websocket clients.
 	opcProcessManagerBroadcaster := NewOpcProcessManagerBroadcaster()
 
+	// Handles the animation processes that produces the incoming OPC network traffic.
 	opcProcessManager, err := NewOpcProcessManager(opcProcessManagerBroadcaster)
 	if err != nil {
 		log.Fatalln("Failed to create OPC process manager:", err)
