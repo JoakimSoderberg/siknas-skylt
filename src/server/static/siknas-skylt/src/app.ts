@@ -1,8 +1,8 @@
 import { autoinject, observable } from 'aurelia-framework';
 import { WSAPI } from './ws-api';
 import { EventAggregator } from 'aurelia-event-aggregator';
-import { WebsocketAnimationList } from './messages';
-import { AnimationListMessage } from './types';
+import { WebsocketAnimationList, WebsocketBrightnessMessage } from './messages';
+import { AnimationListMessage, BrightnessMessage } from './types';
 
 @autoinject()
 export class App {
@@ -11,22 +11,30 @@ export class App {
   blurValue: number = 9;
   @observable brightness: number = 128;
 
-  isSending: boolean = false;
+  enableSending: boolean = true;
 
   brightnessChanged(newValue, oldValue) {
-    this.isSending = true;
-    this.api.sendBrightnessMessage(parseInt(newValue));
-    this.isSending = false;
+    if (this.enableSending) {
+      this.api.sendBrightnessMessage(parseInt(newValue));
+    }
   }
 
   created() {
     this.api.connect();
     // TODO: Add button to turn off animation.
 
-    this.events.subscribe(WebsocketAnimationList, msg_raw => {
-      let msg: AnimationListMessage = msg_raw.data;
-      console.log("Animations received by app:", msg);
-      if (msg.brightness != this.brightness && !this.isSending) {
+    this.events.subscribe(WebsocketBrightnessMessage, msg_raw => {
+      let msg: BrightnessMessage = msg_raw.data;
+      console.log("Brightness received: ", this.brightness);
+
+      // Make sure we don't resend any incoming brightness changes
+      // because of the view binding of brightness.
+      this.enableSending = false;
+      setTimeout(() => {
+        this.enableSending = true;
+      }, 1000);
+
+      if (msg.brightness != this.brightness) {
         this.brightness = msg.brightness;
       }
     });

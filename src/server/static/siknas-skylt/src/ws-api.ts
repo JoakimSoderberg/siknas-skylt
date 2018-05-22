@@ -2,7 +2,7 @@ import { autoinject } from 'aurelia-framework';
 import { EventAggregator } from 'aurelia-event-aggregator';
 import {
     WebsocketDisconnected, WebsocketConnected, WebsocketError,
-    WebsocketMessageReceived, WebsocketAnimationList, WebsocketControlPanelMessage
+    WebsocketMessageReceived, WebsocketAnimationList, WebsocketControlPanelMessage, WebsocketBrightnessMessage
 } from "./messages";
 import { Animation, AnimationListMessage, ControlPanelMessage } from "./types";
 
@@ -38,6 +38,7 @@ export class WSAPI {
         // TODO: Would be nice if this was typesafe instead.
         let data = JSON.parse(e.data);
 
+        // TODO: Get rid of the message types and use events.publish("topic", data) instead...
         switch (data["message_type"]) {
             case "animations":
                 let animations: AnimationListMessage = data;
@@ -49,6 +50,9 @@ export class WSAPI {
             case "control_panel":
                 let msg: ControlPanelMessage = data;
                 this.events.publish(new WebsocketControlPanelMessage(data));
+                break;
+            case "brightness":
+                this.events.publish(new WebsocketBrightnessMessage(data));
                 break;
             default:
                 console.log("Unknown message:", e.data);

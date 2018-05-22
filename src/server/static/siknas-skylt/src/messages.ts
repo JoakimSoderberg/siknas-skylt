@@ -34,3 +34,7 @@ export class WebsocketOPCMessage {
 export class WebsocketControlPanelMessage {
     constructor(public data) {}
 }
+
+export class WebsocketBrightnessMessage {
+    constructor(public data) {}
+}

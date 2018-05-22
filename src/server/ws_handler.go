@@ -22,7 +22,8 @@ type clientPlayMsg struct {
 	AnimationName string `json:"animation_name"`
 }
 
-type clientBrightnessMsg struct {
+// BrightnessMsg is a message that can be sent by both the server and the client.
+type BrightnessMsg struct {
 	clientMsg
 	Brightness int `json:"brightness"`
 }
@@ -73,6 +74,7 @@ func newServerAnimationsMsg(animationState AnimationState) *serverAnimationMsg {
 	}
 }
 
+/*
 // sendClientReply unmarshals a client message and returns a server status.
 func sendClientReply(data []byte, opcManager *OpcProcessManager,
 	replyChan chan interface{}, opcBroadcaster *OpcBroadcaster) {
@@ -96,11 +98,13 @@ func sendClientReply(data []byte, opcManager *OpcProcessManager,
 	case "brightness":
 		brightnessMsgHandler(data, opcManager, opcBroadcaster)
 	}
-}
+}*/
 
 // brightnessMsgHandler handles incoming client requests for brightness changes.
-func brightnessMsgHandler(data []byte, opcManager *OpcProcessManager, opcBroadcaster *OpcBroadcaster) {
-	var brightnessMsg clientBrightnessMsg
+func brightnessMsgHandler(data []byte, opcManager *OpcProcessManager,
+	opcBroadcaster *OpcBroadcaster, opcProcessManagerReceiver *OpcProcessManagerReceiver) {
+
+	var brightnessMsg BrightnessMsg
 	err := json.Unmarshal(data, &brightnessMsg)
 	if err != nil {
 		log.Printf("Error unmarshalling brigthnessMsg: ", err)
@@ -112,8 +116,8 @@ func brightnessMsgHandler(data []byte, opcManager *OpcProcessManager, opcBroadca
 	}
 
 	// Brightness should be sent to any newly connected clients, so we must save the state.
-	// TODO: This ends up in an infinite loop!
-	//opcManager.SetBrightness(brightnessMsg.Brightness)
+	// This will make opcManager broadcast to everyone except ourselves.
+	opcManager.SetBrightness(brightnessMsg.Brightness, opcProcessManagerReceiver)
 
 	// Needs to be a value between 0.0-1.0 for the OPC message.
 	brightness := float32(brightnessMsg.Brightness) / 255.0
@@ -187,7 +191,8 @@ func WsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProcessManager, op
 		})
 
 		// Reader.
-		go readOpcWsConn(conn, serverMessages, ctrlPanelClient, opcManager, opcBroadcaster)
+		// TODO: Keep these in a struct instead?
+		go readOpcWsConn(conn, serverMessages, ctrlPanelClient, opcManager, opcBroadcaster, opcProcessManagerReceiver)
 
 		// Writer.
 		go func() {
@@ -225,9 +230,18 @@ func WsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProcessManager, op
 					}
 					conn.WriteJSON(serverControlPanelMsg)
 				case animationState := <-opcProcessManagerReceiver.animationStateChan:
-					log.Println("Broadcasting animation state: ", animationState)
+					log.Printf("Broadcasting animation state to %v: %v\n", conn.RemoteAddr(), animationState)
 					listMsg := newServerAnimationsMsg(animationState)
 					conn.WriteJSON(*listMsg)
+				case brightness := <-opcProcessManagerReceiver.brightnessChan:
+					log.Printf("Broadcasting brightness change to %v: %v\n", conn.RemoteAddr(), brightness)
+					brightnessMsg := BrightnessMsg{
+						clientMsg: clientMsg{
+							MessageType: "brightness",
+						},
+						Brightness: brightness,
+					}
+					conn.WriteJSON(brightnessMsg)
 				case <-pingTicker.C:
 					log.Println("Ping! ", conn.RemoteAddr())
 					conn.SetWriteDeadline(time.Now().Add(writeWait))
@@ -241,13 +255,13 @@ func WsHandler(bcast *ControlPanelBroadcaster, opcManager *OpcProcessManager, op
 }
 
 // readOpcWsConn reads incoming Websocket client messages.
-func readOpcWsConn(conn *websocket.Conn, serverMessages chan interface{},
+func readOpcWsConn(conn *websocket.Conn, replyChan chan interface{},
 	ctrlPanelClient *ControlPanelReceiver, opcManager *OpcProcessManager,
-	opcBroadcaster *OpcBroadcaster) {
+	opcBroadcaster *OpcBroadcaster, opcProcessManagerReceiver *OpcProcessManagerReceiver) {
 
 	defer func() {
 		conn.Close()
-		close(serverMessages)
+		close(replyChan)
 		close(ctrlPanelClient.controlPanel)
 	}()
 
@@ -258,6 +272,25 @@ func readOpcWsConn(conn *websocket.Conn, serverMessages chan interface{},
 			break
 		}
 
-		sendClientReply(data, opcManager, serverMessages, opcBroadcaster)
+		//sendClientReply(data, opcManager, replyChan, opcBroadcaster)
+		var msg clientMsg
+		err = json.Unmarshal(data, &msg)
+		if err != nil {
+			log.Printf("Failed to unmarshal JSON '%v' from %v: %v\n", string(data), conn.RemoteAddr(), err)
+		}
+
+		log.Printf("Got Websocket client message from %v:\n%s\n", conn.RemoteAddr(), msg)
+
+		switch msg.MessageType {
+		default:
+			log.Printf("Unexpected message type from client %v: %v", conn.RemoteAddr(), msg.MessageType)
+		case "play":
+			err := playMsgHandler(data, opcManager)
+			if err != nil {
+				replyChan <- *newServerErrorMsg(err, fmt.Sprintf("Failed to play"))
+			}
+		case "brightness":
+			brightnessMsgHandler(data, opcManager, opcBroadcaster, opcProcessManagerReceiver)
+		}
 	}
 }

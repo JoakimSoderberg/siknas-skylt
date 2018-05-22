@@ -47,11 +47,15 @@ type AnimationState struct {
 // OpcProcessManagerReceiver is a client that wants to listen to state changes to the OPC Process manager.
 type OpcProcessManagerReceiver struct {
 	animationStateChan chan AnimationState
+	brightnessChan     chan int
 }
 
 // NewOpcProcessManagerReceiver creates a new OpcProcessManagerReceiver instance.
 func NewOpcProcessManagerReceiver() *OpcProcessManagerReceiver {
-	return &OpcProcessManagerReceiver{animationStateChan: make(chan AnimationState)}
+	return &OpcProcessManagerReceiver{
+		animationStateChan: make(chan AnimationState),
+		brightnessChan:     make(chan int),
+	}
 }
 
 // NewOpcProcessManager creates a new process manager and read the config for it.
@@ -149,18 +153,25 @@ func (o *OpcProcessManager) stopAnim() {
 }
 
 // broadCastState broadcasts the current state of the animation being played.
-func (o *OpcProcessManager) broadCastState() {
+func (o *OpcProcessManager) broadcastState() {
 	o.broadcaster.Broadcast(func(r *OpcProcessManagerReceiver) {
 		r.animationStateChan <- o.GetAnimationsState()
 	})
 }
 
 // SetBrightness sets the brightness and broadcasts the current state to all websocket clients.
-func (o *OpcProcessManager) SetBrightness(brightness int) {
-	if o.brightness != brightness {
-		o.brightness = brightness
-		o.broadCastState()
+func (o *OpcProcessManager) SetBrightness(brightness int, sender *OpcProcessManagerReceiver) {
+	if o.brightness == brightness {
+		return
 	}
+
+	o.brightness = brightness
+
+	o.broadcaster.Broadcast(func(r *OpcProcessManagerReceiver) {
+		if r != sender {
+			r.brightnessChan <- o.brightness
+		}
+	})
 }
 
 // PlayAnim starts a given animation process by name. An empty string means stop.
@@ -168,7 +179,7 @@ func (o *OpcProcessManager) PlayAnim(processName string) error {
 	// Broadcast whatever state change we ended up with.
 	defer func() {
 		log.Printf("Broadcasting Play of '%v'\n", processName)
-		o.broadCastState()
+		o.broadcastState()
 	}()
 
 	log.Println("PlayAnim called")
