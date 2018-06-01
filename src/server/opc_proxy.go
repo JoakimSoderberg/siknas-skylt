@@ -152,19 +152,7 @@ func handleOpcCon(messages chan *opc.Message, conn net.Conn) {
 
 		messages <- msg
 
-		// TODO: Example of global brightness control in C++ https://github.com/scanlime/fadecandy/blob/9d09c62a4ce83f12d1f2aca0429c1cb18b9ec28a/examples/cpp/lib/brightness.h
-
-		// TODO: Color correction code can be used for brightness:
-		// https://github.com/scanlime/fadecandy/blob/3bace3a766e96bea0d23bf7846d26a230eee118b/examples/processing/grid24x8z_waves/OPC.pde#L153-L223
-		// Example how it is used to set brightness:
-		// https://github.com/scanlime/fadecandy/blob/3bace3a766e96bea0d23bf7846d26a230eee118b/examples/processing/grid24x8z_waves/grid24x8z_waves.pde#L38-L40
-
 		// TODO: Make it possible to ignore incoming messages (don't forward them)
-
-		// TODO: Create a standalone color correction Go-server that can be started and listens to
-		// websocket connections. The webpage can then connect to that and perform color
-		// correction. Like this:
-		// https://github.com/scanlime/fadecandy/blob/686ab1f5570e563a287474424565bfbf8d8fe4a8/examples/python/color-correction-ui.py#L19-L30
 	}
 }
 

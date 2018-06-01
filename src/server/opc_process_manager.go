@@ -164,6 +164,7 @@ func (o *OpcProcessManager) SetBrightness(brightness int, sender *OpcProcessMana
 	if o.brightness == brightness {
 		return
 	}
+	// TODO: Make an owner and ignore all other clients for ~1s at a time.
 
 	// Save for new clients.
 	o.brightness = brightness
