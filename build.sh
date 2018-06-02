@@ -6,9 +6,17 @@ docker build -t siknas-skylt-aurelia -f ./src/server/static/siknas-skylt/Dockerf
 
 mkdir -p build
 
-# TODO: Build multiple platforms
-docker run -it --rm -v $(pwd)/build/:/shared siknas-skylt-server \
-    /bin/sh -c "GOOS=windows GOARCH=amd64 go build -o /shared/siknas-skylt-server"
+platforms=("windows-amd64" "linux-amd64" "linux-arm64" "linux-arm" "darwin-amd64")
+for platform in "${platforms[@]}"
+do
+    echo "=== Building Siknas-skylt server for '${platform}' ==="
+
+    os_arch=(${platform//-/ })
+    mkdir -p ${platform}
+
+    docker run -it --rm -v $(pwd)/build/:/shared siknas-skylt-server \
+        /bin/sh -c "GOOS=${os_arch[0]} GOARCH=${os_arch[1]} go build -v -o /shared/${platform}/siknas-skylt-server"
+done
 
 mkdir -p build/static/
 
@@ -23,5 +31,7 @@ docker run -it --rm \
 
 
 # TODO: Build processing sketches
-
 # TODO: Build debian package
+# TODO: Systemd service files for Rpi
+# TODO: Dependency on Xvfb and running that using Systemd
+# TODO: Default settings file with static-path set to /usr/share ... by default.
