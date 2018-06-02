@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -27,9 +28,14 @@ func main() {
 	var rootCmd = &cobra.Command{Use: "siknas-skylt", Run: func(c *cobra.Command, args []string) {}}
 	rootCmd.Flags().Int("port", 8080, "The port the webserver should listen on")
 	rootCmd.Flags().Int("opc-listen-port", 7890, "The port to listen for OpenPixelControl protocol data on")
+	rootCmd.Flags().String("static-path", "static/siknas-skylt", "Path to the static files")
 
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatalln(err)
+	}
+
+	if viper.GetBool("help") {
+		os.Exit(1)
 	}
 
 	// Allow viper to parse the command line flags also.
@@ -77,7 +83,7 @@ func main() {
 	router.HandleFunc("/ws/control_panel", ControlPanelWsHandler(controlPanelBroadcaster, opcProcessManager))
 
 	// Must be last so we don't shadow the other routes.
-	router.PathPrefix("/").Handler(http.FileServer(http.Dir("static/siknas-skylt")))
+	router.PathPrefix("/").Handler(http.FileServer(http.Dir(viper.GetString("static-path"))))
 
 	// TODO: Move to function
 	// Add OPC servers we should send to.

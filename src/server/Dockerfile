@@ -10,6 +10,9 @@ RUN curl -s -L https://github.com/golang/dep/releases/download/v0.3.1/dep-linux-
 
 # TODO: Add args for building for production/development.
 #COPY . .
+ADD *.go Gopkg.lock Gopkg.toml ./
+RUN dep ensure -v
+RUN go-wrapper install
 
 ENV DISPLAY=:1
 

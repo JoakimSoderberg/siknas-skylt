@@ -28,7 +28,7 @@ scripts
 
 styles/font-awesome.min.css
 
-fonts/fontawesome*
+fonts/
 
 materialize-css.js
 rbuild.js
