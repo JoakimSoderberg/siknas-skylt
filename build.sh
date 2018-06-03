@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+# TODO: Add command line options.
+
 docker build -t siknas-skylt-server -f ./src/server/Dockerfile ./src/server
 docker build -t siknas-skylt-aurelia -f ./src/server/static/siknas-skylt/Dockerfile ./src/server/static/siknas-skylt
 
