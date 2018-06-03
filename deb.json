@@ -1,0 +1,38 @@
+{
+  "name": "siknas-skylt-server",
+  "maintainer": "Joakim Söderberg <joakim.soderberg@gmail.com>",
+  "files": [
+    {
+      "from": "build/linux-!arch!/!name!",
+      "to": "/usr/bin",
+      "base": "build/linux-!arch!",
+      "fperm": "0755"
+    },
+    {
+      "from": "build/static/siknas-skylt/**/**",
+      "to": "/usr/share/siknas-skylt/",
+      "base": "build/static/siknas-skylt/"
+    }
+  ],
+  "copyrights": [
+    {
+      "files": "*",
+      "copyright": "2018 Joakim Söderberg <joakim.soderberg@gmail.com>",
+      "license": "GPL2",
+      "file": "LICENSE"
+    }
+  ],
+  "envs": {
+    "some": "value"
+  },
+  "depends": [
+    "adduser",
+    "xvfb"
+  ],
+  "description": "Siknas-skylt Server runs an Openpixel Protocol Control Proxy and webserver to control a LED display",
+  "systemd-file": "deb/siknas-skylt.service",
+  "preinst-file": "deb/preinst.sh",
+  "postinst-file": "deb/postinst.sh",
+  "prerm-file": "deb/prerm.sh",
+  "postrm-file": "deb/postrm.sh"
+}

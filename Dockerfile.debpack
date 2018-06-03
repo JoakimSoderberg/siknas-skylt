@@ -1,0 +1,5 @@
+FROM ubuntu:18.04
+
+RUN apt-get -qqy update
+RUN apt-get -qqy install build-essential lintian wget
+RUN wget -q https://github.com/mh-cbon/go-bin-deb/releases/download/0.0.19/go-bin-deb-amd64.deb && dpkg -i go-bin-deb-amd64.deb 
