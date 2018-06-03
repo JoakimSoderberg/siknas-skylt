@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -34,25 +35,29 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	if viper.GetBool("help") {
-		os.Exit(1)
-	}
-
 	// Allow viper to parse the command line flags also.
 	viper.BindPFlags(rootCmd.Flags())
-	//viper.BindPFlag("port", rootCmd.Flags().Lookup("port"))
 
+	if viper.GetBool("help") {
+		os.Exit(0)
+	}
+
+	// Get config file.
 	viper.SetConfigName("siknas")
 	viper.AddConfigPath("/etc/siknas/")
 	viper.AddConfigPath(".")
 	err := viper.ReadInConfig() // Find and read the config file
 	if err != nil {
-		log.Printf("No config file: %s\n", err)
+		log.Printf("Warning: %s\n", err)
 	} else {
 		log.Printf("Found config file: %s\n", viper.ConfigFileUsed())
 	}
 
-	// TODO: Move the config parsing here and pass as arguments.
+	staticPath := viper.GetString("static-path")
+
+	if _, err := os.Stat(path.Join(staticPath, "index.html")); os.IsNotExist(err) {
+		log.Fatalf("Error: Static path '%s' doesn't contain 'index.html' please set it using --static-path\n", staticPath)
+	}
 
 	// Broadcasts control panel messages to all connected websocket clients.
 	controlPanelBroadcaster := NewControlPanelBroadcaster()

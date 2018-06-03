@@ -9,6 +9,8 @@ import { AnimationList } from './animation-list';
 export class App {
   constructor(private api: WSAPI, private events: EventAggregator) { }
 
+  // TODO: If no animation show error about not being configured correctly.
+
   blurValue: number = 9;
   @observable brightness: number = 128;
 

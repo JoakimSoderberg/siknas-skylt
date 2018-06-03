@@ -8,8 +8,6 @@ RUN apk --no-cache add ca-certificates curl git \
 
 RUN curl -s -L https://github.com/golang/dep/releases/download/v0.3.1/dep-linux-amd64 -o /usr/bin/dep && chmod +x /usr/bin/dep
 
-# TODO: Add args for building for production/development.
-#COPY . .
 ADD *.go Gopkg.lock Gopkg.toml ./
 RUN dep ensure -v
 RUN go-wrapper install
