@@ -36,6 +36,7 @@ func main() {
 	rootCmd.Flags().BoolP("list-only", "l", false, "Only list the available sketches on the server. Will not generate any SVGs")
 	rootCmd.Flags().Int("max-frames", 0, "Capture up to this amount of frames. capture-duration sets max time. Set 0 to allow any frame count")
 	rootCmd.Flags().Duration("frame-timeout", 3*time.Second, "The time between frames (Example: 3s, 3000ms)")
+	rootCmd.Flags().StringSlice("filter", nil, "Filter to only generate thumbnails for these animations (Use --list-only to get a list of all animations)")
 
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatalln(err)
@@ -82,7 +83,24 @@ func main() {
 		log.Fatalln("Failed to create output dir: ", err)
 	}
 
+	filteredAnimations := viper.GetStringSlice("filter")
+
+AnimationLoop:
 	for _, animation := range animationList {
+		// Skip any not in the filter list.
+		if len(filteredAnimations) > 0 {
+			var found = false
+			for _, filter := range filteredAnimations {
+				if filter == animation.Name {
+					found = true
+					break
+				}
+			}
+
+			if !found {
+				continue AnimationLoop
+			}
+		}
 		log.Println("====================")
 		log.Println(animation.Name)
 		log.Println("====================")
@@ -92,6 +110,7 @@ func main() {
 		if viper.GetBool("output-frames") {
 			// Each frame will be a separate file, so create a directory.
 			targetPath = path.Join(outputPath, animation.Name)
+			// TODO: If --force remove files in the directory first.
 			err = os.MkdirAll(targetPath, 0644)
 			if err != nil {
 				log.Fatalf("Failed to create directory '%v': %v", targetPath, err)

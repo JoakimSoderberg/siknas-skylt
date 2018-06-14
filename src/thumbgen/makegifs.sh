@@ -48,7 +48,7 @@ animations=$(ls -d ${input_path}/*/ | xargs basename)
 
 for anim in "${animations[@]}"
 do
-    # TODO: Break out into makegif.sh so it can be run on just one dir.
+    # TODO: Use makegif.sh instead here...
     files=( ${input_path}/${anim}/*.svg )
     file_out_path="${output_path}/${anim}.gif"
 
