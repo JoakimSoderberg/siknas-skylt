@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"path"
 	"strconv"
@@ -13,6 +15,39 @@ import (
 	"github.com/spf13/viper"
 	xmldom "github.com/subchen/go-xmldom"
 )
+
+var logoSvgData []byte
+
+func getLogoSvgReader() *bytes.Reader {
+	if len(logoSvgData) > 0 {
+		return bytes.NewReader(logoSvgData)
+	}
+
+	if viper.IsSet("logo-svg") {
+		// Read logo from local file.
+		var err error
+		svgLogoPath := viper.GetString("logo-svg")
+		logoSvgData, err = ioutil.ReadFile(svgLogoPath)
+		if err != nil {
+			log.Fatalf("Failed to read logo SVG %s: %s\n", svgLogoPath, err)
+		}
+	} else {
+		// Download logo from server is none was specified.
+		svgLogoURL := fmt.Sprintf("http://%s/images/siknas-skylt.svg", viper.GetString("host"))
+		response, err := http.Get(svgLogoURL)
+		if err != nil {
+			log.Fatalf("No logo was specified using --logo-svg and failed to get '%s': %s\n", svgLogoURL, err)
+		}
+		defer response.Body.Close()
+
+		logoSvgData, err = ioutil.ReadAll(response.Body)
+		if err != nil {
+			log.Fatalf("Failed to read logo from server '%s': %s\n", svgLogoURL, err)
+		}
+	}
+
+	return bytes.NewReader(logoSvgData)
+}
 
 func createBaseSVG() (*xmldom.Document, *xmldom.Node, float64, float64) {
 	svgLogoPath := viper.GetString("logo-svg")
