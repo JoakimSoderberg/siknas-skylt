@@ -5,7 +5,7 @@ set -e
 echo "NOTE! Assuming server is up and Xvfb is running inside of the server."
 echo "(Also you need animations configured in the server config files, read the README.md)"
 echo ""
-echo "To start server:"
+echo "To start server using docker-compose:"
 echo "  docker-compose up -d"
 echo "  docker-compose exec server Xvfb :1 -screen 0, 1024x768x16 &  # Run in separate window"
 echo ""

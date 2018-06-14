@@ -50,4 +50,4 @@ docker build -t svg2gif -f Dockerfile.svg2gif .
 docker run -it --rm -v $(pwd):/shared -w /shared svg2gif ./makegifs.sh
 ```
 
-**NOTE** On Windows running this in docker takes 2x more time!
+**NOTE** On Windows running this in docker takes 2x more time compared to using a native ImageMagick installation!

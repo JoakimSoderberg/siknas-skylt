@@ -9,7 +9,7 @@ input_path="output"
 
 show_help() {
     echo ""
-    echo "Make gifs from the generated SVG frames"
+    echo "Make gifs from the generated SVG frames created by thumbgen"
     echo ""
     echo "  -h          Show this help."
     echo "  -i <path>   Input path, each sub-directory is expected to contain animation SVG frames."
@@ -48,6 +48,7 @@ animations=$(ls -d ${input_path}/*/ | xargs basename)
 
 for anim in "${animations[@]}"
 do
+    # TODO: Break out into makegif.sh so it can be run on just one dir.
     files=( ${input_path}/${anim}/*.svg )
     file_out_path="${output_path}/${anim}.gif"
 
