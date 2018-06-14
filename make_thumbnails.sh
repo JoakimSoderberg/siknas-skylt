@@ -36,7 +36,7 @@ popd
 docker run -it --rm \
     -v $(pwd)/src/server/static/siknas-skylt/images/animations:/go/src/app/output \
     siknas-skylt-thumbgen \
-    sh -c "go run *.go --host $(docker-machine ip):8080 --output-frames --max-frames 400 --capture-duration 30s --force"
+    sh -c "go run *.go --host $(docker-machine ip):8080 --max-frames 400 --capture-duration 30s --force"
 
 # Make gifs from the SVGs
 if [ imagemagick_in_docker = 1 ]; then

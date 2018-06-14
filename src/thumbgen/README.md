@@ -30,11 +30,11 @@ Running
 # Help
 docker run -it --rm -v $(pwd):/go/src/app siknas-skylt-thumbgen go run *.go --help
 
-# Generate a single SVG animation.
+# Generate one frame per OPC message (use makegif.sh to generate animated gif from these).
 docker run -it --rm -v $(pwd):/go/src/app siknas-skylt-thumbgen go run *.go --host $(docker-machine ip):8080
 
-# Generate one frame per OPC message.
-docker run -it --rm -v $(pwd):/go/src/app siknas-skylt-thumbgen go run *.go --host $(docker-machine ip):8080 --output-frames
+# Generate a single SVG animation (slow in browsers, not recommended).
+docker run -it --rm -v $(pwd):/go/src/app siknas-skylt-thumbgen go run *.go --host $(docker-machine ip):8080 --inline-svg-animation
 ```
 
 ImageMagick and gifs
@@ -48,6 +48,13 @@ docker build -t svg2gif -f Dockerfile.svg2gif .
 
 # Convert a set of SVG frames to an animated gif using Imagemagick (Takes a long time).
 docker run -it --rm -v $(pwd):/shared -w /shared svg2gif ./makegifs.sh
+```
+
+### Single animation
+
+```bash
+
+./makegif.sh
 ```
 
 **NOTE** On Windows running this in docker takes 2x more time compared to using a native ImageMagick installation!

@@ -32,13 +32,13 @@ func getLogoSvgReader() *bytes.Reader {
 			log.Fatalf("Failed to read logo SVG %s: %s\n", svgLogoPath, err)
 		}
 	} else {
-		// Download logo from server is none was specified.
+		// Download logo from server if none was specified.
 		// We first check for one named "-thumb" that is optimized for use when generating a gif thumbnail
 		// but if it doesn't exist, use the normal one.
 		svgLogoURL := fmt.Sprintf("http://%s/images/siknas-skylt-thumb.svg", viper.GetString("host"))
 		response, err := http.Get(svgLogoURL)
 		if err != nil {
-			fmt.Sprintf("http://%s/images/siknas-skylt.svg", viper.GetString("host"))
+			svgLogoURL = fmt.Sprintf("http://%s/images/siknas-skylt.svg", viper.GetString("host"))
 			response, err = http.Get(svgLogoURL)
 			if err != nil {
 				log.Fatalf("No logo was specified using --logo-svg and failed to get '%s': %s\n", svgLogoURL, err)
@@ -70,11 +70,13 @@ func createBaseSVG() (*xmldom.Document, *xmldom.Node, float64, float64) {
 		log.Fatalln("Failed to parse SVG height: ", height)
 	}
 
-	// Make the text black as a background to the LEDs.
-	svg.QueryEach("//g[@id = 'Siknas']//path",
-		func(i int, node *xmldom.Node) {
-			node.SetAttributeValue("style", "fill: black")
-		})
+	if viper.GetString("siknas-background-color") != "" {
+		// Make the text black as a background to the LEDs.
+		svg.QueryEach("//g[@id = 'Siknas']//path",
+			func(i int, node *xmldom.Node) {
+				node.SetAttributeValue("style", fmt.Sprintf("fill: %s", viper.GetString("siknas-background-color")))
+			})
+	}
 
 	// Create a group for the LEDs
 	ledGroupNode := svg.CreateNode("g")

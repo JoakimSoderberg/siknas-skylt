@@ -15,7 +15,7 @@ import (
 func main() {
 	var rootCmd = &cobra.Command{
 		Use:  "thumbgen",
-		Long: "This progam is used to generate animated SVGs that are used as thumbnails for the web page",
+		Long: "\nThis progam is used to generate animated SVGs that are used as thumbnails for the Siknas skylt web page",
 		Run:  func(c *cobra.Command, args []string) {},
 	}
 	rootCmd.Flags().String("host", "localhost:8080", "OPC websocket server host including port")
@@ -27,16 +27,17 @@ func main() {
 	rootCmd.MarkFlagFilename("led-layout", "json")
 
 	rootCmd.Flags().Duration("capture-duration", 10*time.Second, "Duration of data we should capture (in seconds). See also --max-frames")
-	rootCmd.Flags().String("output", "output/", "Output path where to place the animation SVGs")
-	rootCmd.Flags().Bool("output-frames", false, "Output each frame, instead of adding the animation to the SVG itself")
+	rootCmd.Flags().String("output", "output/", "Output path where to place the animation SVGs. A subdirectory is created for each animation")
+	rootCmd.Flags().Bool("inline-svg-animation", false, "This produces an SVG with inline animation (this becomes very slow in a browser though). Normal behavior is to output each frame as a separate SVG.")
 
-	rootCmd.Flags().String("ws-opc-path", "/ws/opc", "Websocket OPC path to connect to")
-	rootCmd.Flags().String("ws-path", "/ws", "Websocket control path to connect to")
+	rootCmd.Flags().String("ws-opc-path", "/ws/opc", "(Advanced) Websocket OPC path to connect to")
+	rootCmd.Flags().String("ws-path", "/ws", "(Advanced) Websocket control path to connect to")
 	rootCmd.Flags().BoolP("force", "f", false, "Force overwriting any existing ouput files. They are skipped by default")
 	rootCmd.Flags().BoolP("list-only", "l", false, "Only list the available sketches on the server. Will not generate any SVGs")
 	rootCmd.Flags().Int("max-frames", 0, "Capture up to this amount of frames. capture-duration sets max time. Set 0 to allow any frame count")
 	rootCmd.Flags().Duration("frame-timeout", 3*time.Second, "The time between frames (Example: 3s, 3000ms)")
 	rootCmd.Flags().StringSlice("filter", nil, "Filter to only generate thumbnails for these animations (Use --list-only to get a list of all animations)")
+	rootCmd.Flags().String("siknas-background-color", "", "Force the 'Siknas' text background to be this color (should be a valid CSS style color)")
 
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatalln(err)
@@ -118,7 +119,9 @@ AnimationLoop:
 
 		var targetPath string
 
-		if viper.GetBool("output-frames") {
+		if viper.GetBool("inline-svg-animation") {
+			targetPath = path.Join(outputPath, fmt.Sprintf("%s.%s", animation.Name, "svg"))
+		} else {
 			// Each frame will be a separate file, so create a directory.
 			targetPath = path.Join(outputPath, animation.Name)
 			// TODO: If --force remove files in the directory first.
@@ -126,8 +129,6 @@ AnimationLoop:
 			if err != nil {
 				log.Fatalf("Failed to create directory '%v': %v", targetPath, err)
 			}
-		} else {
-			targetPath = path.Join(outputPath, fmt.Sprintf("%s.%s", animation.Name, "svg"))
 		}
 
 		if !viper.GetBool("force") {
@@ -165,12 +166,12 @@ AnimationLoop:
 
 		opcMessages := <-opcDoneChan
 
-		if viper.GetBool("output-frames") {
+		if viper.GetBool("inline-svg-animation") {
+			log.Printf("Saving inline SVG animation for '%s' to %v\n", animation.Name, targetPath)
+			createAnimatedSVG(targetPath, opcMessages, ledPositions)
+		} else {
 			log.Printf("Saving SVG %d frames for '%s' to %v", len(opcMessages), animation.Name, targetPath)
 			createSVGFrames(targetPath, animation.Name, opcMessages, ledPositions)
-		} else {
-			log.Printf("Saving SVG for '%s' to %v\n", animation.Name, targetPath)
-			createAnimatedSVG(targetPath, opcMessages, ledPositions)
 		}
 	}
 
