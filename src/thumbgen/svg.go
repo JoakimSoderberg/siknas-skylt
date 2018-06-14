@@ -23,7 +23,7 @@ func getLogoSvgReader() *bytes.Reader {
 		return bytes.NewReader(logoSvgData)
 	}
 
-	if viper.IsSet("logo-svg") {
+	if viper.GetString("logo-svg") != "" {
 		// Read logo from local file.
 		var err error
 		svgLogoPath := viper.GetString("logo-svg")
@@ -50,8 +50,8 @@ func getLogoSvgReader() *bytes.Reader {
 }
 
 func createBaseSVG() (*xmldom.Document, *xmldom.Node, float64, float64) {
-	svgLogoPath := viper.GetString("logo-svg")
-	doc := xmldom.Must(xmldom.ParseFile(svgLogoPath))
+	logoReader := getLogoSvgReader()
+	doc := xmldom.Must(xmldom.Parse(logoReader))
 	svg := doc.Root
 
 	width, err := strconv.ParseFloat(svg.GetAttributeValue("width"), 32)

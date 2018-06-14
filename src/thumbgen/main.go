@@ -20,19 +20,19 @@ func main() {
 	}
 	rootCmd.Flags().String("host", "localhost:8080", "OPC websocket server host including port")
 
-	rootCmd.Flags().String("logo-svg", "siknas-skylt.svg", "Path to Siknäs logo")
+	rootCmd.Flags().String("logo-svg", "", "Path to Siknäs logo")
 	rootCmd.MarkFlagFilename("logo-svg", "svg")
 
 	rootCmd.Flags().String("led-layout", "layout.json", "Path to the LED layout.json")
 	rootCmd.MarkFlagFilename("led-layout", "json")
 
-	rootCmd.Flags().Duration("capture-duration", 10*time.Second, "Duration of data we should capture (in seconds)")
+	rootCmd.Flags().Duration("capture-duration", 10*time.Second, "Duration of data we should capture (in seconds). See also --max-frames")
 	rootCmd.Flags().String("output", "output/", "Output path where to place the animation SVGs")
 	rootCmd.Flags().Bool("output-frames", false, "Output each frame, instead of adding the animation to the SVG itself")
 
 	rootCmd.Flags().String("ws-opc-path", "/ws/opc", "Websocket OPC path to connect to")
 	rootCmd.Flags().String("ws-path", "/ws", "Websocket control path to connect to")
-	rootCmd.Flags().BoolP("force", "f", false, "Force overwriting any existing ouput files. They are skipped by defaul")
+	rootCmd.Flags().BoolP("force", "f", false, "Force overwriting any existing ouput files. They are skipped by default")
 	rootCmd.Flags().BoolP("list-only", "l", false, "Only list the available sketches on the server. Will not generate any SVGs")
 	rootCmd.Flags().Int("max-frames", 0, "Capture up to this amount of frames. capture-duration sets max time. Set 0 to allow any frame count")
 	rootCmd.Flags().Duration("frame-timeout", 3*time.Second, "The time between frames (Example: 3s, 3000ms)")
