@@ -1,0 +1,12 @@
+[Unit]
+Description=Siknas Skylt Server
+After=Xvfb
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/siknas-skylt-server
+Restart=always
+EnvironmentFile=/etc/siknas/environment
+
+[Install]
+WantedBy=multi-user.target

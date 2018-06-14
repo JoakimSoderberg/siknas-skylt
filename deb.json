@@ -10,8 +10,29 @@
     },
     {
       "from": "build/static/siknas-skylt/**/**",
-      "to": "/usr/share/siknas-skylt/",
+      "to": "/usr/share/siknas-skylt/static/",
       "base": "build/static/siknas-skylt/"
+    },
+    {
+      "from": "build/animations-!arch!/**/**",
+      "to": "/usr/share/siknas-skylt/animations",
+      "base": "build/animations-!arch!/",
+      "fperm": "0755"
+    },
+    {
+      "from": "src/server/siknas.yaml.example",
+      "to": "/etc/siknas",
+      "base": "src/server/"
+    },
+    {
+      "from": "deb/Xvfb.service",
+      "to": "/lib/systemd/system/",
+      "base": "deb/"
+    },
+    {
+      "from": "deb/environment",
+      "to": "/etc/siknas/",
+      "base": "deb/"
     }
   ],
   "copyrights": [
@@ -27,7 +48,8 @@
   },
   "depends": [
     "adduser",
-    "xvfb"
+    "xvfb",
+    "openjdk-8-jre"
   ],
   "description": "Siknas-skylt Server runs an Openpixel Protocol Control Proxy and webserver to control a LED display",
   "systemd-file": "deb/siknas-skylt.service",

@@ -1,8 +1,32 @@
+#
+# Siknas Skylt server configuration file.
+#
+static-path: /usr/share/siknas-skylt/static
+
+# The port the server is listening to, this must be different than
+# what fadecandy/fcserver uses if it is running locally.
+# Also, all animation sketches should connect to this port
+# not directly to fadecandy.
+opc-listen-port: 7899
+
+# A list of Open Pixel Control (OPC) servers we should forward data to.
+# (In most cases you will connect to fcserver running on localhost)
 opc-servers:
-    simulator:
-        host: 192.168.1.75
+    fadecandy:
+        host: 127.0.0.1
         port: 7890
-#processes:
-#    Flames:
-#        description: Cool flames
-#        Exec: /path/to/sketch/executable
+#    simulator:
+#        host: 192.168.1.88
+#        port: 7890
+
+# A list of the animation processes that will run the animations and send the OPC traffic
+# to the server. Which in turn forwards it according to the list above.
+# (If you are using Processing sketches Xvfb must be running when in headless mode).
+processes:
+    Flames:
+        description: Cool flames
+        # Note important to connect to the correct OPC port for the sketch.
+        # 7899 (siknas-skylt-server) not 7890 (fadecandy usb controller server)
+        # siknas-skylt server will forward the traffic.
+        Exec: /usr/share/siknas-skylt/animations/flames/flames 127.0.0.1:7899
+        KillCommand: kill -9 $(ps aux | grep "animations/flames" | awk '{print $1}')

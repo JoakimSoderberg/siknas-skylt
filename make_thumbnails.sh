@@ -49,3 +49,4 @@ else
     cd src/thumbgen && ./makegifs.sh -i ${animation_path} -o ${animation_path}
 fi
 
+# TODO: Cleanup *.svg used to make gifs

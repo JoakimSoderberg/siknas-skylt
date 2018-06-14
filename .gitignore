@@ -3,3 +3,6 @@ bin/
 image-gui/.vs/
 image-gui/obj/
 image-gui/packages/
+build/
+src/server/static/siknas-skylt/yarn-error.log
+.vscode/
