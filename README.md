@@ -9,8 +9,105 @@ the OpenPixelControl (OPC).
 
 To use this software, a **Fadecandy** server needs to run and be connected to the display via **Fadecandy USB controller boards**.
 
-Quickstart
-----------
+Build release package
+--------------------
+
+This program was designed to run on a Raspberry Pi along with **Fadcandy** fcserver.
+
+## Creating the debian package
+
+1. Build the animations themselves (Note requires using the Processing GUI, since the CLI is broken, see https://github.com/processing/processing/issues/5468).
+    - Open each Processing sketch under `examples/`
+    - File -> Export Application...
+    - Click Export
+    - Make sure the sketch dir contains `examples/animation_name/`:
+        - `application.linux-armv6hf`
+        - `application.linux-amd64`
+2. Now run:
+    ```bash
+    ./build-animations.sh
+    ```
+3. Create thumbnails. (**Note** this will start the server and send actual traffic that is recorded and made into animated Gifs. So don't touch the webapp during this):
+    ```bash
+    ./make-thumbnails.sh
+    ```
+4. Now build the executables and static files (This includes Windows, OSX, Linux, Linux ARM):
+    ```bash
+    ./build.sh
+    ```
+5. Finally build the debian packages:
+    ```bash
+    ./build-debian.sh
+    ```
+
+## Install debian package on the Raspberry Pi
+
+The assumption the RPi will run in "headless" mode. This means we need to use **Xvfb** for a virtual screen buffer since Processing needs that to generate the animations.
+
+### Pre-requisite (Fadecandy)
+
+Note that you will need [**Fadecandy**](https://github.com/scanlime/fadecandy) installed somewhere (most likely the same RPi, but not a requirement as long as you have a network connection to it).
+
+The official releases do not contain a debian package:
+https://github.com/scanlime/fadecandy/releases
+
+But it works fine to use those. However we want to install it via the debian package which also includes a **SystemD service unit**.
+
+#### Alternative 1
+To build a debian package yourself on the Raspberry pi:
+
+```bash
+sudo apt-get install git cmake build-essential
+
+git clone git@github.com:scanlime/fadecandy.git
+cd fadecandy
+
+git submodule update --init
+
+cd server
+mkdir build
+cd build
+
+cmake ..
+make
+make package  # For debian package.
+```
+
+#### Alternative 2
+
+Install the official release and create the **SystemD service yourself**
+
+`/lib/systemd/system/fcserver.service`
+```ini
+[Unit]
+Description=Fadecandy USB LED controller server
+
+[Service]
+ExecStart=/usr/local/bin/fcserver
+RemainAfterExit=yes
+StandardOutput=journal+console
+StandardError=journal+console
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### Install
+
+1. Copy the debian package to the RPi somehow. For example using SCP:
+    ```bash
+    scp build/siknas-skylt-server-armhf.deb my-rpi:.   # my-rpi is the ip or hostname of the RPi
+    ```
+2. Install the debian package:
+    ```bash
+    sudo dpkg -i ./siknas-skylt-server.armhf.deb  # This complains about unment dependencies
+    sudo apt-get -f install  # Fixes dependencies.
+    ```
+
+Quickstart (Development)
+------------------------
+
+Running while developing under docker.
 
 See Tutorial below for details.
 
