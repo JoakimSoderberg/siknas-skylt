@@ -155,16 +155,35 @@ type LedPosition struct {
 	Point [3]float64 `json:"point"`
 }
 
-func readLEDLayout(path string) ([]LedPosition, error) {
-	bytes, err := ioutil.ReadFile(path)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read %s: %s", path, err)
+func readLEDLayout() ([]LedPosition, error) {
+	var bytes []byte
+	var path string
+	path = viper.GetString("led-layout")
+
+	if path != "" {
+		var err error
+		bytes, err = ioutil.ReadFile(path)
+		if err != nil {
+			log.Fatalf("Failed to read %s: %s", path, err)
+		}
+	} else {
+		path = fmt.Sprintf("http://%s/misc/layout.json", viper.GetString("host"))
+		response, err := http.Get(path)
+		if err != nil {
+			log.Fatalf("No logo was specified using --layout and failed to get '%s': %s\n", path, err)
+		}
+		defer response.Body.Close()
+
+		bytes, err = ioutil.ReadAll(response.Body)
+		if err != nil {
+			log.Fatalf("Failed to read response body when getting %s: %s\n", path, err)
+		}
 	}
 
 	ledPositions := make([]LedPosition, 0)
-	err = json.Unmarshal(bytes, &ledPositions)
+	err := json.Unmarshal(bytes, &ledPositions)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read JSON from %s: %s", path, err)
+		log.Fatalf("failed to unmarshal JSON from %s: %s", path, err)
 	}
 
 	return ledPositions, nil

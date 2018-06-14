@@ -20,10 +20,10 @@ func main() {
 	}
 	rootCmd.Flags().String("host", "localhost:8080", "OPC websocket server host including port")
 
-	rootCmd.Flags().String("logo-svg", "", "Path to Siknäs logo")
+	rootCmd.Flags().String("logo-svg", "", "Path to Siknäs logo. If this isn't specified the version on the server is used")
 	rootCmd.MarkFlagFilename("logo-svg", "svg")
 
-	rootCmd.Flags().String("led-layout", "layout.json", "Path to the LED layout.json")
+	rootCmd.Flags().String("led-layout", "", "Path to the LED layout.json, otherwise this is fetched from the server")
 	rootCmd.MarkFlagFilename("led-layout", "json")
 
 	rootCmd.Flags().Duration("capture-duration", 10*time.Second, "Duration of data we should capture (in seconds). See also --max-frames")
@@ -54,10 +54,7 @@ func main() {
 
 	// Read the layout file. We expect each OPC message from the server to
 	// be as long as the number of LEDs in this layout.
-	ledPositions, err := readLEDLayout(viper.GetString("led-layout"))
-	if err != nil {
-		log.Fatalln(err)
-	}
+	ledPositions, err := readLEDLayout()
 	expectedMsgLen := uint16(len(ledPositions) * 3)
 
 	wsCtrl, animationList, ctrlMessagesChan, err := ConnectControlWebsocket(doneCtrl, interrupt)

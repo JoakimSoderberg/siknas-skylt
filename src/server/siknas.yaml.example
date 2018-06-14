@@ -2,6 +2,7 @@
 # Siknas Skylt server configuration file.
 #
 static-path: /usr/share/siknas-skylt/static
+port: 80
 
 # The port the server is listening to, this must be different than
 # what fadecandy/fcserver uses if it is running locally.
