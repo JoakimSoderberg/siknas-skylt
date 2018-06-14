@@ -38,45 +38,12 @@ done
 
 shift $((OPTIND-1))
 
-echo "Batch size: ${batch} frames"
-echo ""
-
 mkdir -p ${output_path}
 
 # We assume all directories are animations.
-animations=$(ls -d ${input_path}/*/ | xargs basename)
+animations=( $(echo ${input_path}/*/ | xargs basename) )
 
 for anim in "${animations[@]}"
 do
-    # TODO: Use makegif.sh instead here...
-    files=( ${input_path}/${anim}/*.svg )
-    file_out_path="${output_path}/${anim}.gif"
-
-    echo "Animation: ${anim} (${#files[@]} frames)"
-
-    if [ ${#files[@]} = 0 ]; then
-        echo "  No frames found, skipping ..."
-        continue
-    fi
-
-    mkdir -p tmp/
-    rm -rf tmp/${anim}.*.miff
-
-    if [ ${batch} -ge ${#files[@]} ]; then
-        echo "  Generating ${anim} gif ${file_out_path}"
-        magick -delay 2 -loop 0 -background none "${files[@]}" -scale 150x150 ${file_out_path}
-    else
-        # Generate intermediate batches of animations in the internal ImageMagick miff format.
-        for (( i=0; $i<${#files[@]}; i+=$batch ))
-        do
-            intermediate_path="tmp/${anim}.$(printf "%06d" $i).miff"
-
-            echo "  Generating ($i of ${#files[@]}) ${intermediate_path}"
-            magick -delay 2 -loop 0 -background none "${files[@]:$i:$batch}" -scale 150x150 ${intermediate_path}
-        done
-
-        echo ""
-        echo "  Combining result for ${anim} into ${file_out_path}"
-        magick -background none tmp/${anim}.*.miff ${file_out_path}
-    fi
+    ./makegif.sh -b ${batch} -o "${output_path}/${anim}.gif" ${input_path}/${anim}/*.svg
 done
