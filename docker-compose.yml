@@ -5,7 +5,7 @@ services:
     build: ./src/server
     volumes:
       - "./src/server:/go/src/app"
-      - "./examples:/animations"
+      - "./animations:/animations"
     ports:
       - "3000:3000"
       - "7890:7890"

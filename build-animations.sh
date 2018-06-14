@@ -24,7 +24,7 @@ if [ "${answer}" = "n" ]; then
     exit 0
 fi
 
-anim_dir="./examples"
+anim_dir="./animations"
 out_amd64="./build/animations-amd64"
 out_armhf="./build/animations-armhf"
 

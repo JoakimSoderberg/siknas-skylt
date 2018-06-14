@@ -30,7 +30,7 @@ This tutorial uses **Docker**.
 
     Make sure the installation directory is added to the **Path** in Windows (Or write the full path in the examples below for `processing-java`).
 
-5. Open the [**flames**](examples/flames/flames.pde) example sketch.
+5. Open the [**flames**](animations/flames/flames.pde) example sketch.
 
     **NOTE** If using the **Processing GUI** on Windows you must edit the `host` variable at the top of the sketch to connect to the `docker-machine ip` instead of `localhost`
 
@@ -39,10 +39,10 @@ This tutorial uses **Docker**.
     processing-java --help
 
     # To run the example sketch (Note, must be the full path)
-    processing-java --sketch=$(pwd)/examples/flames/ --run
+    processing-java --sketch=$(pwd)/animations/flames/ --run
 
     # On Windows you have to specify the OPC host to connect to since it is not localhost.
-    processing-java --sketch=$(pwd)/examples/flames/ --run $(docker-machine ip):7890
+    processing-java --sketch=$(pwd)/animations/flames/ --run $(docker-machine ip):7890
 
     # NOTE if you keep getting disconnected repeatedly. Make sure you connect to port 7890.
     ```
@@ -90,10 +90,10 @@ This tutorial uses **Docker**.
     Since this will run inside of docker you'll need to export the Processing sketch you want to run.
 
     ```bash
-    processing-java --sketch=$(pwd)/examples/flames/ --platform=linux --export
+    processing-java --sketch=$(pwd)/animations/flames/ --platform=linux --export
     ```
 
-    The [`docker-compose.yml`](docker-compose.yml) project will mount the `/examples` directory under `/animations`
+    The [`docker-compose.yml`](docker-compose.yml) project will mount the `/animations` directory under `/animations`
 
     ```yaml
     # ...

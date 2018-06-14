@@ -19,10 +19,10 @@ This program was designed to run on a Raspberry Pi along with **Fadcandy** fcser
 Currently this is a multi-stage process.
 
 1. Build the animations themselves (Note requires using the Processing GUI, since the CLI is broken, see https://github.com/processing/processing/issues/5468).
-    - Open each Processing sketch under `examples/`
+    - Open each Processing sketch under `animations/`
     - File -> Export Application...
     - Click Export
-    - Make sure the sketch dir contains `examples/animation_name/`:
+    - Make sure the sketch dir contains `animations/animation_name/`:
         - `application.linux-armv6hf`
         - `application.linux-amd64`
 2. Now run:
@@ -103,7 +103,7 @@ Repository structure
 --------------------
 
 * [`docs`](docs/) - Contains some documentation on how the display works.
-* [`examples/`](examples/) - Contains Processing sketches that animates the display using OPC.
+* [`animations/`](animations/) - Contains Processing sketches that animates the display using OPC.
 * [`image-gui/`](image-gui/) - A .NET C# program used to map real pixel locations to the virtual ones. (Used to produce `layout.json` that the Processing sketches use).
 * [`layouts`](layouts/) - Contains the [`layout.json`](layouts/layout.json) created by using the [`image-gui`](image-gui/), and the source image used to do this.
 * [`scripts/`](scripts/) - A script to re-scale the coordinates in [`layout.json`](layouts/layout.json).

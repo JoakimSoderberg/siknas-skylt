@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO: Remake to use built version instead.
+
 set -e
 
 echo "NOTE! Assuming server is up and Xvfb is running inside of the server."
