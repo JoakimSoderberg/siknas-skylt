@@ -16,6 +16,8 @@ This program was designed to run on a Raspberry Pi along with **Fadcandy** fcser
 
 ## Creating the debian package
 
+Currently this is a multi-stage process.
+
 1. Build the animations themselves (Note requires using the Processing GUI, since the CLI is broken, see https://github.com/processing/processing/issues/5468).
     - Open each Processing sketch under `examples/`
     - File -> Export Application...
@@ -27,7 +29,7 @@ This program was designed to run on a Raspberry Pi along with **Fadcandy** fcser
     ```bash
     ./build-animations.sh
     ```
-3. Create thumbnails. (**Note** this will start the server and send actual traffic that is recorded and made into animated Gifs. So don't touch the webapp during this):
+3. Create thumbnails. (**Note** this will start the server and send actual traffic that is recorded and made into animated Gifs. So don't touch the webapp during this. Details [`src/thumbgen/README.md`](src/thumbgen)):
     ```bash
     ./make-thumbnails.sh
     ```
@@ -46,51 +48,7 @@ The assumption the RPi will run in "headless" mode. This means we need to use **
 
 ### Pre-requisite (Fadecandy)
 
-Note that you will need [**Fadecandy**](https://github.com/scanlime/fadecandy) installed somewhere (most likely the same RPi, but not a requirement as long as you have a network connection to it).
-
-The official releases do not contain a debian package:
-https://github.com/scanlime/fadecandy/releases
-
-But it works fine to use those. However we want to install it via the debian package which also includes a **SystemD service unit**.
-
-#### Alternative 1
-To build a debian package yourself on the Raspberry pi:
-
-```bash
-sudo apt-get install git cmake build-essential
-
-git clone git@github.com:scanlime/fadecandy.git
-cd fadecandy
-
-git submodule update --init
-
-cd server
-mkdir build
-cd build
-
-cmake ..
-make
-make package  # For debian package.
-```
-
-#### Alternative 2
-
-Install the official release and create the **SystemD service yourself**
-
-`/lib/systemd/system/fcserver.service`
-```ini
-[Unit]
-Description=Fadecandy USB LED controller server
-
-[Service]
-ExecStart=/usr/local/bin/fcserver
-RemainAfterExit=yes
-StandardOutput=journal+console
-StandardError=journal+console
-
-[Install]
-WantedBy=multi-user.target
-```
+Follow the instructions in [README_FADECANDY.md](README_FADECANDY.md) on how to build and install **Fadecandy**.
 
 ### Install
 
@@ -109,7 +67,7 @@ Quickstart (Development)
 
 Running while developing under docker.
 
-See Tutorial below for details.
+See the [`TUTORIAL.md`](TUTORIAL.md) for details.
 
 ```bash
 # Create and edit src/server/sikas.yaml
@@ -118,182 +76,13 @@ cp src/server/siknas.yaml.example src/server/siknas.yaml
 # Start server.
 docker-compose up -d
 
-# (Separate window) Run Xvfb inside of server.
+# (Separate window) Run Xvfb inside of server docker.
 ./run_xvfb.sh
 
 # Surf to http://localhost:8080 (Linux)
 open http://$(docker-machine ip):8080   # OSX
 start http://$(docker-machine ip):8080  # Windows.
 ```
-
-Tutorial
---------
-
-This quickstart uses **Docker**, see below on how to **build** a final build instead.
-
-1. Install Docker. (On Windows use [**Docker toolbox**](https://docs.docker.com/toolbox/toolbox_install_windows/)).
-
-2. Start the server. (On Windows run in the **Docker console**):
-
-    ```bash
-    docker-compose up -d
-    docker logs -f server   # Depending what you want to follow.
-    docker logs -f aurelia
-
-    # Get error on starting aurelia?
-    cd src/server/static/siknas-skylt/node_modules/
-    rm -rf npm
-    docker-compose up -d aurelia
-    ```
-
-3. Now you can surf to the server: http://localhost:8080 (Use `docker-machine ip` to get IP on Windows instead of `localhost`)
-    ```bash
-    start http://$(docker-machine ip):8080  # To open the webpage from the console on Windows.
-    ```
-    Which looks like this:
-
-    ![Siknäs skylt website](docs/images/website.png)
-
-4. Download and install [**Processing**](https://processing.org/).
-
-    Make sure the installation directory is added to the **Path** in Windows (Or write the full path in the examples below for `processing-java`).
-
-5. Open the [**flames**](examples/flames/flames.pde) example sketch.
-
-    **NOTE** If using the **Processing GUI** on Windows you must edit the `host` variable at the top of the sketch to connect to the `docker-machine ip` instead of `localhost`
-
-    ```bash
-    # Assuming you are standing in the root of this repository.
-    processing-java --help
-
-    # To run the example sketch (Note, must be the full path)
-    processing-java --sketch=$(pwd)/examples/flames/ --run
-
-    # On Windows you have to specify the OPC host to connect to since it is not localhost.
-    processing-java --sketch=$(pwd)/examples/flames/ --run $(docker-machine ip):7890
-
-    # NOTE if you keep getting disconnected repeatedly. Make sure you connect to port 7890.
-    ```
-
-6. Now if you don't have a real display built yet, you can test with the [**Simulator**](https://github.com/JoakimSoderberg/OPCSim). Download the latest version here: https://github.com/JoakimSoderberg/OPCSim/releases/latest
-
-    Once you have the simulator running, you must configure the server so that it knows how to connect to it. To do this there's a [config file example](src/server/siknas.yaml.example).
-
-    The server will look for this file in either the same path, or under `/etc/siknas/` on the system.
-
-    So create a copy of it:
-
-    ```bash
-    cd src/server/
-    cp siknas.yaml.example siknas.yaml
-    cat siknas.yaml
-    cd ../..
-    ```
-
-    Example contents:
-    ```yaml
-    opc-servers:
-        simulator:
-            host: 192.168.1.75
-            port: 7890
-    #processes:
-    #    Flames:
-    #        description: Cool flames
-    #        Exec: /path/to/sketch/executable
-    #        KillCommand: kill -9 `ps aux | grep path/sketch` | awk '{print $1}'
-    ```
-
-    Edit this to connect to the correct ip. (On **Windows** this is your docker host IP, see `ipconfig`, on **Linux** most likely `localhost`).
-
-    You can make the server forward the traffic both towards the real display, as well as the simualtor by adding a second entry in the config.
-
-    Now restart the server to reload the config:
-
-    ```bash
-    docker-compose restart server
-    ```
-
-7. With the above steps, running **Processing** manually means we are not using the webserver to choose the animation. To enable that we can add a list of processes in the config file:
-
-    Since this will run inside of docker you'll need to export the Processing sketch you want to run.
-
-    ```bash
-    processing-java --sketch=$(pwd)/examples/flames/ --platform=linux --export
-    ```
-
-    The [`docker-compose.yml`](docker-compose.yml) project will mount the `/examples` directory under `/animations`
-
-    ```yaml
-    # ...
-    processes:
-        Flames:
-            description: Cool flames
-            Exec: /animations/flames/application.linux64/flames
-            # The kill command is required since a normal kill won't kill the Java process otherwise.
-            KillCommand: kill -9 `ps aux | grep animations/flames | awk '{print $1}'`
-    ```
-
-    Restart the server so the config is reloaded:
-
-    ```bash
-    docker-compose restart server
-    ```
-
-    It won't work yet. The processing sketch must run in **headless mode**. To do that we must use `Xvfb` (a virtual X server), in production we can set this up at system startup. You will see errors like this:
-
-    ```bash
-    Animation process died unexpectedly restarting: exit status 1
-    ```
-
-    When running in docker we need to start it manually (before attempting to start any process).
-
-    ```bash
-    docker-compose exec server Xvfb :1 -screen 0, 1024x768x16 &
-    ```
-
-8. Surf to http://localhost:8080 and select the animation and press play. The logo should start animating.
-
-
-Building
---------
-
-### Export Processing sketches to be standalone
-
-Examples assuming you are standing in the root of this repository (and using **git bash** or **docker console** on Windows).
-
-To export a single Processing sketch to a standalone including an embedded **Java**:
-
-**NOTE** The Processing CLI is really bad. Using `--output` will not allow you to output for all Platforms! Don't use it!
-
-#### Windows
-
-This produces all versions under the sketch folder.
-
-```bash
-# Add --no-java to not include Java (a lot smaller but you are responsible for Java to work).
-processing-java --sketch=$(pwd)/examples/flames/ --platform=windows --export
-```
-
-#### Linux
-
-This produces all versions under the sketch folder (in theory). Best is to use the GUI.
-
-```bash
-processing-java --sketch=$(pwd)/examples/flames/ --platform=linux --export
-```
-
-It will create all versions in the sketch directory:
-
-```bash
-$ ls -1 examples/flames/
-application.linux32/
-application.linux64/
-application.linux-arm64/
-application.linux-armv6hf/
-application.windows32/
-application.windows64/
-```
-
 
 Display
 -------
