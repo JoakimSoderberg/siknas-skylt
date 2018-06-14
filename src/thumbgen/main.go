@@ -85,6 +85,17 @@ func main() {
 
 	filteredAnimations := viper.GetStringSlice("filter")
 
+	/*
+		Recurring bug:
+		2018/06/14 18:22:35 Connecting to OPC websocket ws://192.168.1.71:8080/ws/opc...
+		2018/06/14 18:22:35 Playing 'flames' for capture...
+		2018/06/14 18:22:35 Capturing...
+		2018/06/14 18:22:35 OPC Websocket started capturing 10s of animation (max frames: 0)
+		2018/06/14 18:22:45 Finished capturing after 10s
+		2018/06/14 18:22:45 OPC Websocket failed to read:  read tcp 172.17.0.2:42998->192.168.1.71:8080: use of closed network connection
+		exit status 1
+	*/
+
 AnimationLoop:
 	for _, animation := range animationList {
 		// Skip any not in the filter list.

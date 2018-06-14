@@ -33,10 +33,16 @@ func getLogoSvgReader() *bytes.Reader {
 		}
 	} else {
 		// Download logo from server is none was specified.
-		svgLogoURL := fmt.Sprintf("http://%s/images/siknas-skylt.svg", viper.GetString("host"))
+		// We first check for one named "-thumb" that is optimized for use when generating a gif thumbnail
+		// but if it doesn't exist, use the normal one.
+		svgLogoURL := fmt.Sprintf("http://%s/images/siknas-skylt-thumb.svg", viper.GetString("host"))
 		response, err := http.Get(svgLogoURL)
 		if err != nil {
-			log.Fatalf("No logo was specified using --logo-svg and failed to get '%s': %s\n", svgLogoURL, err)
+			fmt.Sprintf("http://%s/images/siknas-skylt.svg", viper.GetString("host"))
+			response, err = http.Get(svgLogoURL)
+			if err != nil {
+				log.Fatalf("No logo was specified using --logo-svg and failed to get '%s': %s\n", svgLogoURL, err)
+			}
 		}
 		defer response.Body.Close()
 
