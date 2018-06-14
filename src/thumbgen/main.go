@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -128,7 +129,23 @@ AnimationLoop:
 			}
 		}
 
-		if !viper.GetBool("force") {
+		if viper.GetBool("force") {
+			if !viper.GetBool("inline-svg-animation") {
+				// When outputting multiple frames using force, we will overwrite
+				// any existing files. But we also want to get rid of any stale old files
+				// if we happen to capture less frames this time (would cause a jump in the animation).
+				files, err := filepath.Glob(fmt.Sprintf("%s/%s*.svg", targetPath, animation.Name))
+				if err != nil {
+					log.Fatalf("Failed to glob files in %s:\n  %s\n", targetPath, err)
+				}
+
+				for _, f := range files {
+					if err := os.Remove(f); err != nil {
+						log.Fatalf("Failed to delete file %s:\n  %s\n", f, err)
+					}
+				}
+			}
+		} else {
 			if _, err := os.Stat(targetPath); !os.IsNotExist(err) {
 				log.Printf("Skipping existing animation '%v', use --force to overwrite\n", targetPath)
 				continue
