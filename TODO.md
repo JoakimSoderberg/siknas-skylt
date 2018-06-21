@@ -3,8 +3,8 @@
 GUI
 ===
 
-- [ ] Add a live icon to indicate current animation
-- [ ] Add thumbnails to the list items
+- [x] Add a live icon to indicate current animation
+- [x] Add thumbnails to the list items
 - [ ] Adjust to mobile screen vs big screen
 - [x] Add control panel graphic
     - [ ] When control panel "owns" the server it becomes big and list fades out
@@ -17,11 +17,11 @@ Server
 ======
 
 - [ ] Fix broadcaster with either mutex or channels
-- [ ] When control panel is connected
-    - [ ] Send control panel status to Websocket clients
-    - [ ] If the custom program is not selected disable choosing programs
+- [x] When control panel is connected
+    - [x] Send control panel status to Websocket clients
+    - [x] If the custom program is not selected disable choosing programs
         - [ ] Send command to websocket clients to grey out list
-        - [ ] Ignore websocket client selects server side
+        - [x] Ignore websocket client selects server side
 
 Thumbnail generator
 ===================

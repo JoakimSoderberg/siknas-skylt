@@ -3,6 +3,19 @@ PImage im;
 String host = "127.0.0.1";
 int port = 7890;
 
+void connect_opc()
+{
+  if (args != null) {
+    String[] parts = split(args[0], ":");
+    host = parts[0];
+    port = Integer.parseInt(parts[1]);
+  }
+
+  println("Connecting to ", host, ":", port);
+
+  opc = new OPC(this, host, port);
+}
+
 void load_layout(int x_offset, int y_offset, float scale)
 {
   JSONArray points = loadJSONArray("layout.json");
@@ -21,16 +34,7 @@ void setup()
   // Load a sample image
   im = loadImage("flames.jpeg");
 
-  if (args != null) {
-    String[] parts = split(args[0], ":");
-    host = parts[0];
-    port = Integer.parseInt(parts[1]);
-  }
-
-  println("Connecting to ", host, ":", port);
-
-  // Connect to the local instance of fcserver
-  opc = new OPC(this, host, port);
+  connect_opc();
 
   load_layout(0,0, 200);
 }

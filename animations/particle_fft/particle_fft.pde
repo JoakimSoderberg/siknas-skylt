@@ -6,10 +6,14 @@ import ddf.minim.analysis.*;
 import ddf.minim.*;
 
 OPC opc;
+String host = "127.0.0.1";
+int port = 7890;
+
 PImage dot;
 PImage colors;
 Minim minim;
-AudioPlayer sound;
+//AudioPlayer sound;
+AudioInput sound;
 FFT fft;
 float[] fftFilter;
 
@@ -21,6 +25,19 @@ float decay = 0.97;
 float opacity = 50;
 float minSize = 0.1;
 float sizeScale = 0.6;
+
+void connect_opc()
+{
+  if (args != null) {
+    String[] parts = split(args[0], ":");
+    host = parts[0];
+    port = Integer.parseInt(parts[1]);
+  }
+
+  println("Connecting to ", host, ":", port);
+
+  opc = new OPC(this, host, port);
+}
 
 void load_layout(int x_offset, int y_offset, float scale)
 {
@@ -37,19 +54,21 @@ void setup()
 {
   size(200, 200, P3D);
 
-  minim = new Minim(this); 
+  minim = new Minim(this);
 
   // Small buffer size!
-  sound = minim.loadFile(filename, 512);
-  sound.loop();
+  //sound = minim.loadFile(filename, 512);
+  //sound.loop();
+
+  sound = minim.getLineIn(Minim.STEREO, 512);
+
   fft = new FFT(sound.bufferSize(), sound.sampleRate());
   fftFilter = new float[fft.specSize()];
 
   dot = loadImage("dot.png");
   colors = loadImage("colors.png");
 
-  // Connect to the local instance of fcserver
-  opc = new OPC(this, "127.0.0.1", 7890);
+  connect_opc();
 
   load_layout(0, 0, 200);
 }
