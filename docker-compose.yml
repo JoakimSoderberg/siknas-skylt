@@ -9,6 +9,7 @@ services:
     ports:
       - "3000:3000"
       - "7890:7890"
+      - "7899:7899"
       - "8080:8080"
     command: /bin/sh -c "go run *.go"
     environment:
