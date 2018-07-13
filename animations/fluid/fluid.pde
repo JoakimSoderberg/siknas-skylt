@@ -21,9 +21,10 @@ String host = "192.168.1.71";
 int port = 7899;
 
 Minim minim;
-/*AudioInput sound;
+AudioInput sound;
 FFT fft;
-float[] fftFilter;*/
+float[] fftFilter;
+BeatDetect beat;
 
 PShape siknasMask;
 
@@ -64,20 +65,26 @@ DwFluid2D fluid;
 // render target
 PGraphics2D pg_fluid;
 
+PImage colors;
+float decay = 0.97;
+float opacity = 50;
+
 int prevTime;
 
 PVector[] pts;
 PVector prevPoint;
+float burstDelay;
+int colorIndex;
 
 void setup()
 {
   size(200, 200, P2D);
 
-  /*
-  // TODO: Enable setting mixer via command line arguments
   minim = new Minim(this);
   
-  Mixer.Info[] mixerInfo;
+  // TODO: Enable setting mixer via command line arguments.
+  // TODO: Make this work properly on Raspberry Pi.
+  /*Mixer.Info[] mixerInfo;
   mixerInfo = AudioSystem.getMixerInfo(); 
   
   for(int i = 0; i < mixerInfo.length; i++) {
@@ -85,19 +92,24 @@ void setup()
   } 
   // 0 is pulseaudio mixer on GNU/Linux
   Mixer mixer = AudioSystem.getMixer(mixerInfo[2]);
-  minim.setInputMixer(mixer);
+  minim.setInputMixer(mixer);*/
 
   sound = minim.getLineIn(Minim.STEREO, 512);
 
   fft = new FFT(sound.bufferSize(), sound.sampleRate());
   fftFilter = new float[fft.specSize()];
-  */
+  
+  beat = new BeatDetect(sound.bufferSize(), sound.sampleRate());
+  beat.setSensitivity(50);
+  beat.detectMode(BeatDetect.SOUND_ENERGY);
+
 
   connect_opc();
 
   pts = load_layout(0, 0, 200);
   
   siknasMask = loadShape("siknas-mask-cut-extra.svg");
+  colors = loadImage("colors.png");
   
   // library context
   DwPixelFlow context = new DwPixelFlow(this);
@@ -108,13 +120,32 @@ void setup()
   // some fluid parameters
   fluid.param.dissipation_velocity = 0.70f;
   fluid.param.dissipation_density  = 0.99f;
+  fluid.param.dissipation_temperature = 0.70f;
+  fluid.param.vorticity               = 0.50f;
  
+  // Used to determine how long between the fluid bursts.
   prevTime = millis();
   prevPoint = pts[0];
+  burstDelay = 50;
+  colorIndex = 0;
 
   // adding data to the fluid simulation
   fluid.addCallback_FluiData(new  DwFluid2D.FluidData() {
     public void update(DwFluid2D fluid) {
+
+      beat.detect(sound.mix);
+      fft.forward(sound.mix);
+
+      for (int i = 0; i < fftFilter.length; i++) {
+        fftFilter[i] = max(fftFilter[i] * decay, log(1 + fft.getBand(i)));
+      }
+      colorIndex = colorIndex % fftFilter.length;
+      color rgb = colors.get(int(map(colorIndex, 0, fftFilter.length-1, 0, colors.width-1)), colors.height/2);
+      colorIndex++;
+      //tint(rgb, fftFilter[colorIndex] * opacity);*/
+      //blendMode(ADD);
+
+      // Allow manual interaction.
       if (mousePressed) {
         float px     = mouseX;
         float py     = height-mouseY;
@@ -123,17 +154,34 @@ void setup()
         fluid.addVelocity(px, py, 14, vx, vy);
         fluid.addDensity (px, py, 20, 0.0f, 0.4f, 1.0f, 1.0f);
         fluid.addDensity (px, py, 8, 1.0f, 1.0f, 1.0f, 1.0f);
+        fluid.addTemperature(px, py, 10.0f, 20.0f);
       }
 
-      if (millis() - prevTime >= 1000) {
+      // Generate bursts periodically
+      //if (millis() - prevTime >= burstDelay) {
+      float intensity = noise(millis()) * 0.5;
+      if (beat.isOnset()) {
+        intensity = 1.0f;
+        print(".");
+      }
+
+      /*if (millis() - prevTime >= burstDelay)*/ {
         PVector point = pts[int(random(pts.length))];
         float px = point.x;
         float py = height - point.y;
-        float vx = (point.x - prevPoint.x) * 15;
-        float vy = (point.y - prevPoint.y) * -15;
-        fluid.addVelocity(px, py, 14, vx, vy);
-        fluid.addDensity (px, py, 20, 0.0f, 0.4f, 1.0f, 1.0f);
-        fluid.addDensity (px, py, 8, 1.0f, 1.0f, 1.0f, 1.0f);
+        float vx = (point.x - prevPoint.x) * 2;
+        float vy = (point.y - prevPoint.y) * -2;
+        fluid.addVelocity(px, py, intensity * 14, vx, vy);
+
+        // Use the randomized color.
+        float r = red(rgb) / 255.0f;
+        float g = green(rgb) / 255.0f;
+        float b = blue(rgb) / 255.0f;
+        fluid.addDensity (px, py, 20, 0.0f, g, b, intensity);
+        fluid.addDensity (px, py, 8, r, g, b, intensity);
+        //fluid.addDensity (px, py, 20, 0.0f, 0.4f, 1.0f, 1.0f);
+        //fluid.addDensity (px, py, 8, 1.0f, 1.0f, 1.0f, 1.0f);
+        //fluid.addTemperature(px, py, 10.0f, 1.0f);
 
         prevPoint = point;
         prevTime = millis();

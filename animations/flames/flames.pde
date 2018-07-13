@@ -36,7 +36,7 @@ void setup()
 
   connect_opc();
 
-  load_layout(0,0, 200);
+  load_layout(0, 0, 200);
 }
 
 int imHeight;
