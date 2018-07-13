@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="310.45398mm"
+   height="224.85353mm"
+   viewBox="0 0 310.45398 224.85353"
+   version="1.1"
+   id="svg6039"
+   inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"
+   sodipodi:docname="siknas-s2-only.svg">
+  <defs
+     id="defs6033">
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient2278"
+       id="radialGradient2284"
+       cx="829.88672"
+       cy="860.1311"
+       fx="829.88672"
+       fy="860.1311"
+       r="586.68463"
+       gradientTransform="matrix(0.85699308,-0.22950046,0.10293282,0.38436834,25.348367,861.29157)"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient2278">
+      <stop
+         style="stop-color:#0a5176;stop-opacity:1;"
+         offset="0"
+         id="stop2274" />
+      <stop
+         style="stop-color:#084564;stop-opacity:1"
+         offset="1"
+         id="stop2276" />
+    </linearGradient>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.35"
+     inkscape:cx="910.42049"
+     inkscape:cy="152.35306"
+     inkscape:document-units="mm"
+     inkscape:current-layer="Siknäs"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="986"
+     inkscape:window-x="-11"
+     inkscape:window-y="-11"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata6036">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(175.6377,-36.406565)">
+    <g
+       transform="matrix(0.26458333,0,0,0.26458333,-286.67744,-110.13566)"
+       inkscape:label="Siknas"
+       id="Siknäs"
+       style="display:inline;fill:url(#radialGradient2284);fill-opacity:1">
+      <path
+         inkscape:label="iknas_road_as_shape"
+         style="fill:#010609;fill-opacity:1;fill-rule:evenodd"
+         inkscape:connector-curvature="0"
+         d="m 1480.48,912.37 c 2.4293,7.02475 6.4706,13.38264 11.8,18.564 5.0927,4.76369 11.2143,8.2902 17.89,10.306 7.1667,2.18161 14.609,3.3249 22.1,3.395 8.696,0.28806 17.3656,-1.11034 25.53,-4.118 7.1846,-2.70086 13.6807,-6.96188 19.02,-12.476 5.3398,-5.65497 9.3955,-12.39624 11.89,-19.763 5.1676,-15.72122 5.7297,-32.59268 1.62,-48.623 -1.8023,-6.885 -4.2048,-13.59871 -7.18,-20.064 -2.673,-5.80426 -5.7125,-11.43262 -9.1,-16.851 -3.21,-5.09267 -6.0367,-9.42867 -8.48,-13.008 l -33.67,-47.115 c -3.8041,-5.62485 -7.1835,-11.52554 -10.11,-17.653 -2.5454,-5.49305 -3.791,-11.49873 -3.64,-17.551 0.037,-2.84306 0.3958,-5.67279 1.07,-8.435 0.6277,-2.66499 1.7653,-5.1833 3.35,-7.416 1.5969,-2.22756 3.6972,-4.04658 6.13,-5.309 2.9212,-1.42253 6.1551,-2.0817 9.4,-1.916 4.31,0.0667 7.7833,1.23533 10.42,3.506 2.6367,2.27067 4.6867,5.61167 6.15,10.023 1.6386,5.41274 2.6058,11.00632 2.88,16.655 0.47,6.69 0.69,14.49 0.66,23.4 l 29.8,0.47 c 0.97,-4.17667 1.9867,-9.20567 3.05,-15.087 1.0741,-6.02674 1.656,-12.13088 1.74,-18.252 0.2859,-8.32102 -0.9128,-16.62643 -3.54,-24.527 -4.4766,-13.43511 -14.9465,-24.0244 -28.33,-28.653 -7.3758,-2.56973 -15.1294,-3.88791 -22.94,-3.9 -7.4842,-0.15719 -14.9387,0.9889 -22.03,3.387 -6.8881,2.33532 -13.1939,6.12388 -18.49,11.109 -5.5959,5.3722 -9.9922,11.86737 -12.9,19.059 -3.25,7.682 -4.9567,16.76233 -5.12,27.241 -0.154,7.54636 0.615,15.08326 2.29,22.443 1.616,6.99846 3.8446,13.84118 6.66,20.449 2.8089,6.5579 6.0666,12.91431 9.75,19.024 3.71,6.15133 7.5633,12.20667 11.56,18.166 l 30.83,43.336 c 2.22,3.312 4.2167,6.35733 5.99,9.136 1.6882,2.63026 3.1822,5.38023 4.47,8.228 1.1597,2.57887 2.0867,5.25618 2.77,8 0.6448,2.70801 0.9439,5.48681 0.89,8.27 0.013,5.19746 -1.6177,10.26594 -4.66,14.48 -3.02,4.148 -7.7633,6.17 -14.23,6.066 -4.0979,0.0611 -8.1486,-0.87984 -11.8,-2.741 -3.3982,-1.96052 -6.0712,-4.96748 -7.62,-8.572 -1.8667,-3.96133 -3.1733,-9.25633 -3.92,-15.885 -0.8081,-8.20092 -1.1053,-16.44417 -0.89,-24.682 L 1481.23,854 c -0.96,3.262 -1.9667,7.636 -3.02,13.122 -1.0629,5.63099 -1.6384,11.34315 -1.72,17.073 -0.17,11.13667 1.16,20.52833 3.99,28.175 z"
+         class="cls-1"
+         data-name="iknäs road as shape"
+         id="iknäs_road_as_shape"
+         sodipodi:nodetypes="ccccccccccccccccccscccccccccccccccccccccccccccccccc" />
+    </g>
+  </g>
+</svg>

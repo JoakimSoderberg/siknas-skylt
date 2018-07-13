@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="310.45398mm"
+   height="224.85353mm"
+   viewBox="0 0 310.45398 224.85353"
+   version="1.1"
+   id="svg4332"
+   inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"
+   sodipodi:docname="siknas-k-only.svg">
+  <defs
+     id="defs4326">
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient2278"
+       id="radialGradient2284"
+       cx="829.88672"
+       cy="860.1311"
+       fx="829.88672"
+       fy="860.1311"
+       r="586.68463"
+       gradientTransform="matrix(0.85699308,-0.22950046,0.10293282,0.38436834,25.348367,861.29157)"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient2278">
+      <stop
+         style="stop-color:#0a5176;stop-opacity:1;"
+         offset="0"
+         id="stop2274" />
+      <stop
+         style="stop-color:#084564;stop-opacity:1"
+         offset="1"
+         id="stop2276" />
+    </linearGradient>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.7"
+     inkscape:cx="541.8131"
+     inkscape:cy="379.47214"
+     inkscape:document-units="mm"
+     inkscape:current-layer="Siknäs"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="986"
+     inkscape:window-x="-11"
+     inkscape:window-y="-11"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata4329">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(392.59603,-56.061329)">
+    <g
+       transform="matrix(0.26458333,0,0,0.26458333,-503.63577,-90.480896)"
+       inkscape:label="Siknas"
+       id="Siknäs"
+       style="display:inline;fill:url(#radialGradient2284);fill-opacity:1">
+      <path
+         inkscape:label="iknas_road_as_shape"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd"
+         inkscape:connector-curvature="0"
+         d="m 1047.565,1095.88 40.19,-15.55 -48.455,-125.185 1.27,-0.492 94.52,107.357 40.98,-15.87 -106.21,-116.313 3.92,-134.282 -38.6,14.94 -0.92,127.856 -1.28,0.491 -74.268,-191.9 -40.188,15.555 z"
+         class="cls-1"
+         data-name="iknäs road as shape"
+         id="iknäs_road_as_shape"
+         sodipodi:nodetypes="cccccccccccccc" />
+    </g>
+  </g>
+</svg>
